@@ -1,9 +1,15 @@
-# Fabric Example Mod
-
-## Setup
-
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
-
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+# MCRGB Mod Planned Features
+## Colour Generation
+- Access texture atlas and legend txt file
+- Calculate mean/dominant RGB values of each block
+- Save to a file
+## Inventory
+- Add new tab to Creative inventory
+- Contains all blocks in the game - By default, sorted by hue
+- If colours have been calculated, display hexcode(s) in tooltip. (Clientside, does not affect the item's data)
+- Search bar - lets you type in a hex code. Blocks will be sorted by colour closeness 
+- Sort options. Sort by hue, sat, lightness
+- Quick select colours - A few preset colours. Clicking them sorts blocks by closeness to that colour
+- ## Far off maybe features
+- Colour picker GUI
+- Palette Picker GUI
