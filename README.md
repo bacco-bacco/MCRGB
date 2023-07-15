@@ -1,4 +1,7 @@
 # MCRGB Mod Planned Features
+## Babysteps
+- Print hello world in game chat
+- Read data from files and print in game chat
 ## Colour Generation
 - Access texture atlas and legend txt file
 - Calculate mean/dominant RGB values of each block
