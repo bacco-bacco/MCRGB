@@ -1,6 +1,11 @@
 package com.bacco;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
