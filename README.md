@@ -2,6 +2,7 @@
 ## Babysteps
 - Print hello world in game chat
 - Read data from files and print in game chat
+- Create an inventory tab
 ## Colour Generation
 - Access texture atlas and legend txt file
 - Calculate mean/dominant RGB values of each block
