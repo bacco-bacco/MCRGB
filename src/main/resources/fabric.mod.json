@@ -1,11 +1,11 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
+	"id": "mcrgb",
 	"version": "${version}",
-	"name": "Example mod",
+	"name": "MCRGB mod",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
-		"Me!"
+		"Bacco"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
@@ -16,16 +16,16 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+			"com.bacco.MCRGB"
 		],
 		"client": [
-			"com.example.ExampleModClient"
+			"com.bacco.MCRGBClient"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
+		"mcrgb.mixins.json",
 		{
-			"config": "modid.client.mixins.json",
+			"config": "mcrgb.client.mixins.json",
 			"environment": "client"
 		}
 	],

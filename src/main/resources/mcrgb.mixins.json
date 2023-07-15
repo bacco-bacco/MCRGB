@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.example.mixin.client",
+	"package": "com.bacco.mixin",
 	"compatibilityLevel": "JAVA_17",
-	"client": [
-		"ExampleClientMixin"
+	"mixins": [
+		"MCRGBMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
