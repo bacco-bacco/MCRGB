@@ -1,6 +1,7 @@
 # MCRGB Mod Planned Features
 ## Babysteps
 - Print hello world in game chat on world load
+- Add text to tooltip
 - Read data from files and print in game chat
 - Create an inventory tab
 ## Colour Generation
