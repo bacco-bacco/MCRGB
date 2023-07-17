@@ -2,6 +2,9 @@
 	"required": true,
 	"package": "com.bacco.mixin.client",
 	"compatibilityLevel": "JAVA_17",
+	"mixins":[
+		"BlockColourSaver"
+	],
 	"client": [
 		"MCRGBClientMixin"
 	],
