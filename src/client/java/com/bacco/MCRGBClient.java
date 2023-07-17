@@ -27,65 +27,42 @@ public class MCRGBClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
-	
-		ClientPickBlockApplyCallback.EVENT.register((player, result, _stack) -> {
-			/*Text text = Text.literal("Hello World");
-			player.sendMessage(text);
 
-			Registries.BLOCK.forEach(block -> {
-				var state = block.getDefaultState();
-				Text text2 = Text.literal(state.toString());
-				player.sendMessage(text2);
-
-			});*/
-			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
-				Registries.ITEM.forEach(item -> {
-					for(BlockColourStorage storage : loadedBlockColourArray){
-						//Text text = Text.literal(item.getTranslationKey());
-						//player.sendMessage(text);
-						if(storage.block.equals(item.getTranslationKey())){
-							Text text = Text.literal("Match");
-							player.sendMessage(text);
-							((IItemBlockColourSaver) item).setColour(storage.colour);
-							//Text text2 = Text.literal(storage.colour);
-							//player.sendMessage(text);
-							break;
-						};
-					}
-					
-				});
-			return _stack;
+		//Read the json file for block colours. Load into an array.
+		BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
+		//For each item in the game, loop through the array to search for an entry
+		Registries.ITEM.forEach(item -> {
+			for(BlockColourStorage storage : loadedBlockColourArray){
+				if(storage.block.equals(item.getTranslationKey())){
+					//Set the colour of the block's IItemBlockColourSaver to the value from the json
+					((IItemBlockColourSaver) item).setColour(storage.colour);
+					break;
+				};
+			}
+			
 		});
 
+		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
-			//var text = Text.literal("Hello World");
-			//int count = stack.getMaxCount();
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			String colour = item.getColour();
-			//var text = Text.literal(String.valueOf(count));
 			var text = Text.literal(colour);
 			var message = text.formatted(Formatting.AQUA);
 			lines.add(message);
 		});
 
-		
+		//Add all blocks to a new array list. 
 		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
 		Registries.BLOCK.forEach(block -> {
 
 		BlockColourStorage storage = new BlockColourStorage();
 		storage.block = block.getTranslationKey();
-		storage.colour = "defaulto";
+		storage.colour = "defaulto";	//replace this once functionality for calculating block colours exists.
 		blockColourList.add(storage);
 
 		});
 
-		/*blockColourList.forEach(block -> {
-			var id = ((Item) block).getName();
-			var colour = block.getColour();
-			LOGGER.info(id.toString());
-			LOGGER.info(colour);
-		});*/
-
+		//Write arraylist to json
 		Gson gson = new Gson();
 		String blockColoursJson = gson.toJson(blockColourList);
 		try {
@@ -95,6 +72,7 @@ public class MCRGBClient implements ClientModInitializer {
 
 	}
 
+	//Read and write functions, shamelessly stolen from a Java tutorial.
 	public static void writeJson(String str)
         throws IOException
     {
@@ -102,7 +80,7 @@ public class MCRGBClient implements ClientModInitializer {
   
             // attach a file to FileWriter
             FileWriter fw
-                = new FileWriter("D:/data/file.json");
+                = new FileWriter("./mcrgb_colours/file.json");
   
             // read each character from string and write
             // into FileWriter
@@ -123,7 +101,7 @@ public class MCRGBClient implements ClientModInitializer {
         try {
             // FileReader Class used
             FileReader fileReader
-                = new FileReader("D:/data/custom_file.json");
+                = new FileReader("./mcrgb_colours/custom_file.json");
  
             int i;
 			String str = "";
