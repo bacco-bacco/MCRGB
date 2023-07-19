@@ -46,13 +46,14 @@ public class MCRGBClient implements ClientModInitializer {
 	int successes = 0;
 	@Override
 	public void onInitializeClient() {
+		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+
 		//when client joins (single or multi)
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-			//get top sprite of dirt block default state
+			//get top sprite of stone block default state
 			var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
-			//get atlas id of above
+			//get id of the atlas containing above
 			var atlas = defSprite.getAtlasId();
-			//var atlas = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParticleSprite().getAtlasId();
 			//use atlas id to get OpenGL ID. Atlas contains ALL blocks
 			int glID = client.getTextureManager().getTexture(atlas).getGlId();
 			//get width and height from OpenGL by binding texture
@@ -67,10 +68,11 @@ public class MCRGBClient implements ClientModInitializer {
 			byte[] pixels = new byte[size*4];
 			buffer.get(pixels);
 
-
+			//loop through every block in the game
 			Registries.BLOCK.forEach(block -> {
 				totalBlocks +=1;
 				Sprite sprite;
+				//try to get the default top texture sprite. if fails, report error and skip this block
 				try{
 				sprite = client.getBakedModelManager().getBlockModels().getModel(block.getDefaultState()).getQuads(block.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
 				successes +=1;
@@ -88,13 +90,17 @@ public class MCRGBClient implements ClientModInitializer {
 				//convert coords to byte position
 				int firstPixel = (spriteY*width + spriteX)*4;
 				int sumR = 0; int sumG = 0; int sumB = 0; int count = 0;
+				//for each horizontal row in the sprite
 				for (int row = 0; row < spriteH; row++){
-					int bytepos = firstPixel + row*width*4;
-					for (int pos = bytepos; pos < bytepos + 4*spriteW; pos+=4){
+					int firstInRow = firstPixel + row*width*4;
+					//loop from first pixel in row to the sprite width.
+					//Note: Looping in increments of 4, because each pixel is 4 bytes. (R,G,B and A)
+					for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
 						//retrieve bytes for RGBA values
 						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
 						int a = pixels[pos+3];
 						a = a & 0xFF;
+						//if the pixel is fully transparent, skip it and don't count it
 						if(a > 0) {
 							int r = pixels[pos];
 							r = r & 0xFF;
@@ -102,22 +108,20 @@ public class MCRGBClient implements ClientModInitializer {
 							g = g & 0xFF;
 							int b = pixels[pos+2];
 							b = b & 0xFF;
-							
-							//Text text = Text.literal("r"+Integer.toString(r)+"g"+Integer.toString(g)+"b"+Integer.toString(b)+"a"+Integer.toString(a)+"pos"+Integer.toString(pos));
-							//client.player.sendMessage(text);
 							sumR += r; sumG += g; sumB += b; count +=1;
 						}
 					}
 				}
+				//calculate average RGB values from sums
 				int avgR = sumR/count; int avgG = sumG/count; int avgB = sumB/count;
 				Text text = Text.literal(sprite.getContents().getId() + " R: "+Integer.toString(avgR)+" G: "+Integer.toString(avgG)+" B: "+Integer.toString(avgB));
 				client.player.sendMessage(text);
 			});
-			Text text = Text.literal(" Blocks Analysed: "+Integer.toString(totalBlocks)+" Fails: "+Integer.toString(fails)+" Successes: "+Integer.toString(successes));
+			Text text = Text.literal("Blocks Analysed: "+Integer.toString(totalBlocks)+" Fails: "+Integer.toString(fails)+" Successes: "+Integer.toString(successes));
 			client.player.sendMessage(text);
 		});
 
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+
 
 		//Read the json file for block colours. Load into an array.
 		BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
