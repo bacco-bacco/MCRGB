@@ -114,15 +114,34 @@ public class MCRGBClient implements ClientModInitializer {
 				}
 				//calculate average RGB values from sums
 				int avgR = sumR/count; int avgG = sumG/count; int avgB = sumB/count;
-				Text text = Text.literal(sprite.getContents().getId() + " R: "+Integer.toString(avgR)+" G: "+Integer.toString(avgG)+" B: "+Integer.toString(avgB));
-				client.player.sendMessage(text);
+				String hexColour = rgbToHex(avgR, avgG, avgB);
+				((IItemBlockColourSaver) block.asItem()).setColour(hexColour);
+				//Text text = Text.literal(block.asItem().getTranslationKey()+" ("+sprite.getContents().getId() + "): " + hexColour);
+				//client.player.sendMessage(text);
 			});
 			Text text = Text.literal("Blocks Analysed: "+Integer.toString(totalBlocks)+" Fails: "+Integer.toString(fails)+" Successes: "+Integer.toString(successes));
 			client.player.sendMessage(text);
 		});
 
+		//Add all blocks to a new array list. 
+		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
+		Registries.BLOCK.forEach(block -> {
 
+		BlockColourStorage storage = new BlockColourStorage();
+		storage.block = block.getTranslationKey();
+		storage.colour = ((IItemBlockColourSaver) block.asItem()).getColour();
+		blockColourList.add(storage);
 
+		});
+
+		//Write arraylist to json
+		Gson gson = new Gson();
+		String blockColoursJson = gson.toJson(blockColourList);
+		try {
+			writeJson(blockColoursJson);
+		} catch (IOException e) {
+		}
+/*
 		//Read the json file for block colours. Load into an array.
 		BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
 		//For each item in the game, loop through the array to search for an entry
@@ -136,7 +155,7 @@ public class MCRGBClient implements ClientModInitializer {
 			}
 			
 		});
-
+*/
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
@@ -145,25 +164,6 @@ public class MCRGBClient implements ClientModInitializer {
 			var message = text.formatted(Formatting.AQUA);
 			lines.add(message);
 		});
-
-		//Add all blocks to a new array list. 
-		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
-		Registries.BLOCK.forEach(block -> {
-
-		BlockColourStorage storage = new BlockColourStorage();
-		storage.block = block.getTranslationKey();
-		storage.colour = "defaulto";	//replace this once functionality for calculating block colours exists.
-		blockColourList.add(storage);
-
-		});
-
-		//Write arraylist to json
-		Gson gson = new Gson();
-		String blockColoursJson = gson.toJson(blockColourList);
-		try {
-			writeJson(blockColoursJson);
-		} catch (IOException e) {
-		}
 
 	}
 
@@ -213,5 +213,12 @@ public class MCRGBClient implements ClientModInitializer {
 			return "";
         }
     }
+
+	public static String rgbToHex(int r, int g, int b){
+		String hexR = r < 16 ? "0" + Integer.toHexString(r) : Integer.toHexString(r);
+		String hexG = g < 16 ? "0" + Integer.toHexString(g) : Integer.toHexString(g);
+		String hexB = b < 16 ? "0" + Integer.toHexString(b) : Integer.toHexString(b);
+		return ("#" + hexR + hexG + hexB).toUpperCase();
+	}
 
 }

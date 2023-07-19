@@ -1,13 +1,9 @@
 # MCRGB Mod Planned Features
-## Babysteps
-- Print hello world in game chat on world load
-- Add text to tooltip
-- Read data from files and print in game chat
-- Create an inventory tab
 ## Colour Generation
-- Access texture atlas and legend txt file
+- Access texture atlas and legend json file
 - Calculate mean/dominant RGB values of each block
 - Save to a file
+- Read from a file
 ## Inventory
 - Add new tab to Creative inventory
 - Contains all blocks in the game - By default, sorted by hue
