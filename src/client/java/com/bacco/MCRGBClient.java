@@ -28,6 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
@@ -40,15 +41,17 @@ import net.minecraft.util.math.random.Random;
 
 public class MCRGBClient implements ClientModInitializer {
 	public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
-
+	int totalBlocks = 0;			
+	int fails = 0;
+	int successes = 0;
 	@Override
 	public void onInitializeClient() {
 		//when client joins (single or multi)
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
 			//get top sprite of dirt block default state
-			var sprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.DIRT.getDefaultState()).getQuads(Blocks.DIRT.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
+			var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
 			//get atlas id of above
-			var atlas = sprite.getAtlasId();
+			var atlas = defSprite.getAtlasId();
 			//var atlas = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParticleSprite().getAtlasId();
 			//use atlas id to get OpenGL ID. Atlas contains ALL blocks
 			int glID = client.getTextureManager().getTexture(atlas).getGlId();
@@ -63,13 +66,56 @@ public class MCRGBClient implements ClientModInitializer {
 			//convert buffer to an array of bytes
 			byte[] pixels = new byte[size*4];
 			buffer.get(pixels);
-			
-			//TODO:
-			//for each block and blockstate
-			//get the UV's of the blockstate - calculate the position of the blockstate in the atlas
-			//loop through pixel region defined by UVs & extract RGBA values
-		});
 
+
+			Registries.BLOCK.forEach(block -> {
+				totalBlocks +=1;
+				Sprite sprite;
+				try{
+				sprite = client.getBakedModelManager().getBlockModels().getModel(block.getDefaultState()).getQuads(block.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
+				successes +=1;
+				}catch(Exception e){	
+					Text text = Text.literal("Error wit da: "+block.asItem().getName().getString());
+					client.player.sendMessage(text);	
+					fails +=1;						
+					return;
+				}
+				//get coords of sprite in atlas
+				int spriteX = sprite.getX();
+				int spriteY = sprite.getY();
+				int spriteW = sprite.getContents().getWidth();
+				int spriteH = sprite.getContents().getHeight();
+				//convert coords to byte position
+				int firstPixel = (spriteY*width + spriteX)*4;
+				int sumR = 0; int sumG = 0; int sumB = 0; int count = 0;
+				for (int row = 0; row < spriteH; row++){
+					int bytepos = firstPixel + row*width*4;
+					for (int pos = bytepos; pos < bytepos + 4*spriteW; pos+=4){
+						//retrieve bytes for RGBA values
+						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
+						int a = pixels[pos+3];
+						a = a & 0xFF;
+						if(a > 0) {
+							int r = pixels[pos];
+							r = r & 0xFF;
+							int g = pixels[pos+1];
+							g = g & 0xFF;
+							int b = pixels[pos+2];
+							b = b & 0xFF;
+							
+							//Text text = Text.literal("r"+Integer.toString(r)+"g"+Integer.toString(g)+"b"+Integer.toString(b)+"a"+Integer.toString(a)+"pos"+Integer.toString(pos));
+							//client.player.sendMessage(text);
+							sumR += r; sumG += g; sumB += b; count +=1;
+						}
+					}
+				}
+				int avgR = sumR/count; int avgG = sumG/count; int avgB = sumB/count;
+				Text text = Text.literal(sprite.getContents().getId() + " R: "+Integer.toString(avgR)+" G: "+Integer.toString(avgG)+" B: "+Integer.toString(avgB));
+				client.player.sendMessage(text);
+			});
+			Text text = Text.literal(" Blocks Analysed: "+Integer.toString(totalBlocks)+" Fails: "+Integer.toString(fails)+" Successes: "+Integer.toString(successes));
+			client.player.sendMessage(text);
+		});
 
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 
