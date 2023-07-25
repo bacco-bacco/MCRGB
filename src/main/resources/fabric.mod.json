@@ -1,15 +1,15 @@
 {
 	"schemaVersion": 1,
 	"id": "mcrgb",
-	"version": "0.0.1-1.20.1",
-	"name": "MCRGB mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"version": "0.0.2-1.20.1",
+	"name": "MCRGB",
+	"description": "This mod calculates and displays the average colours of each block in the game.",
 	"authors": [
-		"Bacco"
+		"bacco"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/JacobHerd/MCRGB",
+		"sources": "https://github.com/JacobHerd/MCRGB"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/modid/icon.png",
