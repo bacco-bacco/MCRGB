@@ -97,9 +97,10 @@ public class MCRGBClient implements ClientModInitializer {
 				int spriteH = sprite.getContents().getHeight();
 				//convert coords to byte position
 				int firstPixel = (spriteY*width + spriteX)*4;
-				ArrayList<Integer> red = new ArrayList<Integer>();
+				ArrayList<Vector3i> rgbList = new ArrayList<Vector3i>();
+				/*ArrayList<Integer> red = new ArrayList<Integer>();
 				ArrayList<Integer> grn = new ArrayList<Integer>();
-				ArrayList<Integer> blu = new ArrayList<Integer>();
+				ArrayList<Integer> blu = new ArrayList<Integer>();*/
 				//for each horizontal row in the sprite
 				for (int row = 0; row < spriteH; row++){
 					int firstInRow = firstPixel + row*width*4;
@@ -112,22 +113,19 @@ public class MCRGBClient implements ClientModInitializer {
 						a = a & 0xFF;
 						//if the pixel is fully transparent, skip it and don't count it
 						if(a > 0) {
-							red.add(pixels[pos] & 0xFF);
-							grn.add(pixels[pos+1] & 0xFF);
-							blu.add(pixels[pos+2] & 0xFF);
+							Vector3i c = new Vector3i(pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+							rgbList.add(c);
 						}
 					}
 				}
-				//ColourGroup[] colourGroups = CalculateDominantColours(red, grn, blu);
-				ArrayList<ColourGroup> colourGroups = GroupColours(red, grn, blu);
-				
+				//Calculate the dominant colours
+				ArrayList<ColourGroup> colourGroups = GroupColours(rgbList);
+				//Add each dominant colour to the IItemBlockColourSaver
 				for(int i = 0; i < colourGroups.size(); i++){
 					ColourGroup cg = colourGroups.get(i);
 					((IItemBlockColourSaver) block.asItem()).addColour(cg.meanHex + " " + cg.weight + "%");
 				}
 				
-				//Text text = Text.literal(block.asItem().getTranslationKey()+" ("+sprite.getContents().getId() + "): " + hexColour);
-				//client.player.sendMessage(text);
 			});
 			Text text = Text.literal("Blocks Analysed: "+Integer.toString(totalBlocks)+" Fails: "+Integer.toString(fails)+" Successes: "+Integer.toString(successes));
 			client.player.sendMessage(text);
@@ -153,21 +151,7 @@ public class MCRGBClient implements ClientModInitializer {
 			writeJson(blockColoursJson);
 		} catch (IOException e) {
 		}
-/*
-		//Read the json file for block colours. Load into an array.
-		BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
-		//For each item in the game, loop through the array to search for an entry
-		Registries.ITEM.forEach(item -> {
-			for(BlockColourStorage storage : loadedBlockColourArray){
-				if(storage.block.equals(item.getTranslationKey())){
-					//Set the colour of the block's IItemBlockColourSaver to the value from the json
-					((IItemBlockColourSaver) item).setColour(storage.colour);
-					break;
-				};
-			}
-			
-		});
-*/
+
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
@@ -235,13 +219,16 @@ public class MCRGBClient implements ClientModInitializer {
 		return ("#" + hexR + hexG + hexB).toUpperCase();
 	}
 
-	public static ArrayList<ColourGroup> GroupColours(ArrayList<Integer> redlist, ArrayList<Integer> grnlist, ArrayList<Integer> blulist){
+	//Calculate the dominant colours in a list of colours
+	public static ArrayList<ColourGroup> GroupColours(ArrayList<Vector3i> rgblist){
 		ArrayList<ColourGroup> groups = new ArrayList<>();
+		
+		//Loop through every pixel
+		for (int i = 0; i < rgblist.size(); i++){
+			Vector3i iPix = new Vector3i(rgblist.get(i).x,rgblist.get(i).y,rgblist.get(i).z);
+			//x is r; y is g; z is b
 
-		for (int i = 0; i < redlist.size(); i++){
-			Vector3i iPix = new Vector3i(redlist.get(i),grnlist.get(i),blulist.get(i));
-			//x = r; y = g; z = b
-
+			//check if already in a group
 			boolean iInGroup = false;
 			for (ColourGroup group : groups){
 				if (group.pixels.contains(iPix)){
@@ -250,13 +237,15 @@ public class MCRGBClient implements ClientModInitializer {
 				}
 			}
 
+			//if i is not in a group, create a new one and add i to it...
 			if(!iInGroup){
 				ColourGroup newGroup = new ColourGroup();
 				newGroup.pixels.add(iPix);
 
-
-				for (int j = i + 1; j < redlist.size(); j++){
-					Vector3i jPix = new Vector3i(redlist.get(j),grnlist.get(j),blulist.get(j));
+				//loop through all the pixels after i, and compare them to i
+				for (int j = i + 1; j < rgblist.size(); j++){
+					//if the distance is less than 100, add j to the group (if it is not already in a group)
+					Vector3i jPix = new Vector3i(rgblist.get(j).x,rgblist.get(j).y,rgblist.get(j).z);
 					if(jPix.distance(iPix) < 100){
 						boolean jInGroup = false;
 						for (ColourGroup group : groups){
@@ -272,10 +261,11 @@ public class MCRGBClient implements ClientModInitializer {
 					}
 
 				}
+				//finally, add the new group to the list of groups
 				groups.add(newGroup);
 			}
 		}
-
+		//calculate the average rgb value of each group, convert to hex and calculate weight
 		for (ColourGroup group : groups){
 			Vector3i sum = new Vector3i(0, 0, 0);
 			int counter = 0;
@@ -285,54 +275,9 @@ public class MCRGBClient implements ClientModInitializer {
 			}
 			Vector3i avg = sum.div(counter);
 			group.meanHex = rgbToHex(avg.x, avg.y, avg.z);
-			group.weight = (int)((float)counter/(float)redlist.size() * 100);
+			group.weight = (int)((float)counter/(float)rgblist.size() * 100);
 		}
 
 		return groups;
-	}
-/*
-	public static ColourGroup[] CalculateDominantColours(ArrayList<Integer> red, ArrayList<Integer> grn, ArrayList<Integer> blu){
-		ColourGroup[] colourGroups = new ColourGroup[16];
-		for (int i = 0; i < red.size(); i++){
-			for (int j = 0; j < red.size(); j++){
-				double rds = Math.pow((red.get(i)-red.get(j)),2);
-				double gds = Math.pow((grn.get(i)-grn.get(j)),2);
-				double bds = Math.pow((blu.get(i)-blu.get(j)),2);
-				double distance = Math.sqrt(rds + gds + bds);				
-				if(distance < 100){
-					for (int n = 0; n < colourGroups.length; n++){
-						if(colourGroups[n] == null){
-							colourGroups[n] = new ColourGroup();
-							colourGroups[n].red.add(red.get(i));
-							colourGroups[n].green.add(grn.get(i));
-							colourGroups[n].blue.add(blu.get(i));
-
-							colourGroups[n].red.add(red.get(j));
-							colourGroups[n].green.add(grn.get(j));
-							colourGroups[n].blue.add(blu.get(j));
-							break;
-						}else if(colourGroups[n].red.contains(red.get(i))){
-							if(colourGroups[n].red.contains(red.get(j))) break;
-							colourGroups[n].red.add(red.get(j));
-							colourGroups[n].green.add(grn.get(j));
-							colourGroups[n].blue.add(blu.get(j));
-							break;
-						}
-					}
-				}
-			}
-		}
-		for (int n = 0; n < colourGroups.length; n++){
-			colourGroups[n].weight = colourGroups[n].red.size()/red.size();
-		}
-		return colourGroups;
-	}*/
-
-	public static int arrayListAverage(ArrayList<Integer> al){
-		int total = 0;
-		for (int i = 0; i < al.size(); i++){
-			total += al.get(i);
-		}
-		return total/al.size();
 	}
 }
