@@ -7,7 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.spi.RegisterableService;
 import javax.swing.GroupLayout.Group;
@@ -40,6 +42,7 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.state.State;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -79,57 +82,65 @@ public class MCRGBClient implements ClientModInitializer {
 			//loop through every block in the game
 			Registries.BLOCK.forEach(block -> {
 				totalBlocks +=1;
-				Sprite sprite;
+				Set<Sprite> sprites = new HashSet<Sprite>();
 				//try to get the default top texture sprite. if fails, report error and skip this block
-				try{
-				sprite = client.getBakedModelManager().getBlockModels().getModel(block.getDefaultState()).getQuads(block.getDefaultState(), Direction.DOWN, Random.create()).get(0).getSprite();
-				successes +=1;
-				}catch(Exception e){	
-					Text text = Text.literal("Error wit da: "+block.asItem().getName().getString());
-					client.player.sendMessage(text);	
-					fails +=1;						
+				
+				block.getStateManager().getStates().forEach(state -> {
+					try{
+						var model = client.getBakedModelManager().getBlockModels().getModel(state);						
+						sprites.add(model.getQuads(state, Direction.UP, Random.create()).get(0).getSprite());
+						sprites.add(model.getQuads(state, Direction.DOWN, Random.create()).get(0).getSprite());
+						sprites.add(model.getQuads(state, Direction.NORTH, Random.create()).get(0).getSprite());
+						sprites.add(model.getQuads(state, Direction.SOUTH, Random.create()).get(0).getSprite());
+						sprites.add(model.getQuads(state, Direction.EAST, Random.create()).get(0).getSprite());
+						sprites.add(model.getQuads(state, Direction.WEST, Random.create()).get(0).getSprite());
+						successes +=1;
+					}catch(Exception e){	
+						fails +=1;						
+						return;
+					}
+				});
+				if(sprites.size() < 1){
 					return;
 				}
-				//get coords of sprite in atlas
-				int spriteX = sprite.getX();
-				int spriteY = sprite.getY();
-				int spriteW = sprite.getContents().getWidth();
-				int spriteH = sprite.getContents().getHeight();
-				//convert coords to byte position
-				int firstPixel = (spriteY*width + spriteX)*4;
-				ArrayList<Vector3i> rgbList = new ArrayList<Vector3i>();
-				/*ArrayList<Integer> red = new ArrayList<Integer>();
-				ArrayList<Integer> grn = new ArrayList<Integer>();
-				ArrayList<Integer> blu = new ArrayList<Integer>();*/
-				//for each horizontal row in the sprite
-				for (int row = 0; row < spriteH; row++){
-					int firstInRow = firstPixel + row*width*4;
-					//loop from first pixel in row to the sprite width.
-					//Note: Looping in increments of 4, because each pixel is 4 bytes. (R,G,B and A)
-					for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
-						//retrieve bytes for RGBA values
-						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
-						int a = pixels[pos+3];
-						a = a & 0xFF;
-						//if the pixel is fully transparent, skip it and don't count it
-						if(a > 0) {
-							Vector3i c = new Vector3i(pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-							rgbList.add(c);
+				sprites.forEach(sprite -> {
+					//get coords of sprite in atlas
+					int spriteX = sprite.getX();
+					int spriteY = sprite.getY();
+					int spriteW = sprite.getContents().getWidth();
+					int spriteH = sprite.getContents().getHeight();
+					//convert coords to byte position
+					int firstPixel = (spriteY*width + spriteX)*4;
+					ArrayList<Vector3i> rgbList = new ArrayList<Vector3i>();
+					//for each horizontal row in the sprite
+					for (int row = 0; row < spriteH; row++){
+						int firstInRow = firstPixel + row*width*4;
+						//loop from first pixel in row to the sprite width.
+						//Note: Looping in increments of 4, because each pixel is 4 bytes. (R,G,B and A)
+						for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
+							//retrieve bytes for RGBA values
+							//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
+							int a = pixels[pos+3];
+							a = a & 0xFF;
+							//if the pixel is fully transparent, skip it and don't count it
+							if(a > 0) {
+								Vector3i c = new Vector3i(pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+								rgbList.add(c);
+							}
 						}
 					}
-				}
-				//Calculate the dominant colours
-				ArrayList<ColourGroup> colourGroups = GroupColours(rgbList);
-				//Add each dominant colour to the IItemBlockColourSaver
-				for(int i = 0; i < colourGroups.size(); i++){
-					ColourGroup cg = colourGroups.get(i);
-					((IItemBlockColourSaver) block.asItem()).addColour(cg.meanHex + " " + cg.weight + "%");
-				}
+					//Calculate the dominant colours
+					Set<ColourGroup> colourGroups = GroupColours(rgbList);
+					//Add each dominant colour to the IItemBlockColourSaver
+					String[] namesplit = sprite.getContents().getId().toString().split("/");
+					String name = namesplit[namesplit.length-1];
+					((IItemBlockColourSaver) block.asItem()).addColour(name);
+					colourGroups.forEach(cg -> {		
+						((IItemBlockColourSaver) block.asItem()).addColour("-"+cg.meanHex + " " + cg.weight + "%");
+					});
+				});				
 				
 			});
-			Text text = Text.literal("Blocks Analysed: "+Integer.toString(totalBlocks)+" Fails: "+Integer.toString(fails)+" Successes: "+Integer.toString(successes));
-			client.player.sendMessage(text);
-		});
 
 		//Add all blocks to a new array list. 
 		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
@@ -138,7 +149,7 @@ public class MCRGBClient implements ClientModInitializer {
 		BlockColourStorage storage = new BlockColourStorage();
 		storage.block = block.getTranslationKey();
 		for(int i = 0; i < ((IItemBlockColourSaver) block.asItem()).getLength(); i++){
-			storage.colour = ((IItemBlockColourSaver) block.asItem()).getColour(i);
+			storage.colourinfo.add(((IItemBlockColourSaver) block.asItem()).getColour(i));
 		}		
 		blockColourList.add(storage);
 
@@ -151,6 +162,7 @@ public class MCRGBClient implements ClientModInitializer {
 			writeJson(blockColoursJson);
 		} catch (IOException e) {
 		}
+		});
 
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
@@ -172,8 +184,7 @@ public class MCRGBClient implements ClientModInitializer {
         try {
   
             // attach a file to FileWriter
-            FileWriter fw
-                = new FileWriter("./mcrgb_colours/file.json");
+            FileWriter fw = new FileWriter("./mcrgb_colours/file.json");
   
             // read each character from string and write
             // into FileWriter
@@ -220,8 +231,8 @@ public class MCRGBClient implements ClientModInitializer {
 	}
 
 	//Calculate the dominant colours in a list of colours
-	public static ArrayList<ColourGroup> GroupColours(ArrayList<Vector3i> rgblist){
-		ArrayList<ColourGroup> groups = new ArrayList<>();
+	public static Set<ColourGroup> GroupColours(ArrayList<Vector3i> rgblist){
+		Set<ColourGroup> groups = new HashSet<ColourGroup>();
 		
 		//Loop through every pixel
 		for (int i = 0; i < rgblist.size(); i++){
