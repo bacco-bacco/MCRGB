@@ -23,6 +23,8 @@ import org.lwjgl.system.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bacco.event.KeyInputHandler;
+import com.bacco.gui.ColourInventoryScreen;
 import com.google.gson.Gson;
 import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -35,11 +37,14 @@ import net.fabricmc.fabric.api.event.client.player.ClientPickBlockApplyCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.state.State;
@@ -53,130 +58,35 @@ public class MCRGBClient implements ClientModInitializer {
 	public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
+	public net.minecraft.client.MinecraftClient client;
 	int totalBlocks = 0;			
 	int fails = 0;
 	int successes = 0;
+	public static ColourInventoryScreen colourInvScreen;
+
 	@Override
 	public void onInitializeClient() {
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
-		if(!readMode){
-			//when client joins (single or multi)
-			ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-				//get top sprite of stone block default state
-				var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
-				//get id of the atlas containing above
-				var atlas = defSprite.getAtlasId();
-				//use atlas id to get OpenGL ID. Atlas contains ALL blocks
-				int glID = client.getTextureManager().getTexture(atlas).getGlId();
-				//get width and height from OpenGL by binding texture
-				RenderSystem.bindTexture(glID);
-				int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-				int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
-				int size = width * height;
-				//Make byte buffer and load full atlas into buffer.
-				ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
-				GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-				//convert buffer to an array of bytes
-				byte[] pixels = new byte[size*4];
-				buffer.get(pixels);
-				ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
-				//loop through every block in the game
-				Registries.BLOCK.forEach(block -> {
-					
-					BlockColourStorage storage = new BlockColourStorage();
-					totalBlocks +=1;
-					Set<Sprite> sprites = new HashSet<Sprite>();
-					//try to get the default top texture sprite. if fails, report error and skip this block
-					
-					block.getStateManager().getStates().forEach(state -> {
-						try{
-							var model = client.getBakedModelManager().getBlockModels().getModel(state);						
-							sprites.add(model.getQuads(state, Direction.UP, Random.create()).get(0).getSprite());
-							sprites.add(model.getQuads(state, Direction.DOWN, Random.create()).get(0).getSprite());
-							sprites.add(model.getQuads(state, Direction.NORTH, Random.create()).get(0).getSprite());
-							sprites.add(model.getQuads(state, Direction.SOUTH, Random.create()).get(0).getSprite());
-							sprites.add(model.getQuads(state, Direction.EAST, Random.create()).get(0).getSprite());
-							sprites.add(model.getQuads(state, Direction.WEST, Random.create()).get(0).getSprite());
-							successes +=1;
-						}catch(Exception e){	
-							fails +=1;						
-							return;
-						}
-					});
-					if(sprites.size() < 1){
-						return;
-					}
-					sprites.forEach(sprite -> {
-						//get coords of sprite in atlas
-						int spriteX = sprite.getX();
-						int spriteY = sprite.getY();
-						int spriteW = sprite.getContents().getWidth();
-						int spriteH = sprite.getContents().getHeight();
-						//convert coords to byte position
-						int firstPixel = (spriteY*width + spriteX)*4;
-						ArrayList<Vector3i> rgbList = new ArrayList<Vector3i>();
-						//for each horizontal row in the sprite
-						for (int row = 0; row < spriteH; row++){
-							int firstInRow = firstPixel + row*width*4;
-							//loop from first pixel in row to the sprite width.
-							//Note: Looping in increments of 4, because each pixel is 4 bytes. (R,G,B and A)
-							for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
-								//retrieve bytes for RGBA values
-								//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
-								int a = pixels[pos+3];
-								a = a & 0xFF;
-								//if the pixel is fully transparent, skip it and don't count it
-								if(a > 0) {
-									Vector3i c = new Vector3i(pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-									rgbList.add(c);
-								}
-							}
-						}
-						//Calculate the dominant colours
-						Set<ColourGroup> colourGroups = GroupColours(rgbList);
-
-
-						//Add sprite name and each dominant colour to the IItemBlockColourSaver
-						SpriteDetails spriteDetails = new SpriteDetails();
-						String[] namesplit = sprite.getContents().getId().toString().split("/");
-						String name = namesplit[namesplit.length-1];
-						spriteDetails.name = name;
-						colourGroups.forEach(cg -> {	
-							spriteDetails.colourinfo.add(cg.meanColour);
-							spriteDetails.weights.add(cg.weight);
-						});
-						storage.block = block.asItem().getTranslationKey();
-						storage.spriteDetails.add(spriteDetails);
-					});				
-					storage.spriteDetails.forEach(details -> {
+		
+		KeyInputHandler.register(this);
+		ClientPlayConnectionEvents.JOIN.register((handler, sender, _client) -> {
+			client = _client;
+			colourInvScreen = new ColourInventoryScreen(client);
+		});
+		
+		//Read from JSON
+		BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
+		Registries.BLOCK.forEach(block -> {
+			for(BlockColourStorage storage : loadedBlockColourArray){
+				if(storage.block.equals(block.asItem().getTranslationKey())){
+					storage.spriteDetails.forEach(details -> {	
 						((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
 					});
-					blockColourList.add(storage);
-				});
-
-			//Write arraylist to json
-			Gson gson = new Gson();
-			String blockColoursJson = gson.toJson(blockColourList);
-			try {
-				writeJson(blockColoursJson);
-			} catch (IOException e) {
+					break;
+				};
 			}
-			});
-		}else{//readmode == true
-			//Read from JSON
-			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
-			Registries.BLOCK.forEach(block -> {
-				for(BlockColourStorage storage : loadedBlockColourArray){
-					if(storage.block.equals(block.asItem().getTranslationKey())){
-						storage.spriteDetails.forEach(details -> {	
-							((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
-						});
-						break;
-					};
-				}
 
-			});
-		}
+		});
+
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
@@ -192,7 +102,6 @@ public class MCRGBClient implements ClientModInitializer {
 
 	}
 
-	//Read and write functions, shamelessly stolen from a Java tutorial.
 	public static void writeJson(String str)
         throws IOException
     {
@@ -243,6 +152,16 @@ public class MCRGBClient implements ClientModInitializer {
 		String hexG = g < 0x10 ? "0" + Integer.toHexString(g) : Integer.toHexString(g);
 		String hexB = b < 0x10 ? "0" + Integer.toHexString(b) : Integer.toHexString(b);
 		return ("#" + hexR + hexG + hexB).toUpperCase();
+	}
+
+	public static Vector3i hexToRGB(String hex){
+		hex = hex.replace("#","");
+		int hexint = Integer.parseInt(hex,16);
+		if(hexint > 0xFFFFFF || hexint < 0x000000) return new Vector3i(0,0,0);
+		int b = hexint & 0x0000FF;
+		int g = (hexint & 0x00FF00)/0x100;
+		int r = (hexint & 0xFF0000)/(0x10000);
+		return new Vector3i(r, g, b);
 	}
 
 	//Calculate the dominant colours in a list of colours
@@ -299,6 +218,7 @@ public class MCRGBClient implements ClientModInitializer {
 				sum.add(colour);
 				counter ++;
 			}
+			if(counter == 0){return null;}
 			Vector3i avg = sum.div(counter);
 			group.meanColour = new Vector3i(avg.x, avg.y, avg.z);
 			group.meanHex = rgbToHex(avg.x, avg.y, avg.z);
@@ -306,5 +226,110 @@ public class MCRGBClient implements ClientModInitializer {
 		}
 
 		return groups;
+	}
+
+	public void RefreshColours(){
+		if (client == null) return;
+		//get top sprite of stone block default state
+		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
+		//get id of the atlas containing above
+		var atlas = defSprite.getAtlasId();
+		//use atlas id to get OpenGL ID. Atlas contains ALL blocks
+		int glID = client.getTextureManager().getTexture(atlas).getGlId();
+		//get width and height from OpenGL by binding texture
+		RenderSystem.bindTexture(glID);
+		int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+		int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+		int size = width * height;
+		//Make byte buffer and load full atlas into buffer.
+		ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
+		GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+		//convert buffer to an array of bytes
+		byte[] pixels = new byte[size*4];
+		buffer.get(pixels);
+		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
+		//loop through every block in the game
+		Registries.BLOCK.forEach(block -> {
+			if(block.asItem().getTranslationKey() == Items.AIR.getTranslationKey()) return;
+			((IItemBlockColourSaver) block.asItem()).clearSpriteDetails();
+			BlockColourStorage storage = new BlockColourStorage();
+			totalBlocks +=1;
+			Set<Sprite> sprites = new HashSet<Sprite>();
+			//try to get the default top texture sprite. if fails, report error and skip this block
+			
+			block.getStateManager().getStates().forEach(state -> {
+				try{
+					var model = client.getBakedModelManager().getBlockModels().getModel(state);						
+					sprites.add(model.getQuads(state, Direction.UP, Random.create()).get(0).getSprite());
+					sprites.add(model.getQuads(state, Direction.DOWN, Random.create()).get(0).getSprite());
+					sprites.add(model.getQuads(state, Direction.NORTH, Random.create()).get(0).getSprite());
+					sprites.add(model.getQuads(state, Direction.SOUTH, Random.create()).get(0).getSprite());
+					sprites.add(model.getQuads(state, Direction.EAST, Random.create()).get(0).getSprite());
+					sprites.add(model.getQuads(state, Direction.WEST, Random.create()).get(0).getSprite());
+					successes +=1;
+				}catch(Exception e){	
+					fails +=1;						
+					return;
+				}
+			});
+			if(sprites.size() < 1){
+				return;
+			}
+			sprites.forEach(sprite -> {
+				//get coords of sprite in atlas
+				int spriteX = sprite.getX();
+				int spriteY = sprite.getY();
+				int spriteW = sprite.getContents().getWidth();
+				int spriteH = sprite.getContents().getHeight();
+				//convert coords to byte position
+				int firstPixel = (spriteY*width + spriteX)*4;
+				ArrayList<Vector3i> rgbList = new ArrayList<Vector3i>();
+				//for each horizontal row in the sprite
+				for (int row = 0; row < spriteH; row++){
+					int firstInRow = firstPixel + row*width*4;
+					//loop from first pixel in row to the sprite width.
+					//Note: Looping in increments of 4, because each pixel is 4 bytes. (R,G,B and A)
+					for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
+						//retrieve bytes for RGBA values
+						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
+						int a = pixels[pos+3];
+						a = a & 0xFF;
+						//if the pixel is fully transparent, skip it and don't count it
+						if(a > 0) {
+							Vector3i c = new Vector3i(pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+							rgbList.add(c);
+						}
+					}
+				}
+				//Calculate the dominant colours
+				Set<ColourGroup> colourGroups = GroupColours(rgbList);
+				if (colourGroups == null) return;
+
+				//Add sprite name and each dominant colour to the IItemBlockColourSaver
+				SpriteDetails spriteDetails = new SpriteDetails();
+				String[] namesplit = sprite.getContents().getId().toString().split("/");
+				String name = namesplit[namesplit.length-1];
+				spriteDetails.name = name;
+				colourGroups.forEach(cg -> {	
+					spriteDetails.colourinfo.add(cg.meanColour);
+					spriteDetails.weights.add(cg.weight);
+				});
+				storage.block = block.asItem().getTranslationKey();
+				storage.spriteDetails.add(spriteDetails);
+			});				
+			storage.spriteDetails.forEach(details -> {
+				((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
+			});
+			blockColourList.add(storage);
+		});
+
+		//Write arraylist to json
+		Gson gson = new Gson();
+		String blockColoursJson = gson.toJson(blockColourList);
+		try {
+			writeJson(blockColoursJson);
+		} catch (IOException e) {
+		}
+		client.player.sendMessage(Text.literal("refreshed"));
 	}
 }
