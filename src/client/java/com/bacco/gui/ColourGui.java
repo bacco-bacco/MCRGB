@@ -35,6 +35,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
@@ -63,20 +64,35 @@ public class ColourGui extends LightweightGuiDescription {
     WTextField rInput = new WTextField(Text.literal(Integer.toString(r)));
     WTextField gInput = new WTextField(Text.literal(Integer.toString(g)));
     WTextField bInput = new WTextField(Text.literal(Integer.toString(b)));
+    WButton refreshButton = new WButton(Text.literal("Refresh"));
     private ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
     private ArrayList<WColourGuiSlot> wColourGuiSlots = new ArrayList<WColourGuiSlot>();
     net.minecraft.client.MinecraftClient client;
+    MCRGBClient mcrgbClient;
+    ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
+    ItemStack chestplate = new ItemStack(Items.LEATHER_CHESTPLATE);
+    ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
+    ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
+    ItemStack horse = new ItemStack(Items.LEATHER_HORSE_ARMOR);
+    WColourGuiSlot helmSlot = new WColourGuiSlot(helmet);
+    WColourGuiSlot chestSlot = new WColourGuiSlot(chestplate);
+    WColourGuiSlot legsSlot = new WColourGuiSlot(leggings);
+    WColourGuiSlot bootSlot = new WColourGuiSlot(boots);
+    WColourGuiSlot horseSlot = new WColourGuiSlot(horse);
 
     @Environment(value=EnvType.CLIENT)
-    public ColourGui(net.minecraft.client.MinecraftClient client){
+    public ColourGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient){
         
         this.client = client;
+        this.mcrgbClient = mcrgbClient;
         ColourSort(9,12);
         PlayerInventory inventory = client.player.getInventory();
         setRootPanel(root);
         root.setSize(320, 240);
         root.setInsets(Insets.ROOT_PANEL);
         WItemSlot itemSlot = WItemSlot.of(inventory, 1, 9, 11);
+        root.add(refreshButton,16,13,3,1);
+        
         root.add(label, 0, 0, 2, 1);
         root.add(itemSlot, 0, 1);
         root.add(hexInput, 11, 1, 5, 1);
@@ -108,6 +124,8 @@ public class ColourGui extends LightweightGuiDescription {
         bInput.setChangedListener((String value) -> RGBTyped('b',value));
 
         hexInput.setChangedListener((String value) -> HexTyped(value));
+
+        refreshButton.setOnClick(() -> {mcrgbClient.RefreshColours(); ColourSort(9,12);});
         /*int index = 0;
         for(int j=1; j<12; j++) {
             for(int i=0; i<9; i++) {
@@ -120,6 +138,15 @@ public class ColourGui extends LightweightGuiDescription {
 
         //WItem item = new WItem(stacks);
         //root.add(item, 0,1,9,10);
+
+        UpdateArmour();
+        
+        root.add(helmSlot, 11, 11);
+        root.add(chestSlot, 12, 11);
+        root.add(legsSlot, 13, 11);
+        root.add(bootSlot, 14, 11);
+        root.add(horseSlot, 15, 11);
+
 
         root.validate(this);
     }
@@ -141,38 +168,39 @@ public class ColourGui extends LightweightGuiDescription {
         }
         hex = MCRGBClient.rgbToHex(r, g, b);
         hexInput.setText(hex);
+        UpdateArmour();
         ColourSort(9,12);
     }
     public void RGBTyped(char d, String value){
         try{
-        if(!rInput.isFocused() & !gInput.isFocused() & !bInput.isFocused()) return;
-        if(Integer.valueOf(value) > 255 || Integer.valueOf(value) < 0) return;
+            if(!rInput.isFocused() & !gInput.isFocused() & !bInput.isFocused()) return;
+            if(Integer.valueOf(value) > 255 || Integer.valueOf(value) < 0) return;
 
-        if (d == 'r'){
-            if (r == Integer.valueOf(value)) return;
-            r = Integer.valueOf(value);
-            rSlider.setValue(r);
-        }
-        if (d == 'g'){
-            if (g == Integer.valueOf(value)) return;
-            g = Integer.valueOf(value);
-            gSlider.setValue(g);
-        }
-        if (d == 'b'){
-            if (b == Integer.valueOf(value)) return;
-            b = Integer.valueOf(value);
-            bSlider.setValue(b);
-        }
-        hex = MCRGBClient.rgbToHex(r, g, b);
-        hexInput.setText(hex);
-
-        ColourSort(9,12);
+            if (d == 'r'){
+                if (r == Integer.valueOf(value)) return;
+                r = Integer.valueOf(value);
+                rSlider.setValue(r);
+            }
+            if (d == 'g'){
+                if (g == Integer.valueOf(value)) return;
+                g = Integer.valueOf(value);
+                gSlider.setValue(g);
+            }
+            if (d == 'b'){
+                if (b == Integer.valueOf(value)) return;
+                b = Integer.valueOf(value);
+                bSlider.setValue(b);
+            }
+            hex = MCRGBClient.rgbToHex(r, g, b);
+            hexInput.setText(hex);
+            UpdateArmour();
         }catch(Exception e){
 
         }
     }
     public void HexTyped(String value){
         try{
+            hex = value;
             if(!hexInput.isFocused()) return;
             if(MCRGBClient.hexToRGB(value) == new Vector3i(r,g,b)) return;
             Vector3i rgb = MCRGBClient.hexToRGB(value);
@@ -188,8 +216,19 @@ public class ColourGui extends LightweightGuiDescription {
             bSlider.setValue(b);
             bInput.setText(Integer.toString(b));
 
+            UpdateArmour();
             ColourSort(9,12);
         }catch(Exception e){}
+    }
+
+    public void UpdateArmour(){
+        hex = hex.replace("#","");
+        int hexint = Integer.parseInt(hex,16);
+        helmet.getOrCreateSubNbt("display").putInt("color", hexint);
+        chestplate.getOrCreateSubNbt("display").putInt("color", hexint);
+        leggings.getOrCreateSubNbt("display").putInt("color", hexint);
+        boots.getOrCreateSubNbt("display").putInt("color", hexint);
+        horse.getOrCreateSubNbt("display").putInt("color", hexint);
     }
 
     public void ColourSort(int width, int height){
