@@ -1,5 +1,6 @@
 package com.bacco;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -20,6 +21,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.Struct;
+import org.lwjgl.system.windows.KEYBDINPUT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,20 +73,25 @@ public class MCRGBClient implements ClientModInitializer {
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, _client) -> {
 			client = _client;
 			colourInvScreen = new ColourInventoryScreen(client);
-		});
-		
-		//Read from JSON
-		BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
-		Registries.BLOCK.forEach(block -> {
-			for(BlockColourStorage storage : loadedBlockColourArray){
-				if(storage.block.equals(block.asItem().getTranslationKey())){
-					storage.spriteDetails.forEach(details -> {	
-						((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
-					});
-					break;
-				};
-			}
 
+			//Read from JSON
+			try{
+			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
+			Registries.BLOCK.forEach(block -> {
+				for(BlockColourStorage storage : loadedBlockColourArray){
+					if(storage.block.equals(block.asItem().getTranslationKey())){
+						storage.spriteDetails.forEach(details -> {	
+							((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
+						});
+						break;
+					};
+				}
+
+			});
+			}catch(Exception e){
+				RefreshColours();
+				client.player.sendMessage(Text.literal("MCRGB: Reloaded Colours"));
+			}
 		});
 
 		//Override item tooltips to display the colour.
@@ -106,9 +113,17 @@ public class MCRGBClient implements ClientModInitializer {
         throws IOException
     {
         try {
-  
-            // attach a file to FileWriter
-            FileWriter fw = new FileWriter("./mcrgb_colours/file.json");
+			String path = "./mcrgb_colours/";
+            String fileName = "file.json";
+			File dir = new File(path);
+			File file = new File(dir, fileName);
+			if(!dir.exists()){
+				dir.mkdir();
+			}
+			if(!file.exists()){
+				file.createNewFile();
+			}
+            FileWriter fw = new FileWriter(file);
   
             // read each character from string and write
             // into FileWriter
@@ -330,6 +345,6 @@ public class MCRGBClient implements ClientModInitializer {
 			writeJson(blockColoursJson);
 		} catch (IOException e) {
 		}
-		client.player.sendMessage(Text.literal("refreshed"));
+		client.player.sendMessage(Text.literal("MCRGB: Reloaded Colours"));
 	}
 }
