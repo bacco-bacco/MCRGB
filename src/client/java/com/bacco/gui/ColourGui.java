@@ -234,18 +234,26 @@ public class ColourGui extends LightweightGuiDescription {
     public void ColourSort(int width, int height){
         stacks.clear();
         Vector3i query = new Vector3i(r, g, b);
+        
         Registries.BLOCK.forEach(block -> {   
             try{
                 for(int j = 0; j < ((IItemBlockColourSaver) block.asItem()).getLength(); j++){
                     double distance = 0;
+                    double weightless = 0;
+                    double weight = 0;
                     SpriteDetails sprite = ((IItemBlockColourSaver) block.asItem()).getSpriteDetails(j);
                     for (int i = 0; i < sprite.colourinfo.size(); i++){
                         Vector3i colour = sprite.colourinfo.get(i);
                         if(colour == null) return;
-                        distance += query.distance(colour) * sprite.weights.get(i);
+                        weightless = query.distance(colour)+0.000001;
+                        weight = Double.valueOf(sprite.weights.get(i));
+                        if(weightless/Math.pow(weight,5) < distance || i == 0){  
+                            distance = weightless/Math.pow(weight,5);
+                        }
                     }
+
                     if(distance < ((IItemBlockColourSaver) block.asItem()).getScore() || j == 0){
-                    ((IItemBlockColourSaver) block.asItem()).setScore(distance);
+                        ((IItemBlockColourSaver) block.asItem()).setScore(distance);
                     }
                 }
                 if(block.asItem() != null && ((IItemBlockColourSaver) block.asItem()).getLength() > 0){
