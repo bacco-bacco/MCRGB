@@ -90,21 +90,30 @@ public class MCRGBClient implements ClientModInitializer {
 			});
 			}catch(Exception e){
 				RefreshColours();
-				client.player.sendMessage(Text.literal("MCRGB: Reloaded Colours"));
 			}
 		});
 
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
-			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
-			for(int i = 0; i < item.getLength(); i++){
-				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
-				strings.forEach(string -> {
-				var text = Text.literal(string);
-				var message = text.formatted(Formatting.AQUA);
-				lines.add(message);
-				});		
-			}
+			
+				IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
+				for(int i = 0; i < item.getLength(); i++){
+					ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
+					if(strings.size() > 0){
+						if(Screen.hasShiftDown()){
+							strings.forEach(string -> {
+							var text = Text.literal(string);
+							var message = text.formatted(Formatting.AQUA);
+							lines.add(message);
+							});
+						}else{
+						var text = Text.translatable("tooltip.mcrgb.shift_prompt");
+						var message = text.formatted(Formatting.AQUA);
+						lines.add(message);
+						break;
+						}
+					}	
+				}		
 		});
 
 	}
@@ -345,6 +354,6 @@ public class MCRGBClient implements ClientModInitializer {
 			writeJson(blockColoursJson);
 		} catch (IOException e) {
 		}
-		client.player.sendMessage(Text.literal("MCRGB: Reloaded Colours"));
+		client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"));
 	}
 }

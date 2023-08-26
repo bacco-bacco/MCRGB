@@ -50,13 +50,13 @@ public class ColourGui extends LightweightGuiDescription {
     int b = 255;
     String hex = "#FFFFFF";
     WGridPanel root = new WGridPanel();
-    WLabel label = new WLabel(Text.literal("MCRGB"));
+    WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
     WScrollBar scrollBar = new WScrollBar(Axis.VERTICAL);
-    WTextField hexInput = new WTextField(Text.literal("#cebbed"));
+    WTextField hexInput = new WTextField(Text.literal("#FFFFFF"));
     WPlainPanel labels = new WPlainPanel();
-    WLabel rLabel = new WLabel(Text.literal("R"),0xFF0000);
-    WLabel gLabel = new WLabel(Text.literal("G"),0x00FF00);
-    WLabel bLabel = new WLabel(Text.literal("B"),0x0000FF);
+    WLabel rLabel = new WLabel(Text.translatable("ui.mcrgb.r_for_red"),0xFF0000);
+    WLabel gLabel = new WLabel(Text.translatable("ui.mcrgb.g_for_green"),0x00FF00);
+    WLabel bLabel = new WLabel(Text.translatable("ui.mcrgb.b_for_blue"),0x0000FF);
     WSlider rSlider = new WSlider(0, 255, Axis.VERTICAL);
     WSlider gSlider = new WSlider(0, 255, Axis.VERTICAL);
     WSlider bSlider = new WSlider(0, 255, Axis.VERTICAL);
@@ -64,7 +64,7 @@ public class ColourGui extends LightweightGuiDescription {
     WTextField rInput = new WTextField(Text.literal(Integer.toString(r)));
     WTextField gInput = new WTextField(Text.literal(Integer.toString(g)));
     WTextField bInput = new WTextField(Text.literal(Integer.toString(b)));
-    WButton refreshButton = new WButton(Text.literal("Refresh"));
+    WButton refreshButton = new WButton(Text.translatable("ui.mcrgb.refresh_button"));
     private ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
     private ArrayList<WColourGuiSlot> wColourGuiSlots = new ArrayList<WColourGuiSlot>();
     net.minecraft.client.MinecraftClient client;
@@ -90,11 +90,11 @@ public class ColourGui extends LightweightGuiDescription {
         setRootPanel(root);
         root.setSize(320, 240);
         root.setInsets(Insets.ROOT_PANEL);
-        WItemSlot itemSlot = WItemSlot.of(inventory, 1, 9, 11);
+        //WItemSlot itemSlot = WItemSlot.of(inventory, 1, 9, 11);
         root.add(refreshButton,16,13,3,1);
         
         root.add(label, 0, 0, 2, 1);
-        root.add(itemSlot, 0, 1);
+        //root.add(itemSlot, 0, 1);
         root.add(hexInput, 11, 1, 5, 1);
         root.add(labels, 11,2,6,1);
 
@@ -285,7 +285,5 @@ public class ColourGui extends LightweightGuiDescription {
         }
         root.validate(this);
     }
-
-
 
 }

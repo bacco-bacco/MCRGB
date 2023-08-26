@@ -1,0 +1,11 @@
+{
+    "key.category.mcrgb.mcrgb" : "MCRGB",
+    "key.mcrgb.colour_inv_open" : "Open Color Picker",
+    "message.mcrgb.reloaded" : "MCRGB: Reloaded Colors",
+    "tooltip.mcrgb.shift_prompt" : "Hold SHIFT to view color info",
+    "ui.mcrgb.header" : "MCRGB Color Picker",
+    "ui.mcrgb.refresh_button" : "Refresh",
+    "ui.mcrgb.r_for_red" : "R",
+    "ui.mcrgb.g_for_green" : "G",
+    "ui.mcrgb.b_for_blue" : "B"
+}
