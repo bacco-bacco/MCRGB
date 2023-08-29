@@ -86,15 +86,12 @@ public class ColourGui extends LightweightGuiDescription {
         this.client = client;
         this.mcrgbClient = mcrgbClient;
         ColourSort(9,12);
-        PlayerInventory inventory = client.player.getInventory();
         setRootPanel(root);
         root.setSize(320, 240);
         root.setInsets(Insets.ROOT_PANEL);
-        //WItemSlot itemSlot = WItemSlot.of(inventory, 1, 9, 11);
         root.add(refreshButton,16,13,3,1);
         
         root.add(label, 0, 0, 2, 1);
-        //root.add(itemSlot, 0, 1);
         root.add(hexInput, 11, 1, 5, 1);
         root.add(labels, 11,2,6,1);
 
@@ -126,18 +123,6 @@ public class ColourGui extends LightweightGuiDescription {
         hexInput.setChangedListener((String value) -> HexTyped(value));
 
         refreshButton.setOnClick(() -> {mcrgbClient.RefreshColours(); ColourSort(9,12);});
-        /*int index = 0;
-        for(int j=1; j<12; j++) {
-            for(int i=0; i<9; i++) {
-                WColourGuiSlot colourGuiSlot = new WColourGuiSlot(stacks.get(index));
-                wColourGuiSlots.add(colourGuiSlot);
-                root.add(colourGuiSlot, i, j);
-                index ++;
-            }
-        }*/
-
-        //WItem item = new WItem(stacks);
-        //root.add(item, 0,1,9,10);
 
         UpdateArmour();
         

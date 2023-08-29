@@ -25,6 +25,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -53,16 +54,16 @@ public class WColourGuiSlot extends WWidget{
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
       if(!player.hasPermissionLevel(2) || !player.isCreative()) return InputResult.PROCESSED;
-      String nbt = stack.getNbt() == null ? "" : stack.getNbt().toString();
+      String nbt = stack.getOrCreateNbt().toString();
       switch (button){
          case 0:
-            player.networkHandler.sendCommand("give @s " + stack.getItem().toString()+nbt);
+            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
-            player.networkHandler.sendCommand("give @s " + stack.getItem().toString()+nbt);
+            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 2:
-            player.networkHandler.sendCommand("give @s " + stack.getItem().toString()+nbt + " " + stack.getMaxCount());
+            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;
       }
       return InputResult.PROCESSED;
