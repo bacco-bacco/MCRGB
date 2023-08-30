@@ -1,16 +1,21 @@
-# MCRGB Mod Planned Features
-## Colour Generation
-- Access texture atlas and legend json file
-- Calculate mean/dominant RGB values of each block
-- Save to a file
-- Read from a file
-## Inventory
-- Add new tab to Creative inventory
-- Contains all blocks in the game - By default, sorted by hue
-- If colours have been calculated, display hexcode(s) in tooltip. (Clientside, does not affect the item's data)
-- Search bar - lets you type in a hex code. Blocks will be sorted by colour closeness 
-- Sort options. Sort by hue, sat, lightness
-- Quick select colours - A few preset colours. Clicking them sorts blocks by closeness to that colour
-- ## Far off maybe features
-- Colour picker GUI
-- Palette Picker GUI
+# MCRGB Mod for Minecraft Fabric 1.20.1
+## Requirements:
+- Minecraft 1.20.1
+- Fabric
+- Fabric API
+## Features:
+MCRGB is a client-side Minecraft Mod designed to assist building. It allows you to search for blocks based on the dominant colours in their textures. 
+Press the colour picker key (I by default) to open the colour picker GUI.
+
+Use the RGB sliders or HEX code input to select a colour, and the mod will suggest blocks that closely match that colour.
+If you are in Creative Mode and have Operator Level Permissions, you can click blocks to give them to yourself. 
+
+In any inventory, you can also see the breakdown of a block's colour info by holding SHIFT while hovering over it. This tells you the percentage each colour takes up in each texture, and which blockstates it corresponds to.
+
+Bonus Feature: You can also give yourself leather armour of any RGB/HEX colour using the colour picker.
+## How it works:
+
+On first launch, MCRGB will generate a file, located in `.minecraft/mcrgb_colours/file.json`
+MCRGB attempts to scan every block texture in the game and calculates the dominant colours by grouping together similar pixels based on their euclidean distance in sRGB space, and calculating the mean average of each group. The results are saved in this file. If you ever need to regenerate the file (if you've changed resource packs or added new mods which add more blocks), click the "Refresh" button in the colour picker UI.
+
+When you input a colour to the colour picker, the list of blocks is sorted by the euclidean distance to each of the dominant colours in each texture. Each texture is weighted according to how much of that colour takes up in the texture. 

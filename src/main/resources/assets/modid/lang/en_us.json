@@ -7,5 +7,6 @@
     "ui.mcrgb.refresh_button" : "Refresh",
     "ui.mcrgb.r_for_red" : "R",
     "ui.mcrgb.g_for_green" : "G",
-    "ui.mcrgb.b_for_blue" : "B"
+    "ui.mcrgb.b_for_blue" : "B",
+    "ui.mcrgb.refresh_info" : "Click me after changing resource packs or adding mods! 😀"
 }

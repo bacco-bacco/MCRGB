@@ -1,5 +1,7 @@
 package com.bacco.gui;
 
+
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,6 +15,7 @@ import com.bacco.SpriteDetails;
 import com.mojang.authlib.minecraft.client.MinecraftClient;
 
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
+import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.WItem;
@@ -26,6 +29,7 @@ import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.Axis;
+import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import io.github.cottonmc.cotton.gui.widget.data.Texture;
 import io.github.cottonmc.cotton.gui.widget.icon.Icon;
@@ -45,13 +49,31 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 public class ColourGui extends LightweightGuiDescription {
+    static int height = 12;
+    static int width = 9;
     int r = 255; 
     int g = 255; 
     int b = 255;
     String hex = "#FFFFFF";
     WGridPanel root = new WGridPanel();
     WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
-    WScrollBar scrollBar = new WScrollBar(Axis.VERTICAL);
+    WScrollBar scrollBar = new WScrollBar(Axis.VERTICAL){
+        @Environment(EnvType.CLIENT)
+        @Override
+        public InputResult onMouseDrag(int x, int y, int button, double deltaX, double deltaY) {
+            PlaceSlots();
+            return super.onMouseDrag(x, y, button, deltaX, deltaY);
+        }
+
+        @Environment(EnvType.CLIENT)
+        @Override
+        public InputResult onMouseScroll(int x, int y, double amount) {
+            PlaceSlots();
+            setValue(getValue() + (int) -amount);
+		    return InputResult.PROCESSED;
+            //return super.onMouseScroll(x, y, amount);
+        }
+    };
     WTextField hexInput = new WTextField(Text.literal("#FFFFFF"));
     WPlainPanel labels = new WPlainPanel();
     WLabel rLabel = new WLabel(Text.translatable("ui.mcrgb.r_for_red"),0xFF0000);
@@ -64,7 +86,14 @@ public class ColourGui extends LightweightGuiDescription {
     WTextField rInput = new WTextField(Text.literal(Integer.toString(r)));
     WTextField gInput = new WTextField(Text.literal(Integer.toString(g)));
     WTextField bInput = new WTextField(Text.literal(Integer.toString(b)));
-    WButton refreshButton = new WButton(Text.translatable("ui.mcrgb.refresh_button"));
+    WButton refreshButton = new WButton(Text.translatable("ui.mcrgb.refresh_button")){
+        @Environment(EnvType.CLIENT)
+        @Override
+        public void addTooltip(TooltipBuilder tooltip) {
+            tooltip.add(Text.translatable("ui.mcrgb.refresh_info"));
+            super.addTooltip(tooltip);
+        }
+    };
     private ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
     private ArrayList<WColourGuiSlot> wColourGuiSlots = new ArrayList<WColourGuiSlot>();
     net.minecraft.client.MinecraftClient client;
@@ -85,14 +114,16 @@ public class ColourGui extends LightweightGuiDescription {
         
         this.client = client;
         this.mcrgbClient = mcrgbClient;
-        ColourSort(9,12);
+        ColourSort();
         setRootPanel(root);
         root.setSize(320, 240);
         root.setInsets(Insets.ROOT_PANEL);
+        root.add(hexInput, 11, 1, 5, 1);
+        root.add(scrollBar,9,1,1,11);
         root.add(refreshButton,16,13,3,1);
         
         root.add(label, 0, 0, 2, 1);
-        root.add(hexInput, 11, 1, 5, 1);
+        
         root.add(labels, 11,2,6,1);
 
         labels.add(rLabel, 6, 7, 1, 1);
@@ -111,7 +142,6 @@ public class ColourGui extends LightweightGuiDescription {
         inputs.add(gInput,49,9,27,1);
         inputs.add(bInput,85,9,27,1);
 
-
         rSlider.setValueChangeListener((int value) -> SliderAdjust('r', value));
         gSlider.setValueChangeListener((int value) -> SliderAdjust('g', value));
         bSlider.setValueChangeListener((int value) -> SliderAdjust('b', value));
@@ -122,7 +152,7 @@ public class ColourGui extends LightweightGuiDescription {
 
         hexInput.setChangedListener((String value) -> HexTyped(value));
 
-        refreshButton.setOnClick(() -> {mcrgbClient.RefreshColours(); ColourSort(9,12);});
+        refreshButton.setOnClick(() -> {mcrgbClient.RefreshColours(); ColourSort();});
 
         UpdateArmour();
         
@@ -154,7 +184,7 @@ public class ColourGui extends LightweightGuiDescription {
         hex = MCRGBClient.rgbToHex(r, g, b);
         hexInput.setText(hex);
         UpdateArmour();
-        ColourSort(9,12);
+        ColourSort();
     }
     public void RGBTyped(char d, String value){
         try{
@@ -202,7 +232,7 @@ public class ColourGui extends LightweightGuiDescription {
             bInput.setText(Integer.toString(b));
 
             UpdateArmour();
-            ColourSort(9,12);
+            ColourSort();
         }catch(Exception e){}
     }
 
@@ -216,7 +246,7 @@ public class ColourGui extends LightweightGuiDescription {
         horse.getOrCreateSubNbt("display").putInt("color", hexint);
     }
 
-    public void ColourSort(int width, int height){
+    public void ColourSort(){
         stacks.clear();
         Vector3i query = new Vector3i(r, g, b);
         
@@ -250,6 +280,8 @@ public class ColourGui extends LightweightGuiDescription {
             }   
         });
 
+        scrollBar.setMaxValue(stacks.size()/width+width);
+
         //sort list
         Collections.sort(stacks, new Comparator<ItemStack>(){
             @Override
@@ -259,12 +291,17 @@ public class ColourGui extends LightweightGuiDescription {
                 return Double.compare(x,y);
             }
         });
+        PlaceSlots();
+    }
+
+    public void PlaceSlots(){
         wColourGuiSlots.forEach(slot -> {
         root.remove(slot);
         });
-        int index = 0;
+        int index = width*scrollBar.getValue();
         for(int j=1; j<height; j++) {
             for(int i=0; i<width; i++) {
+                if(index >= stacks.size()) break;
                 WColourGuiSlot colourGuiSlot = new WColourGuiSlot(stacks.get(index));
                 
                 if(wColourGuiSlots.size() <= index){
@@ -274,6 +311,7 @@ public class ColourGui extends LightweightGuiDescription {
                 }
                 root.add(colourGuiSlot, i, j);
                 index ++;
+                
             }
         }
         root.validate(this);
