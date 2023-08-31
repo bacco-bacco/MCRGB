@@ -1,15 +1,15 @@
 {
 	"schemaVersion": 1,
 	"id": "mcrgb",
-	"version": "0.0.5-1.20.1",
+	"version": "0.1.0-1.20.1",
 	"name": "MCRGB",
 	"description": "This mod calculates and displays the dominant colours of each block in the game.",
 	"authors": [
 		"bacco"
 	],
 	"contact": {
-		"homepage": "https://github.com/JacobHerd/MCRGB",
-		"sources": "https://github.com/JacobHerd/MCRGB"
+		"homepage": "https://github.com/bacco-bacco/MCRGB",
+		"sources": "https://github.com/bacco-bacco/MCRGB"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/modid/icon.png",
