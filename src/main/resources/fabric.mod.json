@@ -12,7 +12,7 @@
 		"sources": "https://github.com/bacco-bacco/MCRGB"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
+	"icon": "assets/mcrgb/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [

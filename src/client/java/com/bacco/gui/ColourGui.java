@@ -29,6 +29,7 @@ import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.Axis;
+import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import io.github.cottonmc.cotton.gui.widget.data.Texture;
@@ -86,7 +87,9 @@ public class ColourGui extends LightweightGuiDescription {
     WTextField rInput = new WTextField(Text.literal(Integer.toString(r)));
     WTextField gInput = new WTextField(Text.literal(Integer.toString(g)));
     WTextField bInput = new WTextField(Text.literal(Integer.toString(b)));
-    WButton refreshButton = new WButton(Text.translatable("ui.mcrgb.refresh_button")){
+    Identifier refreshIdentifier = new Identifier("mcrgb", "refresh2.png");
+    TextureIcon refreshIcon = new TextureIcon(refreshIdentifier);
+    WButton refreshButton = new WButton(refreshIcon){
         @Environment(EnvType.CLIENT)
         @Override
         public void addTooltip(TooltipBuilder tooltip) {
@@ -116,11 +119,14 @@ public class ColourGui extends LightweightGuiDescription {
         this.mcrgbClient = mcrgbClient;
         ColourSort();
         setRootPanel(root);
-        root.setSize(320, 240);
+        root.setSize(320, 220);
         root.setInsets(Insets.ROOT_PANEL);
         root.add(hexInput, 11, 1, 5, 1);
         root.add(scrollBar,9,1,1,11);
-        root.add(refreshButton,16,13,3,1);
+        root.add(refreshButton,17,11,1,1);
+        refreshButton.setSize(20,20);
+        refreshButton.setIconSize(18);
+        refreshButton.setAlignment(HorizontalAlignment.LEFT);
         
         root.add(label, 0, 0, 2, 1);
         
