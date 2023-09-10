@@ -81,12 +81,12 @@ public class WColourGuiSlot extends WWidget{
 					ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 					if(strings.size() > 0){
                   for(int j = 0; j < strings.size(); j++){
-                     var text = Text.literal(strings.get(j)).formatted(Formatting.AQUA);
+                     var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
                      MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
                      if(j > 0){
                         text2.append(text);
                      }else{
-                        text2 = text;
+                        text2 = text.formatted(Formatting.DARK_GRAY);
                      }
                      
                      tooltip.add(text2);

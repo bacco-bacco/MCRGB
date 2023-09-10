@@ -40,6 +40,7 @@ import net.fabricmc.fabric.api.event.client.player.ClientPickBlockApplyCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -68,16 +69,17 @@ public class MCRGBClient implements ClientModInitializer {
 	int totalBlocks = 0;			
 	int fails = 0;
 	int successes = 0;
+	boolean scanned = false;
 	public static ColourInventoryScreen colourInvScreen;
 
 	@Override
 	public void onInitializeClient() {
-		
 		KeyInputHandler.register(this);
+
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, _client) -> {
 			client = _client;
 			colourInvScreen = new ColourInventoryScreen(client);
-
+			if (scanned) return;
 			//Read from JSON
 			try{
 			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
@@ -90,8 +92,9 @@ public class MCRGBClient implements ClientModInitializer {
 						break;
 					};
 				}
-
+				
 			});
+			scanned = true;
 			}catch(Exception e){
 				RefreshColours();
 			}
@@ -107,19 +110,19 @@ public class MCRGBClient implements ClientModInitializer {
 					if(strings.size() > 0){
 						if(Screen.hasShiftDown()){
 							for(int j = 0; j < strings.size(); j++){
-								var text = Text.literal(strings.get(j)).formatted(Formatting.AQUA);
+								var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
 								MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
 								if(j > 0){
 									text2.append(text);
 								}else{
-									text2 = text;
+									text2 = text.formatted(Formatting.DARK_GRAY);
 								}
 								
 								lines.add(text2);
 							}
 						}else{
 						var text = Text.translatable("tooltip.mcrgb.shift_prompt");
-						var message = text.formatted(Formatting.AQUA);
+						var message = text.formatted(Formatting.GRAY);
 						lines.add(message);
 						break;
 						}
