@@ -1,23 +1,15 @@
 package com.bacco.event;
 
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-
-import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
-import com.bacco.IItemBlockColourSaver;
 import com.bacco.MCRGBClient;
-import com.bacco.SpriteDetails;
 import com.bacco.gui.ColourGui;
 import com.bacco.gui.ColourScreen;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.C2SPlayChannelEvents.Register;
 
 public class KeyInputHandler {
     public static final String KEY_CATEGORY_MCRGB = "key.category.mcrgb.mcrgb";

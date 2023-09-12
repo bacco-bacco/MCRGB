@@ -1,64 +1,38 @@
 package com.bacco;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import javax.imageio.spi.RegisterableService;
-import javax.swing.GroupLayout.Group;
-
 import org.joml.Vector3i;
-import org.joml.Vector3ic;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.system.Struct;
-import org.lwjgl.system.windows.KEYBDINPUT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bacco.event.KeyInputHandler;
-import com.bacco.gui.ColourInventoryScreen;
 import com.google.gson.Gson;
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
-import net.fabricmc.fabric.api.event.client.player.ClientPickBlockApplyCallback;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.state.State;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.BlockPos.Mutable;
 import net.minecraft.util.math.random.Random;
 
 public class MCRGBClient implements ClientModInitializer {
@@ -70,7 +44,7 @@ public class MCRGBClient implements ClientModInitializer {
 	int fails = 0;
 	int successes = 0;
 	boolean scanned = false;
-	public static ColourInventoryScreen colourInvScreen;
+	//public static ColourInventoryScreen colourInvScreen;
 
 	@Override
 	public void onInitializeClient() {
@@ -78,7 +52,7 @@ public class MCRGBClient implements ClientModInitializer {
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, _client) -> {
 			client = _client;
-			colourInvScreen = new ColourInventoryScreen(client);
+			//colourInvScreen = new ColourInventoryScreen(client);
 			if (scanned) return;
 			//Read from JSON
 			try{
@@ -103,31 +77,35 @@ public class MCRGBClient implements ClientModInitializer {
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
 			
-				IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
-				for(int i = 0; i < item.getLength(); i++){
-					ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
-					ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
-					if(strings.size() > 0){
-						if(Screen.hasShiftDown()){
-							for(int j = 0; j < strings.size(); j++){
-								var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
-								MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
-								if(j > 0){
-									text2.append(text);
-								}else{
-									text2 = text.formatted(Formatting.DARK_GRAY);
-								}
-								
-								lines.add(text2);
+			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
+			for(int i = 0; i < item.getLength(); i++){
+				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
+				ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
+				if(strings.size() > 0){
+					if(Screen.hasShiftDown()){
+						for(int j = 0; j < strings.size(); j++){
+							var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
+							MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
+							if(j > 0){
+								text2.append(text);
+							}else{
+								text2 = text.formatted(Formatting.DARK_GRAY);
 							}
-						}else{
-						var text = Text.translatable("tooltip.mcrgb.shift_prompt");
-						var message = text.formatted(Formatting.GRAY);
-						lines.add(message);
-						break;
+							
+							lines.add(text2);
 						}
-					}	
-				}		
+					}else{
+					var text = Text.translatable("tooltip.mcrgb.shift_prompt");
+					var message = text.formatted(Formatting.GRAY);
+					lines.add(message);
+					break;
+					}
+				}	
+			}	
+			int tes = client.getBlockColors().getColor(Block.getBlockFromItem(stack.getItem()).getDefaultState(), null, null, 0);
+			var text = Integer.toHexString(tes);
+			var message = Text.literal(text);
+			lines.add(message);
 		});
 
 	}

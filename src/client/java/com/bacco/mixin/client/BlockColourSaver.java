@@ -7,8 +7,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import com.bacco.IItemBlockColourSaver;
 import com.bacco.SpriteDetails;
 
-import net.fabricmc.loader.api.metadata.Person;
-import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 //Mixin, which adds one string to the Item class, and getter and setter functions. String colour stores the hexcode value of the block.
 @Mixin(Item.class)
