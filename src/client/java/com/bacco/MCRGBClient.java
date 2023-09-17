@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gson.GsonBuilder;
+import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import net.fabricmc.fabric.mixin.renderer.client.SpriteAtlasTextureMixin;
+import net.minecraft.util.math.ColorHelper;
 import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -36,7 +40,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 
 public class MCRGBClient implements ClientModInitializer {
-	public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
+	public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
 	public net.minecraft.client.MinecraftClient client;
@@ -49,14 +53,14 @@ public class MCRGBClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		KeyInputHandler.register(this);
-
+		MCRGBConfig.load();
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, _client) -> {
 			client = _client;
 			//colourInvScreen = new ColourInventoryScreen(client);
 			if (scanned) return;
 			//Read from JSON
 			try{
-			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson(), BlockColourStorage[].class);
+			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
 			Registries.BLOCK.forEach(block -> {
 				for(BlockColourStorage storage : loadedBlockColourArray){
 					if(storage.block.equals(block.asItem().getTranslationKey())){
@@ -76,7 +80,7 @@ public class MCRGBClient implements ClientModInitializer {
 
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
-			
+			if(!MCRGBConfig.instance.alwaysShowToolTips) return;
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
@@ -100,22 +104,16 @@ public class MCRGBClient implements ClientModInitializer {
 					lines.add(message);
 					break;
 					}
-				}	
-			}	
-			int tes = client.getBlockColors().getColor(Block.getBlockFromItem(stack.getItem()).getDefaultState(), null, null, 0);
-			var text = Integer.toHexString(tes);
-			var message = Text.literal(text);
-			lines.add(message);
+				}
+			}
 		});
 
 	}
 
-	public static void writeJson(String str)
+	public static void writeJson(String str, String path, String fileName)
         throws IOException
     {
         try {
-			String path = "./mcrgb_colours/";
-            String fileName = "file.json";
 			File dir = new File(path);
 			File file = new File(dir, fileName);
 			if(!dir.exists()){
@@ -140,12 +138,12 @@ public class MCRGBClient implements ClientModInitializer {
         }
     }
 
-	public static String readJson()
+	public static String readJson(String path)
     {
         try {
             // FileReader Class used
             FileReader fileReader
-                = new FileReader("./mcrgb_colours/file.json");
+                = new FileReader(path);
  
             int i;
 			String str = "";
@@ -292,6 +290,7 @@ public class MCRGBClient implements ClientModInitializer {
 				return;
 			}
 			sprites.forEach(sprite -> {
+				if(sprite.getContents().getId().getPath().equals("block/grass_block_side")) return;
 				//get coords of sprite in atlas
 				int spriteX = sprite.getX();
 				int spriteY = sprite.getY();
@@ -308,13 +307,20 @@ public class MCRGBClient implements ClientModInitializer {
 					for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
 						//retrieve bytes for RGBA values
 						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
-						int a = pixels[pos+3];
-						a = a & 0xFF;
-						//if the pixel is fully transparent, skip it and don't count it
-						if(a > 0) {
-							Vector3i c = new Vector3i(pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+						int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+						int biomeColour = client.getBlockColors().getColor(block.getDefaultState(), null, null, 0);
+						int alpha = ColorHelper.Argb.getAlpha(pixelColour);
+						if(biomeColour != -1 & (!block.getDefaultState().isOf(Blocks.GRASS_BLOCK) || sprite.getContents().getId().getPath().equals("block/grass_block_top"))){
+							pixelColour = ColorHelper.Argb.mixColor(biomeColour, pixelColour);
+						}
+						//if the pixel is not fully transparent, add to the list
+						if(alpha > 0) {
+							Vector3i c = new Vector3i(ColorHelper.Argb.getRed(pixelColour), ColorHelper.Argb.getGreen(pixelColour), ColorHelper.Argb.getBlue(pixelColour));
 							rgbList.add(c);
 						}
+
+
+
 					}
 				}
 				//Calculate the dominant colours
@@ -340,10 +346,10 @@ public class MCRGBClient implements ClientModInitializer {
 		});
 
 		//Write arraylist to json
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String blockColoursJson = gson.toJson(blockColourList);
 		try {
-			writeJson(blockColoursJson);
+			writeJson(blockColoursJson, "./mcrgb_colours/", "file.json");
 		} catch (IOException e) {
 		}
 		client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"));

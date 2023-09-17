@@ -20,6 +20,9 @@
 		],
 		"client": [
 			"com.bacco.MCRGBClient"
+		],
+		"modmenu": [
+			"com.bacco.ModMenuIntegration"
 		]
 	},
 	"mixins": [

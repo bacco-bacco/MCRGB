@@ -5,6 +5,9 @@ package com.bacco.gui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import com.bacco.ClothConfigIntegration;
+import net.minecraft.client.MinecraftClient;
 import org.joml.Vector3i;
 
 import com.bacco.IItemBlockColourSaver;
@@ -80,6 +83,9 @@ public class ColourGui extends LightweightGuiDescription {
             super.addTooltip(tooltip);
         }
     };
+    Identifier settingsIdentifier = new Identifier("mcrgb", "settings.png");
+    TextureIcon settingsIcon = new TextureIcon(settingsIdentifier);
+    WButton settingsButton = new WButton(settingsIcon);
     private ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
     private ArrayList<WColourGuiSlot> wColourGuiSlots = new ArrayList<WColourGuiSlot>();
     net.minecraft.client.MinecraftClient client;
@@ -110,6 +116,11 @@ public class ColourGui extends LightweightGuiDescription {
         refreshButton.setSize(20,20);
         refreshButton.setIconSize(18);
         refreshButton.setAlignment(HorizontalAlignment.LEFT);
+
+        root.add(settingsButton,17,0,1,1);
+        settingsButton.setSize(20,20);
+        settingsButton.setIconSize(18);
+        settingsButton.setAlignment(HorizontalAlignment.LEFT);
         
         root.add(label, 0, 0, 2, 1);
         
@@ -142,6 +153,7 @@ public class ColourGui extends LightweightGuiDescription {
         hexInput.setChangedListener((String value) -> HexTyped(value));
 
         refreshButton.setOnClick(() -> {mcrgbClient.RefreshColours(); ColourSort();});
+        settingsButton.setOnClick(() -> {MinecraftClient.getInstance().setScreen(ClothConfigIntegration.getConfigScreen(client.currentScreen));});
 
         UpdateArmour();
         
