@@ -25,5 +25,6 @@ public final class MCRGBConfig {
     public static void load(){
         Gson gson = new Gson();
         instance = gson.fromJson(readJson("./config/mcrgb/config.json"), MCRGBConfig.class);
+        if(instance == null) instance = new MCRGBConfig();
     }
 }
