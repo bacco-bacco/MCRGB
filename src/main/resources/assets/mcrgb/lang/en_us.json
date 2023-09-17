@@ -18,5 +18,6 @@
     "options.mcrgb.while_scrolling" : "Update While Scrolling",
     "options.mcrgb.after_scrolling" : "Update After Scrolling",
     "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether color info is displayed in item tooltips outside of the color picker UI.",
-    "tooltip.mcrgb.slider_constant_update" : "Set this to 'Update After Scrolling' if you experience stuttering/lag while using RGB sliders."
+    "tooltip.mcrgb.slider_constant_update" : "Set this to 'Update After Scrolling' if you experience stuttering/lag while using RGB sliders.",
+    "warning.mcrgb.noclothconfig" : "Cloth Config is required to access settings in-game. Edit the config.json manually or install Cloth Config."
 }

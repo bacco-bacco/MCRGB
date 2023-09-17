@@ -2,10 +2,14 @@ package com.bacco;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class ModMenuIntegration implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return ClothConfigIntegration::getConfigScreen;
+        if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
+            return ClothConfigIntegration::getConfigScreen;
+        }
+        else return null;
     }
 }

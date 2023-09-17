@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import com.bacco.*;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.joml.Vector3i;
 
@@ -155,8 +156,15 @@ public class ColourGui extends LightweightGuiDescription {
         hexInput.setChangedListener((String value) -> HexTyped(value));
 
         refreshButton.setOnClick(() -> {mcrgbClient.RefreshColours(); ColourSort();});
-        settingsButton.setOnClick(() -> {MinecraftClient.getInstance().setScreen(ClothConfigIntegration.getConfigScreen(client.currentScreen));});
-
+        if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
+            settingsButton.setOnClick(() -> {
+                MinecraftClient.getInstance().setScreen(ClothConfigIntegration.getConfigScreen(client.currentScreen));
+            });
+        }else{
+            settingsButton.setOnClick(() -> {
+                client.player.sendMessage(Text.translatable("warning.mcrgb.noclothconfig"));
+            });
+        }
         UpdateArmour();
         
         root.add(helmSlot, 11, 11);
