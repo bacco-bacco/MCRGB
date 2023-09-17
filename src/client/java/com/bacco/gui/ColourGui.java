@@ -6,13 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import com.bacco.ClothConfigIntegration;
+import com.bacco.*;
 import net.minecraft.client.MinecraftClient;
 import org.joml.Vector3i;
 
-import com.bacco.IItemBlockColourSaver;
-import com.bacco.MCRGBClient;
-import com.bacco.SpriteDetails;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WButton;
@@ -146,6 +143,11 @@ public class ColourGui extends LightweightGuiDescription {
         gSlider.setValueChangeListener((int value) -> SliderAdjust('g', value));
         bSlider.setValueChangeListener((int value) -> SliderAdjust('b', value));
 
+        rSlider.setDraggingFinishedListener((int value) -> {if(!MCRGBConfig.instance.sliderConstantUpdate) ColourSort();});
+        gSlider.setDraggingFinishedListener((int value) -> {if(!MCRGBConfig.instance.sliderConstantUpdate) ColourSort();});
+        bSlider.setDraggingFinishedListener((int value) -> {if(!MCRGBConfig.instance.sliderConstantUpdate) ColourSort();});
+
+
         rInput.setChangedListener((String value) -> RGBTyped('r',value));
         gInput.setChangedListener((String value) -> RGBTyped('g',value));
         bInput.setChangedListener((String value) -> RGBTyped('b',value));
@@ -185,7 +187,7 @@ public class ColourGui extends LightweightGuiDescription {
         hex = MCRGBClient.rgbToHex(r, g, b);
         hexInput.setText(hex);
         UpdateArmour();
-        ColourSort();
+        if(MCRGBConfig.instance.sliderConstantUpdate) ColourSort();
     }
     public void RGBTyped(char d, String value){
         try{

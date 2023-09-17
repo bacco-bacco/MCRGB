@@ -13,5 +13,10 @@
     "options.mcrgb.picker_only" : "Color Picker Only",
     "title.mcrgb.config" : "MCRGB Options",
     "options.mcrgb.category.configs" : "Config",
-    "option.mcrgb.always_show_in_tooltips" : "Show Block Colors in Tooltips"
+    "option.mcrgb.always_show_in_tooltips" : "Show Block Colors in Tooltips",
+    "option.mcrgb.slider_constant_update" : "Slider Mode",
+    "options.mcrgb.while_scrolling" : "Update While Scrolling",
+    "options.mcrgb.after_scrolling" : "Update After Scrolling",
+    "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether color info is displayed in item tooltips outside of the color picker UI.",
+    "tooltip.mcrgb.slider_constant_update" : "Set this to 'Update After Scrolling' if you experience stuttering/lag while using RGB sliders."
 }

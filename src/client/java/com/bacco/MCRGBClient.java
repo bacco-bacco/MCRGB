@@ -11,6 +11,8 @@ import java.util.Set;
 
 import com.google.gson.GsonBuilder;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.mixin.renderer.client.SpriteAtlasTextureMixin;
 import net.minecraft.util.math.ColorHelper;
 import org.joml.Vector3i;
@@ -39,6 +41,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 
+@Environment(EnvType.CLIENT)
 public class MCRGBClient implements ClientModInitializer {
 	public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");

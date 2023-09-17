@@ -9,15 +9,13 @@
 	],
 	"contact": {
 		"homepage": "https://github.com/bacco-bacco/MCRGB",
-		"sources": "https://github.com/bacco-bacco/MCRGB"
+		"sources": "https://github.com/bacco-bacco/MCRGB",
+		"issues": "https://github.com/bacco-bacco/MCRGB/issues"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/mcrgb/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-			"com.bacco.MCRGB"
-		],
 		"client": [
 			"com.bacco.MCRGBClient"
 		],
@@ -40,5 +38,9 @@
 	},
 	"suggests": {
 		"another-mod": "*"
+	},
+	"custom": {
+		"modmenu": {
+		}
 	}
 }

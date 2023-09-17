@@ -11,6 +11,7 @@ public final class MCRGBConfig {
 
     public static MCRGBConfig instance = new MCRGBConfig();
     public boolean alwaysShowToolTips = false;
+    public boolean sliderConstantUpdate = true;
 
     public static void save(){
         Gson gson = new Gson();
