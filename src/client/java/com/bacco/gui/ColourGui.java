@@ -52,11 +52,11 @@ public class ColourGui extends LightweightGuiDescription {
 
         @Environment(EnvType.CLIENT)
         @Override
-        public InputResult onMouseScroll(int x, int y, double amount) {
+        public InputResult onMouseScroll(int x, int y, double hAmount, double vAmount) {
             PlaceSlots();
-            setValue(getValue() + (int) -amount);
+            setValue(getValue() + (int) -vAmount);
 		    return InputResult.PROCESSED;
-            //return super.onMouseScroll(x, y, amount);
+            //return super.onMouseScroll(x, y, hAmount, vAmount);
         }
     };
     WTextField hexInput = new WTextField(Text.literal("#FFFFFF"));
