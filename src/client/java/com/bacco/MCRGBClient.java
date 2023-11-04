@@ -1,34 +1,14 @@
 package com.bacco;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.gson.GsonBuilder;
-import me.shedaniel.clothconfig2.api.ConfigBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.mixin.renderer.client.SpriteAtlasTextureMixin;
-import net.minecraft.util.math.ColorHelper;
-import org.joml.Vector3i;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.bacco.event.KeyInputHandler;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.Sprite;
@@ -38,8 +18,23 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import org.joml.Vector3i;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public class MCRGBClient implements ClientModInitializer {

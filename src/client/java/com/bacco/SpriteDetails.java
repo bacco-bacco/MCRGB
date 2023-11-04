@@ -1,7 +1,8 @@
 package com.bacco;
-import java.util.ArrayList;
 
 import org.joml.Vector3i;
+
+import java.util.ArrayList;
 
 
 public class SpriteDetails {
