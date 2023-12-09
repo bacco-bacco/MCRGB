@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "mcrgb",
-	"version": "0.2.3-1.20.2",
+	"version": "0.2.4-1.20.4",
 	"name": "MCRGB",
 	"description": "This mod calculates and displays the dominant colours of each block in the game.",
 	"authors": [
@@ -31,8 +31,8 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.14.21",
-		"minecraft": ">=1.20.2",
+		"fabricloader": ">=0.15.1",
+		"minecraft": ">=1.20.4",
 		"java": ">=17",
 		"fabric-api": "*"
 	},
