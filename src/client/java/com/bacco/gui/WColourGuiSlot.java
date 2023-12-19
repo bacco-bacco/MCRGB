@@ -1,5 +1,4 @@
 package com.bacco.gui;
-import java.util.ArrayList;
 
 import com.bacco.IItemBlockColourSaver;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
@@ -9,15 +8,17 @@ import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+
+import java.util.ArrayList;
 
 
 public class WColourGuiSlot extends WWidget{
@@ -29,10 +30,10 @@ public class WColourGuiSlot extends WWidget{
    }
 
    @Override
-	public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
-      context.drawItem(stack, x+1, y+1);
+	public void paint(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY) {
+      //context.drawItem(stack, x+1, y+1);
       //context.drawTexture(SLOT_TEXTURE, x,y, 0, 0,0, 18, 18, 64, 64);
-      ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
+      ScreenDrawing.texturedRect(matrixStack, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
       //context.drawTexture();
    }
 
@@ -44,13 +45,13 @@ public class WColourGuiSlot extends WWidget{
       String nbt = stack.getOrCreateNbt().toString();
       switch (button){
          case 0:
-            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
+            player.getServer().getCommandManager().execute(null,"give @s " + Registry.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
-            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
+            player.getServer().getCommandManager().execute(null,"give @s " + Registry.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 2:
-            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
+            player.getServer().getCommandManager().execute(null,"give @s " + Registry.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;
       }
       return InputResult.PROCESSED;

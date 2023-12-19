@@ -13,7 +13,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -21,7 +20,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import org.joml.Vector3i;
+import net.minecraft.util.registry.Registry;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
@@ -59,7 +58,7 @@ public class MCRGBClient implements ClientModInitializer {
 			//Read from JSON
 			try{
 			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
-			Registries.BLOCK.forEach(block -> {
+			Registry.BLOCK.forEach(block -> {
 				for(BlockColourStorage storage : loadedBlockColourArray){
 					if(storage.block.equals(block.asItem().getTranslationKey())){
 						storage.spriteDetails.forEach(details -> {	
@@ -166,24 +165,23 @@ public class MCRGBClient implements ClientModInitializer {
 		return ("#" + hexR + hexG + hexB).toUpperCase();
 	}
 
-	public static Vector3i hexToRGB(String hex){
+	public static ColourVector hexToRGB(String hex){
 		hex = hex.replace("#","");
 		int hexint = Integer.parseInt(hex,16);
-		if(hexint > 0xFFFFFF || hexint < 0x000000) return new Vector3i(0,0,0);
+		if(hexint > 0xFFFFFF || hexint < 0x000000) return new ColourVector(0,0,0);
 		int b = hexint & 0x0000FF;
 		int g = (hexint & 0x00FF00)/0x100;
 		int r = (hexint & 0xFF0000)/(0x10000);
-		return new Vector3i(r, g, b);
+		return new ColourVector(r, g, b);
 	}
 
 	//Calculate the dominant colours in a list of colours
-	public static Set<ColourGroup> GroupColours(ArrayList<Vector3i> rgblist){
+	public static Set<ColourGroup> GroupColours(ArrayList<ColourVector> rgblist){
 		Set<ColourGroup> groups = new HashSet<ColourGroup>();
 		
 		//Loop through every pixel
 		for (int i = 0; i < rgblist.size(); i++){
-			Vector3i iPix = new Vector3i(rgblist.get(i).x,rgblist.get(i).y,rgblist.get(i).z);
-			//x is r; y is g; z is b
+			ColourVector iPix = new ColourVector(rgblist.get(i).r,rgblist.get(i).g,rgblist.get(i).b);
 
 			//check if already in a group
 			boolean iInGroup = false;
@@ -202,7 +200,7 @@ public class MCRGBClient implements ClientModInitializer {
 				//loop through all the pixels after i, and compare them to i
 				for (int j = i + 1; j < rgblist.size(); j++){
 					//if the distance is less than 100, add j to the group (if it is not already in a group)
-					Vector3i jPix = new Vector3i(rgblist.get(j).x,rgblist.get(j).y,rgblist.get(j).z);
+					ColourVector jPix = new ColourVector(rgblist.get(j).r,rgblist.get(j).g,rgblist.get(j).b);
 					if(jPix.distance(iPix) < 100){
 						boolean jInGroup = false;
 						for (ColourGroup group : groups){
@@ -224,16 +222,16 @@ public class MCRGBClient implements ClientModInitializer {
 		}
 		//calculate the average rgb value of each group, convert to hex and calculate weight
 		for (ColourGroup group : groups){
-			Vector3i sum = new Vector3i(0, 0, 0);
+			ColourVector sum = new ColourVector(0, 0, 0);
 			int counter = 0;
-			for (Vector3i colour : group.pixels){
+			for (ColourVector colour : group.pixels){
 				sum.add(colour);
 				counter ++;
 			}
 			if(counter == 0){return null;}
-			Vector3i avg = sum.div(counter);
-			group.meanColour = new Vector3i(avg.x, avg.y, avg.z);
-			group.meanHex = rgbToHex(avg.x, avg.y, avg.z);
+			ColourVector avg = sum.div(counter);
+			group.meanColour = new ColourVector(avg.r, avg.g, avg.b);
+			group.meanHex = rgbToHex(avg.r, avg.g, avg.b);
 			group.weight = (int)((float)counter/(float)rgblist.size() * 100);
 		}
 
@@ -245,7 +243,7 @@ public class MCRGBClient implements ClientModInitializer {
 		//get top sprite of stone block default state
 		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
 		//get id of the atlas containing above
-		var atlas = defSprite.getAtlasId();
+		var atlas = defSprite.getAtlas().getId();
 		//use atlas id to get OpenGL ID. Atlas contains ALL blocks
 		int glID = client.getTextureManager().getTexture(atlas).getGlId();
 		//get width and height from OpenGL by binding texture
@@ -261,7 +259,7 @@ public class MCRGBClient implements ClientModInitializer {
 		buffer.get(pixels);
 		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
 		//loop through every block in the game
-		Registries.BLOCK.forEach(block -> {
+		Registry.BLOCK.forEach(block -> {
 			if(block.asItem().getTranslationKey() == Items.AIR.getTranslationKey()) return;
 			((IItemBlockColourSaver) block.asItem()).clearSpriteDetails();
 			BlockColourStorage storage = new BlockColourStorage();
@@ -288,15 +286,15 @@ public class MCRGBClient implements ClientModInitializer {
 				return;
 			}
 			sprites.forEach(sprite -> {
-				if(sprite.getContents().getId().getPath().equals("block/grass_block_side")) return;
+				if(sprite.getId().getPath().equals("block/grass_block_side")) return;
 				//get coords of sprite in atlas
 				int spriteX = sprite.getX();
 				int spriteY = sprite.getY();
-				int spriteW = sprite.getContents().getWidth();
-				int spriteH = sprite.getContents().getHeight();
+				int spriteW = sprite.getWidth();
+				int spriteH = sprite.getHeight();
 				//convert coords to byte position
 				int firstPixel = (spriteY*width + spriteX)*4;
-				ArrayList<Vector3i> rgbList = new ArrayList<Vector3i>();
+				ArrayList<ColourVector> rgbList = new ArrayList<ColourVector>();
 				//for each horizontal row in the sprite
 				for (int row = 0; row < spriteH; row++){
 					int firstInRow = firstPixel + row*width*4;
@@ -308,12 +306,12 @@ public class MCRGBClient implements ClientModInitializer {
 						int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
 						int biomeColour = client.getBlockColors().getColor(block.getDefaultState(), null, null, 0);
 						int alpha = ColorHelper.Argb.getAlpha(pixelColour);
-						if(biomeColour != -1 & (!block.getDefaultState().isOf(Blocks.GRASS_BLOCK) || sprite.getContents().getId().getPath().equals("block/grass_block_top"))){
+						if(biomeColour != -1 & (!block.getDefaultState().isOf(Blocks.GRASS_BLOCK) || sprite.getId().getPath().equals("block/grass_block_top"))){
 							pixelColour = ColorHelper.Argb.mixColor(biomeColour, pixelColour);
 						}
 						//if the pixel is not fully transparent, add to the list
 						if(alpha > 0) {
-							Vector3i c = new Vector3i(ColorHelper.Argb.getRed(pixelColour), ColorHelper.Argb.getGreen(pixelColour), ColorHelper.Argb.getBlue(pixelColour));
+							ColourVector c = new ColourVector(ColorHelper.Argb.getRed(pixelColour), ColorHelper.Argb.getGreen(pixelColour), ColorHelper.Argb.getBlue(pixelColour));
 							rgbList.add(c);
 						}
 
@@ -327,7 +325,7 @@ public class MCRGBClient implements ClientModInitializer {
 
 				//Add sprite name and each dominant colour to the IItemBlockColourSaver
 				SpriteDetails spriteDetails = new SpriteDetails();
-				String[] namesplit = sprite.getContents().getId().toString().split("/");
+				String[] namesplit = sprite.getId().toString().split("/");
 				String name = namesplit[namesplit.length-1];
 				spriteDetails.name = name;
 				colourGroups.forEach(cg -> {	

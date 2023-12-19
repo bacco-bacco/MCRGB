@@ -1,25 +1,9 @@
 package com.bacco.gui;
 
 
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
 import com.bacco.*;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import org.joml.Vector3i;
-
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
-import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
-import io.github.cottonmc.cotton.gui.widget.WButton;
-import io.github.cottonmc.cotton.gui.widget.WGridPanel;
-import io.github.cottonmc.cotton.gui.widget.WLabel;
-import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
-import io.github.cottonmc.cotton.gui.widget.WScrollBar;
-import io.github.cottonmc.cotton.gui.widget.WSlider;
-import io.github.cottonmc.cotton.gui.widget.WTextField;
+import io.github.cottonmc.cotton.gui.widget.*;
 import io.github.cottonmc.cotton.gui.widget.data.Axis;
 import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
@@ -27,11 +11,17 @@ import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class ColourGui extends LightweightGuiDescription {
     static int height = 12;
@@ -52,7 +42,7 @@ public class ColourGui extends LightweightGuiDescription {
 
         @Environment(EnvType.CLIENT)
         @Override
-        public InputResult onMouseScroll(int x, int y, double hAmount, double vAmount) {
+        public InputResult onMouseScroll(int x, int y, double vAmount) {
             PlaceSlots();
             setValue(getValue() + (int) -vAmount);
 		    return InputResult.PROCESSED;
@@ -228,17 +218,17 @@ public class ColourGui extends LightweightGuiDescription {
         try{
             hex = value;
             if(!hexInput.isFocused()) return;
-            if(MCRGBClient.hexToRGB(value) == new Vector3i(r,g,b)) return;
-            Vector3i rgb = MCRGBClient.hexToRGB(value);
-            r = rgb.x;
+            if(MCRGBClient.hexToRGB(value) == new ColourVector(r,g,b)) return;
+            ColourVector rgb = MCRGBClient.hexToRGB(value);
+            r = rgb.r;
             rSlider.setValue(r);
             rInput.setText(Integer.toString(r));
 
-            g = rgb.y;
+            g = rgb.g;
             gSlider.setValue(g);
             gInput.setText(Integer.toString(g));
 
-            b = rgb.z;
+            b = rgb.b;
             bSlider.setValue(b);
             bInput.setText(Integer.toString(b));
 
@@ -259,9 +249,9 @@ public class ColourGui extends LightweightGuiDescription {
 
     public void ColourSort(){
         stacks.clear();
-        Vector3i query = new Vector3i(r, g, b);
-        
-        Registries.BLOCK.forEach(block -> {   
+        ColourVector query = new ColourVector(r, g, b);
+
+        Registry.BLOCK.forEach(block -> {
             try{
                 for(int j = 0; j < ((IItemBlockColourSaver) block.asItem()).getLength(); j++){
                     double distance = 0;
@@ -269,7 +259,7 @@ public class ColourGui extends LightweightGuiDescription {
                     double weight = 0;
                     SpriteDetails sprite = ((IItemBlockColourSaver) block.asItem()).getSpriteDetails(j);
                     for (int i = 0; i < sprite.colourinfo.size(); i++){
-                        Vector3i colour = sprite.colourinfo.get(i);
+                        ColourVector colour = sprite.colourinfo.get(i);
                         if(colour == null) return;
                         weightless = query.distance(colour)+0.000001;
                         weight = Double.valueOf(sprite.weights.get(i));
