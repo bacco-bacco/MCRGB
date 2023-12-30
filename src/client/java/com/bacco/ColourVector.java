@@ -20,6 +20,15 @@ public class ColourVector {
 
         return this;
     }
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj) return true;
+        if(obj == null) return false;
+        if(getClass() != obj.getClass()) return false;
+        ColourVector other = (ColourVector) obj;
+        if(this.r != other.r || this.g != other.g || this.b != other.b) return false;
+        return true;
+    }
 
     public ColourVector div(int i){
         this.r = this.r/i;
