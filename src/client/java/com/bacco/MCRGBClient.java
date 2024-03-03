@@ -1,34 +1,14 @@
 package com.bacco;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.gson.GsonBuilder;
-import me.shedaniel.clothconfig2.api.ConfigBuilder;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.mixin.renderer.client.SpriteAtlasTextureMixin;
-import net.minecraft.util.math.ColorHelper;
-import org.joml.Vector3i;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.bacco.event.KeyInputHandler;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.Sprite;
@@ -38,8 +18,22 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public class MCRGBClient implements ClientModInitializer {
@@ -171,24 +165,23 @@ public class MCRGBClient implements ClientModInitializer {
 		return ("#" + hexR + hexG + hexB).toUpperCase();
 	}
 
-	public static Vector3i hexToRGB(String hex){
+	public static ColourVector hexToRGB(String hex){
 		hex = hex.replace("#","");
 		int hexint = Integer.parseInt(hex,16);
-		if(hexint > 0xFFFFFF || hexint < 0x000000) return new Vector3i(0,0,0);
+		if(hexint > 0xFFFFFF || hexint < 0x000000) return new ColourVector(0,0,0);
 		int b = hexint & 0x0000FF;
 		int g = (hexint & 0x00FF00)/0x100;
 		int r = (hexint & 0xFF0000)/(0x10000);
-		return new Vector3i(r, g, b);
+		return new ColourVector(r, g, b);
 	}
 
 	//Calculate the dominant colours in a list of colours
-	public static Set<ColourGroup> GroupColours(ArrayList<Vector3i> rgblist){
+	public static Set<ColourGroup> GroupColours(ArrayList<ColourVector> rgblist){
 		Set<ColourGroup> groups = new HashSet<ColourGroup>();
 		
 		//Loop through every pixel
 		for (int i = 0; i < rgblist.size(); i++){
-			Vector3i iPix = new Vector3i(rgblist.get(i).x,rgblist.get(i).y,rgblist.get(i).z);
-			//x is r; y is g; z is b
+			ColourVector iPix = new ColourVector(rgblist.get(i).r,rgblist.get(i).g,rgblist.get(i).b);
 
 			//check if already in a group
 			boolean iInGroup = false;
@@ -207,7 +200,7 @@ public class MCRGBClient implements ClientModInitializer {
 				//loop through all the pixels after i, and compare them to i
 				for (int j = i + 1; j < rgblist.size(); j++){
 					//if the distance is less than 100, add j to the group (if it is not already in a group)
-					Vector3i jPix = new Vector3i(rgblist.get(j).x,rgblist.get(j).y,rgblist.get(j).z);
+					ColourVector jPix = new ColourVector(rgblist.get(j).r,rgblist.get(j).g,rgblist.get(j).b);
 					if(jPix.distance(iPix) < 100){
 						boolean jInGroup = false;
 						for (ColourGroup group : groups){
@@ -229,16 +222,16 @@ public class MCRGBClient implements ClientModInitializer {
 		}
 		//calculate the average rgb value of each group, convert to hex and calculate weight
 		for (ColourGroup group : groups){
-			Vector3i sum = new Vector3i(0, 0, 0);
+			ColourVector sum = new ColourVector(0, 0, 0);
 			int counter = 0;
-			for (Vector3i colour : group.pixels){
+			for (ColourVector colour : group.pixels){
 				sum.add(colour);
 				counter ++;
 			}
 			if(counter == 0){return null;}
-			Vector3i avg = sum.div(counter);
-			group.meanColour = new Vector3i(avg.x, avg.y, avg.z);
-			group.meanHex = rgbToHex(avg.x, avg.y, avg.z);
+			ColourVector avg = sum.div(counter);
+			group.meanColour = new ColourVector(avg.r, avg.g, avg.b);
+			group.meanHex = rgbToHex(avg.r, avg.g, avg.b);
 			group.weight = (int)((float)counter/(float)rgblist.size() * 100);
 		}
 
@@ -301,7 +294,7 @@ public class MCRGBClient implements ClientModInitializer {
 				int spriteH = sprite.getContents().getHeight();
 				//convert coords to byte position
 				int firstPixel = (spriteY*width + spriteX)*4;
-				ArrayList<Vector3i> rgbList = new ArrayList<Vector3i>();
+				ArrayList<ColourVector> rgbList = new ArrayList<ColourVector>();
 				//for each horizontal row in the sprite
 				for (int row = 0; row < spriteH; row++){
 					int firstInRow = firstPixel + row*width*4;
@@ -318,7 +311,7 @@ public class MCRGBClient implements ClientModInitializer {
 						}
 						//if the pixel is not fully transparent, add to the list
 						if(alpha > 0) {
-							Vector3i c = new Vector3i(ColorHelper.Argb.getRed(pixelColour), ColorHelper.Argb.getGreen(pixelColour), ColorHelper.Argb.getBlue(pixelColour));
+							ColourVector c = new ColourVector(ColorHelper.Argb.getRed(pixelColour), ColorHelper.Argb.getGreen(pixelColour), ColorHelper.Argb.getBlue(pixelColour));
 							rgbList.add(c);
 						}
 

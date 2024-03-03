@@ -18,7 +18,6 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -219,17 +218,17 @@ public class ColourGui extends LightweightGuiDescription {
         try{
             hex = value;
             if(!hexInput.isFocused()) return;
-            if(MCRGBClient.hexToRGB(value) == new Vector3i(r,g,b)) return;
-            Vector3i rgb = MCRGBClient.hexToRGB(value);
-            r = rgb.x;
+            if(MCRGBClient.hexToRGB(value) == new ColourVector(r,g,b)) return;
+            ColourVector rgb = MCRGBClient.hexToRGB(value);
+            r = rgb.r;
             rSlider.setValue(r);
             rInput.setText(Integer.toString(r));
 
-            g = rgb.y;
+            g = rgb.g;
             gSlider.setValue(g);
             gInput.setText(Integer.toString(g));
 
-            b = rgb.z;
+            b = rgb.b;
             bSlider.setValue(b);
             bInput.setText(Integer.toString(b));
 
@@ -250,9 +249,9 @@ public class ColourGui extends LightweightGuiDescription {
 
     public void ColourSort(){
         stacks.clear();
-        Vector3i query = new Vector3i(r, g, b);
-        
-        Registries.BLOCK.forEach(block -> {   
+        ColourVector query = new ColourVector(r, g, b);
+
+        Registries.BLOCK.forEach(block -> {
             try{
                 for(int j = 0; j < ((IItemBlockColourSaver) block.asItem()).getLength(); j++){
                     double distance = 0;
@@ -260,7 +259,7 @@ public class ColourGui extends LightweightGuiDescription {
                     double weight = 0;
                     SpriteDetails sprite = ((IItemBlockColourSaver) block.asItem()).getSpriteDetails(j);
                     for (int i = 0; i < sprite.colourinfo.size(); i++){
-                        Vector3i colour = sprite.colourinfo.get(i);
+                        ColourVector colour = sprite.colourinfo.get(i);
                         if(colour == null) return;
                         weightless = query.distance(colour)+0.000001;
                         weight = Double.valueOf(sprite.weights.get(i));
