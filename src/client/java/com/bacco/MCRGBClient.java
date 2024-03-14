@@ -158,23 +158,6 @@ public class MCRGBClient implements ClientModInitializer {
         }
     }
 
-	public static String rgbToHex(int r, int g, int b){
-		String hexR = r < 0x10 ? "0" + Integer.toHexString(r) : Integer.toHexString(r);
-		String hexG = g < 0x10 ? "0" + Integer.toHexString(g) : Integer.toHexString(g);
-		String hexB = b < 0x10 ? "0" + Integer.toHexString(b) : Integer.toHexString(b);
-		return ("#" + hexR + hexG + hexB).toUpperCase();
-	}
-
-	public static ColourVector hexToRGB(String hex){
-		hex = hex.replace("#","");
-		int hexint = Integer.parseInt(hex,16);
-		if(hexint > 0xFFFFFF || hexint < 0x000000) return new ColourVector(0,0,0);
-		int b = hexint & 0x0000FF;
-		int g = (hexint & 0x00FF00)/0x100;
-		int r = (hexint & 0xFF0000)/(0x10000);
-		return new ColourVector(r, g, b);
-	}
-
 	//Calculate the dominant colours in a list of colours
 	public static Set<ColourGroup> GroupColours(ArrayList<ColourVector> rgblist){
 		Set<ColourGroup> groups = new HashSet<ColourGroup>();
@@ -231,7 +214,7 @@ public class MCRGBClient implements ClientModInitializer {
 			if(counter == 0){return null;}
 			ColourVector avg = sum.div(counter);
 			group.meanColour = new ColourVector(avg.r, avg.g, avg.b);
-			group.meanHex = rgbToHex(avg.r, avg.g, avg.b);
+			group.meanHex = group.meanColour.getHex();
 			group.weight = (int)((float)counter/(float)rgblist.size() * 100);
 		}
 

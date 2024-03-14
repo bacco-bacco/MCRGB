@@ -12,7 +12,7 @@ public class SpriteDetails {
         ArrayList<String> strings = new ArrayList<String>();
         strings.add(name+":");
         for(int i = 0; i < colourinfo.size(); i++){
-            strings.add(MCRGBClient.rgbToHex(colourinfo.get(i).r,colourinfo.get(i).g,colourinfo.get(i).b)+"  "+weights.get(i)+"%");
+            strings.add(colourinfo.get(i).getHex()+"  "+weights.get(i)+"%");
         }
         return strings;
     }
@@ -20,7 +20,7 @@ public class SpriteDetails {
         ArrayList<Integer> colours = new ArrayList<Integer>();
         colours.add(0xffffff);
         for(int i = 0; i < colourinfo.size(); i++){
-            String hex = MCRGBClient.rgbToHex(colourinfo.get(i).r,colourinfo.get(i).g,colourinfo.get(i).b);
+            String hex = colourinfo.get(i).getHex();
             hex = hex.replace("#","");
             int hexint = Integer.parseInt(hex,16);
             colours.add(hexint);
