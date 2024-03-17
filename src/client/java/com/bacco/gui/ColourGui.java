@@ -198,11 +198,11 @@ public class ColourGui extends LightweightGuiDescription {
 
         switch (mode){
             case RGB:
-                rLabel.setText(Text.literal("R"));
+                rLabel.setText(Text.translatable("ui.mcrgb.r_for_red"));
                 rLabel.setColor(0xFF0000);
-                gLabel.setText(Text.literal("G"));
+                gLabel.setText(Text.translatable("ui.mcrgb.g_for_green"));
                 gLabel.setColor(0x00FF00);
-                bLabel.setText(Text.literal("B"));
+                bLabel.setText(Text.translatable("ui.mcrgb.b_for_blue"));
                 bLabel.setColor(0x0000FF);
 
                 rSlider.setMinValue(0);
@@ -213,11 +213,11 @@ public class ColourGui extends LightweightGuiDescription {
                 bSlider.setMaxValue(255);
                 break;
             case HSV:
-                rLabel.setText(Text.literal("H"));
+                rLabel.setText(Text.translatable("ui.mcrgb.h_for_hue_hsv"));
                 rLabel.setColor(0x3F3F3F);
-                gLabel.setText(Text.literal("S"));
+                gLabel.setText(Text.translatable("ui.mcrgb.s_for_sat_hsv"));
                 gLabel.setColor(0x3F3F3F);
-                bLabel.setText(Text.literal("V"));
+                bLabel.setText(Text.translatable("ui.mcrgb.v_for_val_hsv"));
                 bLabel.setColor(0x3F3F3F);
                 rSlider.setMinValue(0);
                 gSlider.setMinValue(0);
@@ -227,11 +227,11 @@ public class ColourGui extends LightweightGuiDescription {
                 bSlider.setMaxValue(100);
                 break;
             case HSL:
-                rLabel.setText(Text.literal("H"));
+                rLabel.setText(Text.translatable("ui.mcrgb.h_for_hue_hsl");
                 rLabel.setColor(0x3F3F3F);
-                gLabel.setText(Text.literal("S"));
+                gLabel.setText(Text.translatable("ui.mcrgb.s_for_sat_hsl"));
                 gLabel.setColor(0x3F3F3F);
-                bLabel.setText(Text.literal("L"));
+                bLabel.setText(Text.translatable("ui.mcrgb.l_for_lit_hsl"));
                 bLabel.setColor(0x3F3F3F);
                 rSlider.setMinValue(0);
                 gSlider.setMinValue(0);
