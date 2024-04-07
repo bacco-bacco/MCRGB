@@ -76,9 +76,9 @@ public class ColourGui extends LightweightGuiDescription {
     TextureIcon settingsIcon = new TextureIcon(settingsIdentifier);
     WButton settingsButton = new WButton(settingsIcon);
 
-    WButton rgbButton = new WButton(Text.literal("RGB"));
-    WButton hsvButton = new WButton(Text.literal("HSV"));
-    WButton hslButton = new WButton(Text.literal("HSL"));
+    WButton rgbButton = new WButton(Text.translatable("ui.mcrgb.rgb"));
+    WButton hsvButton = new WButton(Text.translatable("ui.mcrgb.hsv"));
+    WButton hslButton = new WButton(Text.translatable("ui.mcrgb.hsl"));
     private ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
     private ArrayList<WColourGuiSlot> wColourGuiSlots = new ArrayList<WColourGuiSlot>();
     net.minecraft.client.MinecraftClient client;
@@ -122,13 +122,20 @@ public class ColourGui extends LightweightGuiDescription {
         settingsButton.setIconSize(18);
         settingsButton.setAlignment(HorizontalAlignment.LEFT);
 
-        root.add(rgbButton,17,3,1,1);
-        rgbButton.setSize(20,10);
-        root.add(hsvButton,17,4,1,1);
-        hsvButton.setSize(20,10);
-        root.add(hslButton,17,5,1,1);
-        hslButton.setSize(20,10);
-        
+        root.add(rgbButton,10,11,1,1);
+        rgbButton.setLocation(201,205);
+        rgbButton.setSize(26,20);
+        rgbButton.setEnabled(false);
+        rgbButton.setAlignment(HorizontalAlignment.CENTER);
+        root.add(hsvButton,13,11,1,1);
+        hsvButton.setLocation(237,205);
+        hsvButton.setSize(26,20);
+        hsvButton.setAlignment(HorizontalAlignment.CENTER);
+        root.add(hslButton,15,11,1,1);
+        hslButton.setLocation(273,205);
+        hslButton.setSize(26,20);
+        hslButton.setAlignment(HorizontalAlignment.CENTER);
+
         root.add(label, 0, 0, 2, 1);
         
         root.add(labels, 11,2,6,1);
@@ -145,9 +152,9 @@ public class ColourGui extends LightweightGuiDescription {
         bSlider.setValue(inputColour.b);
 
         root.add(inputs,10,9,2,1);
-        inputs.add(rInput,13,9,27,1);
-        inputs.add(gInput,49,9,27,1);
-        inputs.add(bInput,85,9,27,1);
+        inputs.add(rInput,14,9,26,1);
+        inputs.add(gInput,50,9,26,1);
+        inputs.add(bInput,86,9,26,1);
 
         rSlider.setValueChangeListener((int value) -> {if(enableSliderListeners) SliderAdjust('r', value);});
         gSlider.setValueChangeListener((int value) -> {if(enableSliderListeners) SliderAdjust('g', value);});
@@ -181,11 +188,11 @@ public class ColourGui extends LightweightGuiDescription {
         }
         UpdateArmour();
         
-        root.add(helmSlot, 11, 11);
-        root.add(chestSlot, 12, 11);
-        root.add(legsSlot, 13, 11);
-        root.add(bootSlot, 14, 11);
-        root.add(horseSlot, 15, 11);
+        root.add(helmSlot, 17, 3);
+        root.add(chestSlot, 17, 4);
+        root.add(legsSlot, 17, 5);
+        root.add(bootSlot, 17, 6);
+        root.add(horseSlot, 17, 7);
 
 
         root.validate(this);
@@ -211,6 +218,9 @@ public class ColourGui extends LightweightGuiDescription {
                 rSlider.setMaxValue(255);
                 gSlider.setMaxValue(255);
                 bSlider.setMaxValue(255);
+                rgbButton.setEnabled(false);
+                hsvButton.setEnabled(true);
+                hslButton.setEnabled(true);
                 break;
             case HSV:
                 rLabel.setText(Text.translatable("ui.mcrgb.h_for_hue_hsv"));
@@ -225,9 +235,12 @@ public class ColourGui extends LightweightGuiDescription {
                 rSlider.setMaxValue(360);
                 gSlider.setMaxValue(100);
                 bSlider.setMaxValue(100);
+                rgbButton.setEnabled(true);
+                hsvButton.setEnabled(false);
+                hslButton.setEnabled(true);
                 break;
             case HSL:
-                rLabel.setText(Text.translatable("ui.mcrgb.h_for_hue_hsl");
+                rLabel.setText(Text.translatable("ui.mcrgb.h_for_hue_hsl"));
                 rLabel.setColor(0x3F3F3F);
                 gLabel.setText(Text.translatable("ui.mcrgb.s_for_sat_hsl"));
                 gLabel.setColor(0x3F3F3F);
@@ -239,6 +252,9 @@ public class ColourGui extends LightweightGuiDescription {
                 rSlider.setMaxValue(360);
                 gSlider.setMaxValue(100);
                 bSlider.setMaxValue(100);
+                rgbButton.setEnabled(true);
+                hsvButton.setEnabled(true);
+                hslButton.setEnabled(false);
                 break;
         }
         HexTyped(colour.getHex(),true);
