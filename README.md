@@ -1,12 +1,14 @@
 # MCRGB Mod for Minecraft Fabric 1.20.1+
 
--[Modrinth](https://modrinth.com/mod/mcrgb)
+- [Modrinth](https://modrinth.com/mod/mcrgb)
 
--[Curseforge](https://legacy.curseforge.com/minecraft/mc-mods/mcrgb-a-colour-picker-for-minecraft-blocks)
+- [Curseforge](https://legacy.curseforge.com/minecraft/mc-mods/mcrgb-a-colour-picker-for-minecraft-blocks)
 
--[Discord](https://discord.gg/883ybFjSEf)
+- [Discord](https://discord.gg/883ybFjSEf)
 
--[Youtube Trailer](https://www.youtube.com/watch?v=MNBBPMVZp5g)
+- Trailer:
+
+[![Youtube Trailer](https://github.com/bacco-bacco/MCRGB/assets/22712685/83dd58c1-7452-449e-bb7d-36e930dd1182)]([https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE](https://www.youtube.com/watch?v=MNBBPMVZp5g))
 
 ## Requirements:
 - Minecraft 1.20.1+
