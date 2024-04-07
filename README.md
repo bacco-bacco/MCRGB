@@ -4,6 +4,10 @@
 
 -[Curseforge](https://legacy.curseforge.com/minecraft/mc-mods/mcrgb-a-colour-picker-for-minecraft-blocks)
 
+-[Discord](https://discord.gg/883ybFjSEf)
+
+-[Youtube Trailer](https://www.youtube.com/watch?v=MNBBPMVZp5g)
+
 ## Requirements:
 - Minecraft 1.20.1+
 - Fabric
@@ -17,7 +21,7 @@ MCRGB is a client-side Minecraft Mod designed to assist building. It allows you 
 Press the colour picker key (I by default) to open the colour picker GUI.
 ![Colour Picker GUI](https://github.com/bacco-bacco/MCRGB/assets/22712685/2cb6bf2f-5c4c-4ee9-865a-78af099a416c)
 
-###H SV, HSL, RGB and Hex Support!
+### HSV, HSL, RGB and Hex Support!
 Input your colours using your favourite colour space, and the mod will suggest blocks that closely match that colour.
 If you are in Creative Mode and have Operator Level Permissions, you can click blocks to give them to yourself. 
 
