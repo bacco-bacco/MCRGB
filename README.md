@@ -8,7 +8,7 @@
 
 - Trailer:
 
-[![Youtube Trailer](https://github.com/bacco-bacco/MCRGB/assets/22712685/83dd58c1-7452-449e-bb7d-36e930dd1182)]([https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE](https://www.youtube.com/watch?v=MNBBPMVZp5g))
+[![Youtube Trailer](https://github.com/bacco-bacco/MCRGB/assets/22712685/83dd58c1-7452-449e-bb7d-36e930dd1182)](https://www.youtube.com/watch?v=MNBBPMVZp5g)
 
 ## Requirements:
 - Minecraft 1.20.1+
