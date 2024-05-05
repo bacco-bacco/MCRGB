@@ -1,5 +1,4 @@
 package com.bacco.gui;
-import java.util.ArrayList;
 
 import com.bacco.IItemBlockColourSaver;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
@@ -11,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
@@ -18,6 +18,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+
+import java.util.ArrayList;
 
 
 public class WColourGuiSlot extends WWidget{
@@ -41,7 +43,10 @@ public class WColourGuiSlot extends WWidget{
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
       if(!player.hasPermissionLevel(2) || !player.isCreative()) return InputResult.PROCESSED;
-      String nbt = stack.getOrCreateNbt().toString();
+      String nbt = "";
+      if(stack.contains(DataComponentTypes.DYED_COLOR)) {
+         nbt = "[dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) + "]";//stack.getOrCreateNbt().toString();
+      }
       switch (button){
          case 0:
             player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);

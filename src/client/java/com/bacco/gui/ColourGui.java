@@ -13,6 +13,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -88,11 +90,13 @@ public class ColourGui extends LightweightGuiDescription {
     ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
     ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
     ItemStack horse = new ItemStack(Items.LEATHER_HORSE_ARMOR);
+    ItemStack wolf = new ItemStack(Items.WOLF_ARMOR);
     WColourGuiSlot helmSlot = new WColourGuiSlot(helmet);
     WColourGuiSlot chestSlot = new WColourGuiSlot(chestplate);
     WColourGuiSlot legsSlot = new WColourGuiSlot(leggings);
     WColourGuiSlot bootSlot = new WColourGuiSlot(boots);
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse);
+    WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf);
     boolean enableSliderListeners = true;
 
     enum ColourMode {
@@ -193,6 +197,7 @@ public class ColourGui extends LightweightGuiDescription {
         root.add(legsSlot, 17, 5);
         root.add(bootSlot, 17, 6);
         root.add(horseSlot, 17, 7);
+        root.add(wolfSlot, 17, 8);
 
 
         root.validate(this);
@@ -427,11 +432,13 @@ public class ColourGui extends LightweightGuiDescription {
     public void UpdateArmour(){
         String hex = inputColour.getHex().replace("#","");
         int hexint = Integer.parseInt(hex,16);
-        helmet.getOrCreateSubNbt("display").putInt("color", hexint);
-        chestplate.getOrCreateSubNbt("display").putInt("color", hexint);
-        leggings.getOrCreateSubNbt("display").putInt("color", hexint);
-        boots.getOrCreateSubNbt("display").putInt("color", hexint);
-        horse.getOrCreateSubNbt("display").putInt("color", hexint);
+        DyedColorComponent dyedColorComponent = new DyedColorComponent(hexint,true);
+        helmet.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
+        chestplate.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
+        leggings.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
+        boots.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
+        horse.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
+        wolf.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
     }
 
     public void ColourSort(){
