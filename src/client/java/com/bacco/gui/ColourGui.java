@@ -4,10 +4,7 @@ package com.bacco.gui;
 import com.bacco.*;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
-import io.github.cottonmc.cotton.gui.widget.data.Axis;
-import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
-import io.github.cottonmc.cotton.gui.widget.data.InputResult;
-import io.github.cottonmc.cotton.gui.widget.data.Insets;
+import io.github.cottonmc.cotton.gui.widget.data.*;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,8 +23,9 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class ColourGui extends LightweightGuiDescription {
-    static int height = 12;
-    static int width = 9;
+    ColourGui cg = this;
+    static int slotsHeight = 7;
+    static int slotsWidth = 9;
     ColourVector inputColour = new ColourVector(255,255,255);
     /*int r = 255;
     int g = 255; 
@@ -97,6 +95,10 @@ public class ColourGui extends LightweightGuiDescription {
     WColourGuiSlot bootSlot = new WColourGuiSlot(boots);
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse);
     WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf);
+    WLabel savedColours = new WLabel(Text.translatable("ui.mcrgb.saved_colours"));
+    Identifier colourIdentifier = new Identifier("mcrgb", "square.png");
+
+    ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
     boolean enableSliderListeners = true;
 
     enum ColourMode {
@@ -115,7 +117,7 @@ public class ColourGui extends LightweightGuiDescription {
         root.setSize(320, 220);
         root.setInsets(Insets.ROOT_PANEL);
         root.add(hexInput, 11, 1, 5, 1);
-        root.add(scrollBar,9,1,1,11);
+        root.add(scrollBar,9,1,1,slotsHeight-1);
         root.add(refreshButton,17,11,1,1);
         refreshButton.setSize(20,20);
         refreshButton.setIconSize(18);
@@ -141,7 +143,15 @@ public class ColourGui extends LightweightGuiDescription {
         hslButton.setAlignment(HorizontalAlignment.CENTER);
 
         root.add(label, 0, 0, 2, 1);
-        
+        root.add(savedColours, 0,slotsHeight,2,1);
+        savedColours.setVerticalAlignment(VerticalAlignment.BOTTOM);
+
+        for(int i = 0; i < slotsWidth; i++) {
+            SavedColours.add(new WColourPreviewIcon(colourIdentifier,cg));
+
+            root.add(SavedColours.get(i), i, slotsHeight + 1, 1, 1);
+        }
+
         root.add(labels, 11,2,6,1);
 
         labels.add(rLabel, 6, 7, 1, 1);
@@ -430,8 +440,7 @@ public class ColourGui extends LightweightGuiDescription {
     }
 
     public void UpdateArmour(){
-        String hex = inputColour.getHex().replace("#","");
-        int hexint = Integer.parseInt(hex,16);
+        int hexint = GetColour();
         DyedColorComponent dyedColorComponent = new DyedColorComponent(hexint,true);
         helmet.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
         chestplate.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
@@ -475,7 +484,7 @@ public class ColourGui extends LightweightGuiDescription {
             }   
         });
 
-        scrollBar.setMaxValue(stacks.size()/width+width);
+        scrollBar.setMaxValue(stacks.size()/ slotsWidth + slotsWidth);
 
         //sort list
         Collections.sort(stacks, new Comparator<ItemStack>(){
@@ -493,9 +502,9 @@ public class ColourGui extends LightweightGuiDescription {
         wColourGuiSlots.forEach(slot -> {
         root.remove(slot);
         });
-        int index = width*scrollBar.getValue();
-        for(int j=1; j<height; j++) {
-            for(int i=0; i<width; i++) {
+        int index = slotsWidth *scrollBar.getValue();
+        for(int j = 1; j< slotsHeight; j++) {
+            for(int i = 0; i< slotsWidth; i++) {
                 if(index >= stacks.size()) break;
                 WColourGuiSlot colourGuiSlot = new WColourGuiSlot(stacks.get(index));
                 
@@ -510,6 +519,50 @@ public class ColourGui extends LightweightGuiDescription {
             }
         }
         root.validate(this);
+    }
+
+    int GetColour(){
+        String hex = inputColour.getHex().replace("#","");
+        return Integer.parseInt(hex,16);
+    }
+
+    void SetColour(ColourVector colour){
+        switch(mode) {
+            case RGB:
+                rSlider.setValue(colour.r);
+                rInput.setText(Integer.toString(colour.r));
+
+                gSlider.setValue(colour.g);
+                gInput.setText(Integer.toString(colour.g));
+
+                bSlider.setValue(colour.b);
+                bInput.setText(Integer.toString(colour.b));
+                break;
+            case HSV:
+                rSlider.setValue(colour.getHue());
+                rInput.setText(Integer.toString(colour.getHue()));
+
+                gSlider.setValue(colour.getSatV());
+                gInput.setText(Integer.toString(colour.getSatV()));
+
+                bSlider.setValue(colour.getVal());
+                bInput.setText(Integer.toString(colour.getVal()));
+                break;
+            case HSL:
+                rSlider.setValue(colour.getHue());
+                rInput.setText(Integer.toString(colour.getHue()));
+
+                gSlider.setValue(colour.getSatL());
+                gInput.setText(Integer.toString(colour.getSatL()));
+
+                bSlider.setValue(colour.getLight());
+                bInput.setText(Integer.toString(colour.getLight()));
+                break;
+        }
+        inputColour = colour;
+        hexInput.setText(inputColour.getHex());
+        UpdateArmour();
+        ColourSort();
     }
 
 }

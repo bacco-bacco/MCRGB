@@ -21,6 +21,14 @@ public class ColourVector {
         this.b = c.getBlue();
     }
 
+    public ColourVector(int colour){
+        String hex = String.format("#%06X", (0xFFFFFF & colour));
+        Color c = Color.decode(hex);
+        this.r = c.getRed();
+        this.g = c.getGreen();
+        this.b = c.getBlue();
+    }
+
     public void fromHSV(int hue, int sat, int val){
         float s = sat/100f;
         float v = val/100f;

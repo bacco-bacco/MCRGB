@@ -3,6 +3,7 @@
     "message.mcrgb.reloaded" : "MCRGB: Reloaded Colours",
     "tooltip.mcrgb.shift_prompt" : "Hold SHIFT to view colour info",
     "ui.mcrgb.header" : "MCRGB Colour Picker",
+    "ui.mcrgb.saved_colours" : "Saved Colours:",
     "options.mcrgb.picker_only" : "Colour Picker Only",
     "option.mcrgb.always_show_in_tooltips" : "Show Block Colours in Tooltips",
     "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether colour info is displayed in item tooltips outside of the colour picker UI."

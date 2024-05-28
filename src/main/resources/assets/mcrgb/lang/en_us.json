@@ -18,6 +18,7 @@
     "ui.mcrgb.hsv" : "HSV",
     "ui.mcrgb.hsl" : "HSL",
     "ui.mcrgb.refresh_info" : "Click me after changing resource packs or adding mods! 😀",
+    "ui.mcrgb.saved_colours" : "Saved Colors:",
     "options.mcrgb.all_contexts" : "All Contexts",
     "options.mcrgb.picker_only" : "Color Picker Only",
     "title.mcrgb.config" : "MCRGB Options",
