@@ -45,6 +45,7 @@ public class MCRGBClient implements ClientModInitializer {
 	int fails = 0;
 	int successes = 0;
 	boolean scanned = false;
+	public ArrayList<Palette> palettes = new ArrayList<>();
 	//public static ColourInventoryScreen colourInvScreen;
 
 	@Override
@@ -337,5 +338,14 @@ public class MCRGBClient implements ClientModInitializer {
 		} catch (IOException e) {
 		}
 		client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"), false);
+	}
+
+	public void SavePalettes(){
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String blockColoursJson = gson.toJson(palettes);
+		try {
+			writeJson(blockColoursJson, "./mcrgb_colours/", "palettes.json");
+		} catch (IOException e) {
+		}
 	}
 }

@@ -2,6 +2,7 @@ package com.bacco.gui;
 
 
 import com.bacco.*;
+import io.github.cottonmc.cotton.gui.client.BackgroundPainter;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
 import io.github.cottonmc.cotton.gui.widget.data.*;
@@ -21,6 +22,7 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.function.BiConsumer;
 
 public class ColourGui extends LightweightGuiDescription {
     ColourGui cg = this;
@@ -95,10 +97,24 @@ public class ColourGui extends LightweightGuiDescription {
     WColourGuiSlot bootSlot = new WColourGuiSlot(boots);
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse);
     WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf);
-    WLabel savedColours = new WLabel(Text.translatable("ui.mcrgb.saved_colours"));
+    WLabel savedColoursLabel = new WLabel(Text.translatable("ui.mcrgb.saved_colours"));
     Identifier colourIdentifier = new Identifier("mcrgb", "square.png");
 
     ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
+
+    Identifier savePaletteIdentifier = new Identifier("mcrgb", "save.png");
+    TextureIcon savePaletteIcon = new TextureIcon(savePaletteIdentifier);
+    WButton savePaletteButton = new WButton(savePaletteIcon);
+
+    //WPaletteWidget paletteWidget = new WPaletteWidget(slotsWidth);
+
+    BiConsumer<Palette,WPaletteWidget> configurator = (Palette p, WPaletteWidget pwig) -> {
+        for(int i = 0; i < pwig.SavedColours.size(); i++) {
+            String hex = p.getColour(i).getHex().replace("#","");
+            int c = Integer.parseInt(hex,16);
+            pwig.SavedColours.get(i).setColour(c);
+        }
+    };
     boolean enableSliderListeners = true;
 
     enum ColourMode {
@@ -143,14 +159,24 @@ public class ColourGui extends LightweightGuiDescription {
         hslButton.setAlignment(HorizontalAlignment.CENTER);
 
         root.add(label, 0, 0, 2, 1);
-        root.add(savedColours, 0,slotsHeight,2,1);
-        savedColours.setVerticalAlignment(VerticalAlignment.BOTTOM);
+        root.add(savedColoursLabel, 0,slotsHeight,2,1);
+        savedColoursLabel.setVerticalAlignment(VerticalAlignment.BOTTOM);
 
         for(int i = 0; i < slotsWidth; i++) {
             SavedColours.add(new WColourPreviewIcon(colourIdentifier,cg));
 
             root.add(SavedColours.get(i), i, slotsHeight + 1, 1, 1);
         }
+
+        root.add(savePaletteButton,slotsWidth,slotsHeight+1,1,1);
+        savePaletteButton.setSize(20,20);
+        savePaletteButton.setIconSize(18);
+        savePaletteButton.setAlignment(HorizontalAlignment.LEFT);
+
+        WListPanel<Palette,WPaletteWidget> paletteList = new WListPanel<>(mcrgbClient.palettes, WPaletteWidget::new, configurator);
+        paletteList.setBackgroundPainter(BackgroundPainter.createColorful(0x999999));
+        paletteList.setListItemHeight(18);
+        root.add(paletteList,0,slotsHeight+2, 10, 3);
 
         root.add(labels, 11,2,6,1);
 
@@ -190,6 +216,8 @@ public class ColourGui extends LightweightGuiDescription {
         rgbButton.setOnClick(() -> {SetColourMode(ColourMode.RGB);});
         hsvButton.setOnClick(() -> {SetColourMode(ColourMode.HSV);});
         hslButton.setOnClick(() -> {SetColourMode(ColourMode.HSL);});
+
+        savePaletteButton.setOnClick(() -> {SavePalette();});
 
         if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
             settingsButton.setOnClick(() -> {
@@ -563,6 +591,19 @@ public class ColourGui extends LightweightGuiDescription {
         hexInput.setText(inputColour.getHex());
         UpdateArmour();
         ColourSort();
+    }
+
+    Palette CreatePalette(){
+        Palette newPallet = new Palette();
+        for(int i = 0; i < SavedColours.size(); i++){
+            newPallet.addColour(new ColourVector(SavedColours.get(i).colour));
+        }
+        return  newPallet;
+    }
+
+    void SavePalette(){
+        mcrgbClient.palettes.add(CreatePalette());
+        mcrgbClient.SavePalettes();
     }
 
 }
