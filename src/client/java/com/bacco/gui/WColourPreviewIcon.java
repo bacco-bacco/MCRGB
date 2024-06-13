@@ -9,27 +9,26 @@ public class WColourPreviewIcon extends WSprite {
 
     int colour = 0xFFFFFF;
     ColourGui gui;
-    boolean interactable;
+    boolean interactable = true;
     public WColourPreviewIcon(Identifier image,ColourGui gui) {
         super(image);
         this.gui = gui;
-        interactable = true;
     }
 
     public WColourPreviewIcon(Identifier image) {
         super(image);
-        interactable = false;
     }
 
     @Override
     public InputResult onClick(int x, int y, int button) {
-        if (!interactable) return InputResult.PROCESSED;
         switch (button){
             case 0:
+                if (!interactable) return InputResult.PROCESSED;
                 colour = gui.GetColour();
                 setOpaqueTint(colour);
                 break;
             case 1:
+                if (!interactable) return InputResult.PROCESSED;
                 colour = 0xFFFFFF;
                 setOpaqueTint(colour);
                 break;
@@ -43,5 +42,9 @@ public class WColourPreviewIcon extends WSprite {
     public void setColour(int colour) {
         this.colour = colour;
         setOpaqueTint(colour);
+    }
+
+    public  void setInteractable(boolean interactable){
+        this.interactable = interactable;
     }
 }

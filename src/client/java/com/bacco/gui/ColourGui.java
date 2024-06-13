@@ -105,10 +105,10 @@ public class ColourGui extends LightweightGuiDescription {
     Identifier savePaletteIdentifier = new Identifier("mcrgb", "save.png");
     TextureIcon savePaletteIcon = new TextureIcon(savePaletteIdentifier);
     WButton savePaletteButton = new WButton(savePaletteIcon);
-
-    //WPaletteWidget paletteWidget = new WPaletteWidget(slotsWidth);
-
+    WListPanel<Palette,WPaletteWidget> paletteList;
     BiConsumer<Palette,WPaletteWidget> configurator = (Palette p, WPaletteWidget pwig) -> {
+        pwig.buildPaletteWidget(cg);
+        pwig.setIndex(p.getIndex());
         for(int i = 0; i < pwig.SavedColours.size(); i++) {
             String hex = p.getColour(i).getHex().replace("#","");
             int c = Integer.parseInt(hex,16);
@@ -173,10 +173,13 @@ public class ColourGui extends LightweightGuiDescription {
         savePaletteButton.setIconSize(18);
         savePaletteButton.setAlignment(HorizontalAlignment.LEFT);
 
-        WListPanel<Palette,WPaletteWidget> paletteList = new WListPanel<>(mcrgbClient.palettes, WPaletteWidget::new, configurator);
+        paletteList = new WListPanel<>(mcrgbClient.palettes, WPaletteWidget::new, configurator);
+
         paletteList.setBackgroundPainter(BackgroundPainter.createColorful(0x999999));
-        paletteList.setListItemHeight(18);
+        paletteList.setListItemHeight(19);
         root.add(paletteList,0,slotsHeight+2, 10, 3);
+        paletteList.setLocation(9,(int)(18*(slotsHeight+2.7)));
+        paletteList.setSize(10*18,(int)(2.8f*18));
 
         root.add(labels, 11,2,6,1);
 
@@ -598,12 +601,24 @@ public class ColourGui extends LightweightGuiDescription {
         for(int i = 0; i < SavedColours.size(); i++){
             newPallet.addColour(new ColourVector(SavedColours.get(i).colour));
         }
+        newPallet.setIndex(mcrgbClient.palettes.size());
         return  newPallet;
     }
 
     void SavePalette(){
         mcrgbClient.palettes.add(CreatePalette());
         mcrgbClient.SavePalettes();
+        root.validate(this);
+    }
+
+    public void DeletePalette(int i){
+        mcrgbClient.palettes.remove(i);
+        mcrgbClient.palettes.forEach(palette -> {
+            palette.setIndex(mcrgbClient.palettes.indexOf(palette));
+            System.out.println(palette.getIndex());
+        });
+        paletteList.layout();
+        root.validate(this);
     }
 
 }
