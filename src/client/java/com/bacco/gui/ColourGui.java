@@ -64,7 +64,7 @@ public class ColourGui extends LightweightGuiDescription {
     WTextField rInput = new WTextField(Text.literal(Integer.toString(inputColour.r)));
     WTextField gInput = new WTextField(Text.literal(Integer.toString(inputColour.g)));
     WTextField bInput = new WTextField(Text.literal(Integer.toString(inputColour.b)));
-    Identifier refreshIdentifier = new Identifier("mcrgb", "refresh.png");
+    Identifier refreshIdentifier = Identifier.of("mcrgb", "refresh.png");
     TextureIcon refreshIcon = new TextureIcon(refreshIdentifier);
     WButton refreshButton = new WButton(refreshIcon){
         @Environment(EnvType.CLIENT)
@@ -74,7 +74,7 @@ public class ColourGui extends LightweightGuiDescription {
             super.addTooltip(tooltip);
         }
     };
-    Identifier settingsIdentifier = new Identifier("mcrgb", "settings.png");
+    Identifier settingsIdentifier = Identifier.of("mcrgb", "settings.png");
     TextureIcon settingsIcon = new TextureIcon(settingsIdentifier);
     WButton settingsButton = new WButton(settingsIcon);
 
