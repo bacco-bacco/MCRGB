@@ -64,7 +64,7 @@ public class ColourGui extends LightweightGuiDescription {
     WTextField rInput = new WTextField(Text.literal(Integer.toString(inputColour.r)));
     WTextField gInput = new WTextField(Text.literal(Integer.toString(inputColour.g)));
     WTextField bInput = new WTextField(Text.literal(Integer.toString(inputColour.b)));
-    Identifier refreshIdentifier = new Identifier("mcrgb", "refresh.png");
+    Identifier refreshIdentifier = Identifier.of("mcrgb", "refresh.png");
     TextureIcon refreshIcon = new TextureIcon(refreshIdentifier);
     WButton refreshButton = new WButton(refreshIcon){
         @Environment(EnvType.CLIENT)
@@ -74,7 +74,7 @@ public class ColourGui extends LightweightGuiDescription {
             super.addTooltip(tooltip);
         }
     };
-    Identifier settingsIdentifier = new Identifier("mcrgb", "settings.png");
+    Identifier settingsIdentifier = Identifier.of("mcrgb", "settings.png");
     TextureIcon settingsIcon = new TextureIcon(settingsIdentifier);
     WButton settingsButton = new WButton(settingsIcon);
 
@@ -98,11 +98,11 @@ public class ColourGui extends LightweightGuiDescription {
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse);
     WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf);
     WLabel savedColoursLabel = new WLabel(Text.translatable("ui.mcrgb.saved_colours"));
-    Identifier colourIdentifier = new Identifier("mcrgb", "square.png");
+    Identifier colourIdentifier = Identifier.of("mcrgb", "square.png");
 
     ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
 
-    Identifier savePaletteIdentifier = new Identifier("mcrgb", "save.png");
+    Identifier savePaletteIdentifier = Identifier.of("mcrgb", "save.png");
     TextureIcon savePaletteIcon = new TextureIcon(savePaletteIdentifier);
     WButton savePaletteButton = new WButton(savePaletteIcon);
     WListPanel<Palette,WPaletteWidget> paletteList;

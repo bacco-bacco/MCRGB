@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 
 public class WColourGuiSlot extends WWidget{
-	public static final Identifier SLOT_TEXTURE = new Identifier(LibGuiCommon.MOD_ID, "textures/widget/item_slot.png");
+	public static final Identifier SLOT_TEXTURE = Identifier.of(LibGuiCommon.MOD_ID, "textures/widget/item_slot.png");
    ClientPlayerEntity player = net.minecraft.client.MinecraftClient.getInstance().player;
    ItemStack stack;
    public WColourGuiSlot(ItemStack stack){
