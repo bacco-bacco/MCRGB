@@ -278,6 +278,12 @@ public class MCRGBClient implements ClientModInitializer {
 				//convert coords to byte position
 				int firstPixel = (spriteY*width + spriteX)*4;
 				ArrayList<ColourVector> rgbList = new ArrayList<ColourVector>();
+				int biomeColour = 0xFFFFFF;
+				try{
+					biomeColour = client.getBlockColors().getColor(block.getDefaultState(), null, null, 0);
+				}catch (Exception e){
+					LOGGER.warn("Could not find biome colour for block: " + block.getName() + ". Please report this logfile to https://github.com/bacco-bacco/MCRGB/issues");
+				}
 				//for each horizontal row in the sprite
 				for (int row = 0; row < spriteH; row++){
 					int firstInRow = firstPixel + row*width*4;
@@ -287,7 +293,6 @@ public class MCRGBClient implements ClientModInitializer {
 						//retrieve bytes for RGBA values
 						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
 						int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-						int biomeColour = client.getBlockColors().getColor(block.getDefaultState(), null, null, 0);
 						int alpha = ColorHelper.Argb.getAlpha(pixelColour);
 						if(biomeColour != -1 & (!block.getDefaultState().isOf(Blocks.GRASS_BLOCK) || sprite.getContents().getId().getPath().equals("block/grass_block_top"))){
 							pixelColour = ColorHelper.Argb.mixColor(biomeColour, pixelColour);
