@@ -1,5 +1,6 @@
 package com.bacco.gui;
 
+import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
 import io.github.cottonmc.cotton.gui.impl.LibGuiCommon;
@@ -26,8 +27,12 @@ public class WColourGuiSlot extends WWidget{
 	public static final Identifier SLOT_TEXTURE = Identifier.of(LibGuiCommon.MOD_ID, "textures/widget/item_slot.png");
    ClientPlayerEntity player = net.minecraft.client.MinecraftClient.getInstance().player;
    ItemStack stack;
-   public WColourGuiSlot(ItemStack stack){
+
+   ColourGui gui;
+   public WColourGuiSlot(ItemStack stack, ColourGui gui){
+
       this.stack = stack;
+      this.gui = gui;
    }
 
    @Override
@@ -52,7 +57,12 @@ public class WColourGuiSlot extends WWidget{
             player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
-            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
+            //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
+            IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
+            if(item.getLength() <= 0) break;
+            ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
+            ColourVector colour = colours.get(0);
+            gui.SetColour(colour);
             break;
          case 2:
             player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
