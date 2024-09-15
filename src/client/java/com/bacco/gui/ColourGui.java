@@ -98,11 +98,11 @@ public class ColourGui extends LightweightGuiDescription {
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse);
     WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf);
     WLabel savedColoursLabel = new WLabel(Text.translatable("ui.mcrgb.saved_colours"));
-    Identifier colourIdentifier = new Identifier("mcrgb", "square.png");
+    Identifier colourIdentifier = Identifier.of("mcrgb", "square.png");
 
     ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
 
-    Identifier savePaletteIdentifier = new Identifier("mcrgb", "save.png");
+    Identifier savePaletteIdentifier = Identifier.of("mcrgb", "save.png");
     TextureIcon savePaletteIcon = new TextureIcon(savePaletteIdentifier);
     WButton savePaletteButton = new WButton(savePaletteIcon);
     WListPanel<Palette,WPaletteWidget> paletteList;

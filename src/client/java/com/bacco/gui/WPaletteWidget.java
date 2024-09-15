@@ -17,11 +17,11 @@ import java.util.ArrayList;
 public class WPaletteWidget extends WPlainPanel {
 
     ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
-    Identifier colourIdentifier = new Identifier("mcrgb", "square.png");
+    Identifier colourIdentifier = Identifier.of("mcrgb", "square.png");
     int slotsWidth = 9;
 
     int index = 0;
-    Identifier editIdentifier = new Identifier("mcrgb", "edit.png");
+    Identifier editIdentifier = Identifier.of("mcrgb", "edit.png");
     TextureIcon editIcon = new TextureIcon(editIdentifier);
     WButton editButton = new WButton(editIcon){
         @Environment(EnvType.CLIENT)
@@ -31,7 +31,7 @@ public class WPaletteWidget extends WPlainPanel {
             super.addTooltip(tooltip);
         }
     };
-    Identifier deleteIdentifier = new Identifier("mcrgb", "delete.png");
+    Identifier deleteIdentifier = Identifier.of("mcrgb", "delete.png");
     TextureIcon deleteIcon = new TextureIcon(deleteIdentifier);
 
     WLabel numberLabel = new WLabel(Text.literal("N"));
