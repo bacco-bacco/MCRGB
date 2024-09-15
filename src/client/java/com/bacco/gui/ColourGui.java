@@ -91,12 +91,12 @@ public class ColourGui extends LightweightGuiDescription {
     ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
     ItemStack horse = new ItemStack(Items.LEATHER_HORSE_ARMOR);
     ItemStack wolf = new ItemStack(Items.WOLF_ARMOR);
-    WColourGuiSlot helmSlot = new WColourGuiSlot(helmet);
-    WColourGuiSlot chestSlot = new WColourGuiSlot(chestplate);
-    WColourGuiSlot legsSlot = new WColourGuiSlot(leggings);
-    WColourGuiSlot bootSlot = new WColourGuiSlot(boots);
-    WColourGuiSlot horseSlot = new WColourGuiSlot(horse);
-    WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf);
+    WColourGuiSlot helmSlot = new WColourGuiSlot(helmet, cg);
+    WColourGuiSlot chestSlot = new WColourGuiSlot(chestplate, cg);
+    WColourGuiSlot legsSlot = new WColourGuiSlot(leggings, cg);
+    WColourGuiSlot bootSlot = new WColourGuiSlot(boots, cg);
+    WColourGuiSlot horseSlot = new WColourGuiSlot(horse, cg);
+    WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf, cg);
     WLabel savedColoursLabel = new WLabel(Text.translatable("ui.mcrgb.saved_colours"));
     Identifier colourIdentifier = Identifier.of("mcrgb", "square.png");
 
@@ -537,7 +537,7 @@ public class ColourGui extends LightweightGuiDescription {
         for(int j = 1; j< slotsHeight; j++) {
             for(int i = 0; i< slotsWidth; i++) {
                 if(index >= stacks.size()) break;
-                WColourGuiSlot colourGuiSlot = new WColourGuiSlot(stacks.get(index));
+                WColourGuiSlot colourGuiSlot = new WColourGuiSlot(stacks.get(index), cg);
                 
                 if(wColourGuiSlots.size() <= index){
                 wColourGuiSlots.add(colourGuiSlot);
@@ -594,6 +594,8 @@ public class ColourGui extends LightweightGuiDescription {
         hexInput.setText(inputColour.getHex());
         UpdateArmour();
         ColourSort();
+        scrollBar.setValue(0);
+        PlaceSlots();
     }
 
     Palette CreatePalette(){

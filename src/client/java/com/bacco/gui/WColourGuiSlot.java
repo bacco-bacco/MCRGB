@@ -1,5 +1,6 @@
 package com.bacco.gui;
 
+import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import com.bacco.MCRGBConfig;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
@@ -27,8 +28,12 @@ public class WColourGuiSlot extends WWidget{
 	public static final Identifier SLOT_TEXTURE = Identifier.of(LibGuiCommon.MOD_ID, "textures/widget/item_slot.png");
    ClientPlayerEntity player = net.minecraft.client.MinecraftClient.getInstance().player;
    ItemStack stack;
-   public WColourGuiSlot(ItemStack stack){
+
+   ColourGui gui;
+   public WColourGuiSlot(ItemStack stack, ColourGui gui){
+
       this.stack = stack;
+      this.gui = gui;
    }
 
    @Override
@@ -43,9 +48,7 @@ public class WColourGuiSlot extends WWidget{
    public InputResult onClick(int x, int y, int button) {
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
-      System.out.println(1);
       if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
-      System.out.println(2);
       String command = MCRGBConfig.instance.command;
       command = command.replace("%p",player.getName().getString());
       command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
@@ -62,15 +65,18 @@ public class WColourGuiSlot extends WWidget{
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
-            command = command.replace("%q","1");
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
+            IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
+            if(item.getLength() <= 0) break;
+            ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
+            ColourVector colour = colours.get(0);
+            gui.SetColour(colour);
             break;
          case 2:
             command = command.replace("%q",Integer.toString(stack.getMaxCount()));
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;
       }
-      System.out.println(command);
       player.networkHandler.sendCommand(command);
       return InputResult.PROCESSED;
     }
