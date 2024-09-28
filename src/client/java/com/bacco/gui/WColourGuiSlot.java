@@ -46,11 +46,6 @@ public class WColourGuiSlot extends WWidget{
 
    @Override
    public InputResult onClick(int x, int y, int button) {
-      if(gui.infoBox!=null) {
-         if(!gui.infoBox.isHovered()){
-            gui.root.remove(gui.infoBox);
-         }
-      }
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
       String nbt = "";
@@ -59,7 +54,7 @@ public class WColourGuiSlot extends WWidget{
       }
       switch (button){
          case 0:
-            if(!player.hasPermissionLevel(2) || !player.isCreative() || gui.infoBox!=null) return InputResult.PROCESSED;
+            if(!player.hasPermissionLevel(2) || !player.isCreative()) return InputResult.PROCESSED;
             player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
@@ -71,13 +66,13 @@ public class WColourGuiSlot extends WWidget{
             gui.SetColour(colour);*/
             gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
 
-            //gui.root.add(this.gui.infoBox,this.getAbsoluteX()/18+1,this.getAbsoluteY()/18+1);
-            gui.root.add(this.gui.infoBox,19,1);
-            gui.root.validate(gui);
+            //gui.mainPanel.add(this.gui.infoBox,this.getAbsoluteX()/18+1,this.getAbsoluteY()/18+1);
+            gui.mainPanel.add(this.gui.infoBox,19,0);
+            gui.mainPanel.validate(gui);
             gui.PlaceSlots();
             break;
          case 2:
-            if(!player.hasPermissionLevel(2) || !player.isCreative() || gui.infoBox!=null) return InputResult.PROCESSED;
+            if(!player.hasPermissionLevel(2) || !player.isCreative()) return InputResult.PROCESSED;
             player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;
       }

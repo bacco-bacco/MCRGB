@@ -33,9 +33,10 @@ public class ColourGui extends LightweightGuiDescription {
     int g = 255; 
     int b = 255;*/
     //String hex = "#FFFFFF";
-    WGridPanel root = new WGridPanel();
 
+    WGridPanel root = new WGridPanel();
     WGridPanel mainPanel = new WGridPanel();
+
     WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
 
     public WBlockInfoBox infoBox;
@@ -135,45 +136,46 @@ public class ColourGui extends LightweightGuiDescription {
         this.mcrgbClient = mcrgbClient;
         ColourSort();
         setRootPanel(root);
-        root.setSize(320, 220);
-        root.setInsets(Insets.ROOT_PANEL);
-        root.add(hexInput, 11, 1, 5, 1);
-        root.add(scrollBar,9,1,1,slotsHeight-1);
-        root.add(refreshButton,17,11,1,1);
+        root.add(mainPanel, 0,0);
+        mainPanel.setSize(320, 220);
+        mainPanel.setInsets(Insets.ROOT_PANEL);
+        mainPanel.add(hexInput, 11, 1, 5, 1);
+        mainPanel.add(scrollBar,9,1,1,slotsHeight-1);
+        mainPanel.add(refreshButton,17,11,1,1);
         refreshButton.setSize(20,20);
         refreshButton.setIconSize(18);
         refreshButton.setAlignment(HorizontalAlignment.LEFT);
 
-        root.add(settingsButton,17,0,1,1);
+        mainPanel.add(settingsButton,17,0,1,1);
         settingsButton.setSize(20,20);
         settingsButton.setIconSize(18);
         settingsButton.setAlignment(HorizontalAlignment.LEFT);
 
-        root.add(rgbButton,10,11,1,1);
+        mainPanel.add(rgbButton,10,11,1,1);
         rgbButton.setLocation(201,205);
         rgbButton.setSize(26,20);
         rgbButton.setEnabled(false);
         rgbButton.setAlignment(HorizontalAlignment.CENTER);
-        root.add(hsvButton,13,11,1,1);
+        mainPanel.add(hsvButton,13,11,1,1);
         hsvButton.setLocation(237,205);
         hsvButton.setSize(26,20);
         hsvButton.setAlignment(HorizontalAlignment.CENTER);
-        root.add(hslButton,15,11,1,1);
+        mainPanel.add(hslButton,15,11,1,1);
         hslButton.setLocation(273,205);
         hslButton.setSize(26,20);
         hslButton.setAlignment(HorizontalAlignment.CENTER);
 
-        root.add(label, 0, 0, 2, 1);
-        root.add(savedColoursLabel, 0,slotsHeight,2,1);
+        mainPanel.add(label, 0, 0, 2, 1);
+        mainPanel.add(savedColoursLabel, 0,slotsHeight,2,1);
         savedColoursLabel.setVerticalAlignment(VerticalAlignment.BOTTOM);
 
         for(int i = 0; i < slotsWidth; i++) {
             SavedColours.add(new WColourPreviewIcon(colourIdentifier,cg));
 
-            root.add(SavedColours.get(i), i, slotsHeight + 1, 1, 1);
+            mainPanel.add(SavedColours.get(i), i, slotsHeight + 1, 1, 1);
         }
 
-        root.add(savePaletteButton,slotsWidth,slotsHeight+1,1,1);
+        mainPanel.add(savePaletteButton,slotsWidth,slotsHeight+1,1,1);
         savePaletteButton.setSize(20,20);
         savePaletteButton.setIconSize(18);
         savePaletteButton.setAlignment(HorizontalAlignment.LEFT);
@@ -182,24 +184,24 @@ public class ColourGui extends LightweightGuiDescription {
 
         paletteList.setBackgroundPainter(BackgroundPainter.createColorful(0x999999));
         paletteList.setListItemHeight(19);
-        root.add(paletteList,0,slotsHeight+2, 10, 3);
+        mainPanel.add(paletteList,0,slotsHeight+2, 10, 3);
         paletteList.setLocation(9,(int)(18*(slotsHeight+2.7)));
         paletteList.setSize(10*18,(int)(2.8f*18));
 
-        root.add(labels, 11,2,6,1);
+        mainPanel.add(labels, 11,2,6,1);
 
         labels.add(rLabel, 6, 7, 1, 1);
         labels.add(gLabel, 42, 7, 1, 1);
         labels.add(bLabel, 78, 7, 1, 1);
 
-        root.add(rSlider, 11, 3, 1, 6);
+        mainPanel.add(rSlider, 11, 3, 1, 6);
         rSlider.setValue(inputColour.r);
-        root.add(gSlider, 13, 3, 1, 6);
+        mainPanel.add(gSlider, 13, 3, 1, 6);
         gSlider.setValue(inputColour.g);
-        root.add(bSlider, 15, 3, 1, 6);
+        mainPanel.add(bSlider, 15, 3, 1, 6);
         bSlider.setValue(inputColour.b);
 
-        root.add(inputs,10,9,2,1);
+        mainPanel.add(inputs,10,9,2,1);
         inputs.add(rInput,14,9,26,1);
         inputs.add(gInput,50,9,26,1);
         inputs.add(bInput,86,9,26,1);
@@ -238,15 +240,15 @@ public class ColourGui extends LightweightGuiDescription {
         }
         UpdateArmour();
         
-        root.add(helmSlot, 17, 3);
-        root.add(chestSlot, 17, 4);
-        root.add(legsSlot, 17, 5);
-        root.add(bootSlot, 17, 6);
-        root.add(horseSlot, 17, 7);
-        root.add(wolfSlot, 17, 8);
+        mainPanel.add(helmSlot, 17, 3);
+        mainPanel.add(chestSlot, 17, 4);
+        mainPanel.add(legsSlot, 17, 5);
+        mainPanel.add(bootSlot, 17, 6);
+        mainPanel.add(horseSlot, 17, 7);
+        mainPanel.add(wolfSlot, 17, 8);
 
 
-        root.validate(this);
+        mainPanel.validate(this);
     }
 
     public  void SetColourMode(ColourMode cm){
@@ -536,7 +538,7 @@ public class ColourGui extends LightweightGuiDescription {
 
     public void PlaceSlots(){
         wColourGuiSlots.forEach(slot -> {
-        root.remove(slot);
+        mainPanel.remove(slot);
         });
         int index = slotsWidth *scrollBar.getValue();
         for(int j = 1; j< slotsHeight; j++) {
@@ -549,12 +551,12 @@ public class ColourGui extends LightweightGuiDescription {
                 }else{
                 wColourGuiSlots.set(index, colourGuiSlot);
                 }
-                root.add(colourGuiSlot, i, j);
+                mainPanel.add(colourGuiSlot, i, j);
                 index ++;
                 
             }
         }
-        root.validate(this);
+        mainPanel.validate(this);
     }
 
     int GetColour(){
@@ -615,7 +617,7 @@ public class ColourGui extends LightweightGuiDescription {
     void SavePalette(){
         mcrgbClient.palettes.add(CreatePalette());
         mcrgbClient.SavePalettes();
-        root.validate(this);
+        mainPanel.validate(this);
     }
 
     public void DeletePalette(int i){
@@ -625,7 +627,7 @@ public class ColourGui extends LightweightGuiDescription {
             System.out.println(palette.getIndex());
         });
         paletteList.layout();
-        root.validate(this);
+        mainPanel.validate(this);
     }
 
 }
