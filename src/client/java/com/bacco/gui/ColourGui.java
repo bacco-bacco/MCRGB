@@ -34,7 +34,12 @@ public class ColourGui extends LightweightGuiDescription {
     int b = 255;*/
     //String hex = "#FFFFFF";
     WGridPanel root = new WGridPanel();
+
+    WGridPanel mainPanel = new WGridPanel();
     WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
+
+    public WBlockInfoBox infoBox;
+
     WScrollBar scrollBar = new WScrollBar(Axis.VERTICAL){
         @Environment(EnvType.CLIENT)
         @Override
