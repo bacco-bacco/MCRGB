@@ -1,11 +1,11 @@
 package com.bacco.gui;
 
-import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
 import io.github.cottonmc.cotton.gui.impl.LibGuiCommon;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
+import io.github.cottonmc.cotton.gui.widget.data.Axis;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -28,6 +28,7 @@ public class WColourGuiSlot extends WWidget{
    ClientPlayerEntity player = net.minecraft.client.MinecraftClient.getInstance().player;
    ItemStack stack;
 
+
    ColourGui gui;
    public WColourGuiSlot(ItemStack stack, ColourGui gui){
 
@@ -45,26 +46,38 @@ public class WColourGuiSlot extends WWidget{
 
    @Override
    public InputResult onClick(int x, int y, int button) {
+      if(gui.infoBox!=null) {
+         if(!gui.infoBox.isHovered()){
+            gui.root.remove(gui.infoBox);
+         }
+      }
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
-      if(!player.hasPermissionLevel(2) || !player.isCreative()) return InputResult.PROCESSED;
       String nbt = "";
       if(stack.contains(DataComponentTypes.DYED_COLOR)) {
          nbt = "[dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) + "]";//stack.getOrCreateNbt().toString();
       }
       switch (button){
          case 0:
+            if(!player.hasPermissionLevel(2) || !player.isCreative() || gui.infoBox!=null) return InputResult.PROCESSED;
             player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
-            if(item.getLength() <= 0) break;
+            /*if(item.getLength() <= 0) break;
             ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
             ColourVector colour = colours.get(0);
-            gui.SetColour(colour);
+            gui.SetColour(colour);*/
+            gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
+
+            //gui.root.add(this.gui.infoBox,this.getAbsoluteX()/18+1,this.getAbsoluteY()/18+1);
+            gui.root.add(this.gui.infoBox,19,1);
+            gui.root.validate(gui);
+            gui.PlaceSlots();
             break;
          case 2:
+            if(!player.hasPermissionLevel(2) || !player.isCreative() || gui.infoBox!=null) return InputResult.PROCESSED;
             player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;
       }
