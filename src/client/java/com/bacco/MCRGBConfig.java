@@ -13,6 +13,10 @@ public final class MCRGBConfig {
     public boolean alwaysShowToolTips = false;
     public boolean sliderConstantUpdate = true;
 
+    public String command = "give %p %i[%c] %q";
+
+    public boolean bypassOP = false;
+
     public static void save(){
         Gson gson = new Gson();
         String blockColoursJson = gson.toJson(instance);

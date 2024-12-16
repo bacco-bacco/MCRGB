@@ -187,7 +187,7 @@ public class ColourGui extends LightweightGuiDescription {
             });
         }else{
             settingsButton.setOnClick(() -> {
-                client.player.sendMessage(Text.translatable("warning.mcrgb.noclothconfig"));
+                client.player.sendMessage(Text.translatable("warning.mcrgb.noclothconfig"), false);
             });
         }
         UpdateArmour();

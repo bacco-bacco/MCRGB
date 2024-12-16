@@ -1,6 +1,7 @@
 package com.bacco.gui;
 
 import com.bacco.IItemBlockColourSaver;
+import com.bacco.MCRGBConfig;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
 import io.github.cottonmc.cotton.gui.impl.LibGuiCommon;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
@@ -42,29 +43,42 @@ public class WColourGuiSlot extends WWidget{
    public InputResult onClick(int x, int y, int button) {
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
-      if(!player.hasPermissionLevel(2) || !player.isCreative()) return InputResult.PROCESSED;
+      System.out.println(1);
+      if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+      System.out.println(2);
+      String command = MCRGBConfig.instance.command;
+      command = command.replace("%p",player.getName().getString());
+      command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
+
       String nbt = "";
       if(stack.contains(DataComponentTypes.DYED_COLOR)) {
-         nbt = "[dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) + "]";//stack.getOrCreateNbt().toString();
+         nbt = "dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) ;//stack.getOrCreateNbt().toString();
+
       }
+      command = command.replace("%c",nbt);
       switch (button){
          case 0:
-            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
+            command = command.replace("%q","1");
+            //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
-            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
+            command = command.replace("%q","1");
+            //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 2:
-            player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
+            command = command.replace("%q",Integer.toString(stack.getMaxCount()));
+            //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;
       }
+      System.out.println(command);
+      player.networkHandler.sendCommand(command);
       return InputResult.PROCESSED;
     }
 
    @Environment(EnvType.CLIENT)
    @Override
    public void addTooltip(TooltipBuilder tooltip) {
-      tooltip.add(Text.translatable(stack.getTranslationKey()));
+      tooltip.add(stack.getItemName());
       IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();

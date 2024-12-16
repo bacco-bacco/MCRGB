@@ -6,7 +6,6 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import java.util.function.Function;
 
@@ -46,6 +45,19 @@ public class ClothConfigIntegration {
                     .setSaveConsumer(newValue -> MCRGBConfig.instance.sliderConstantUpdate = newValue)
                     .setTooltip(Text.translatable("tooltip.mcrgb.slider_constant_update"))
                     .build());
+
+            configs.addEntry(entryBuilder.startStrField(Text.translatable("option.mcrgb.give_command"),MCRGBConfig.instance.command)
+                    .setDefaultValue("give %p %i[%c] %q")
+                    .setSaveConsumer(newValue -> MCRGBConfig.instance.command = newValue)
+                    .setTooltip(Text.translatable("tooltip.mcrgb.give_command"))
+                    .build());
+
+            configs.addEntry(entryBuilder.startBooleanToggle(Text.translatable("Bypass Operator Check"),MCRGBConfig.instance.bypassOP)
+                    .setDefaultValue(false)
+                    .setSaveConsumer(newValue -> MCRGBConfig.instance.bypassOP = newValue)
+                    .setTooltip(Text.translatable("tooltip.mcrgb.bypass_op"))
+                    .build());
+
 
             builder.setSavingRunnable(MCRGBConfig::save);
 

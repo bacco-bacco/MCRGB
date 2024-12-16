@@ -292,14 +292,14 @@ public class MCRGBClient implements ClientModInitializer {
 					for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
 						//retrieve bytes for RGBA values
 						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
-						int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-						int alpha = ColorHelper.Argb.getAlpha(pixelColour);
+						int pixelColour = ColorHelper.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+						int alpha = ColorHelper.getAlpha(pixelColour);
 						if(biomeColour != -1 & (!block.getDefaultState().isOf(Blocks.GRASS_BLOCK) || sprite.getContents().getId().getPath().equals("block/grass_block_top"))){
-							pixelColour = ColorHelper.Argb.mixColor(biomeColour, pixelColour);
+							pixelColour = ColorHelper.mix(biomeColour, pixelColour);
 						}
 						//if the pixel is not fully transparent, add to the list
 						if(alpha > 0) {
-							ColourVector c = new ColourVector(ColorHelper.Argb.getRed(pixelColour), ColorHelper.Argb.getGreen(pixelColour), ColorHelper.Argb.getBlue(pixelColour));
+							ColourVector c = new ColourVector(ColorHelper.getRed(pixelColour), ColorHelper.getGreen(pixelColour), ColorHelper.getBlue(pixelColour));
 							rgbList.add(c);
 						}
 
@@ -336,6 +336,6 @@ public class MCRGBClient implements ClientModInitializer {
 			writeJson(blockColoursJson, "./mcrgb_colours/", "file.json");
 		} catch (IOException e) {
 		}
-		client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"));
+		client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"), false);
 	}
 }
