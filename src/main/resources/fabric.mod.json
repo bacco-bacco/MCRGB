@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "mcrgb",
-	"version": "0.2.7+1.21.4",
+	"version": "0.2.7+1.21.1",
 	"name": "MCRGB",
 	"description": "Search for blocks based on the dominant colours in their textures.",
 	"authors": [
