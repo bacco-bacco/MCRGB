@@ -13,7 +13,7 @@ public final class MCRGBConfig {
     public boolean alwaysShowToolTips = false;
     public boolean sliderConstantUpdate = true;
 
-    public String command = "give %p %i[%c] %q";
+    public String command = "give %p %i%c %q";
 
     public boolean bypassOP = false;
 

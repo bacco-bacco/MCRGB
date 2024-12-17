@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
@@ -51,8 +50,8 @@ public class WColourGuiSlot extends WWidget{
       command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
 
       String nbt = "";
-      if(stack.contains(DataComponentTypes.DYED_COLOR)) {
-         nbt = "dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) ;//stack.getOrCreateNbt().toString();
+      if(stack.hasNbt()) {
+         nbt = stack.getOrCreateNbt().toString();
 
       }
       command = command.replace("%c",nbt);

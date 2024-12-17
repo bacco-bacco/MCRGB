@@ -30,7 +30,7 @@
     "options.mcrgb.after_scrolling" : "Update After Scrolling",
     "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether color info is displayed in item tooltips outside of the color picker UI.",
     "tooltip.mcrgb.slider_constant_update" : "Set this to 'Update After Scrolling' if you experience stuttering/lag while using RGB sliders.",
-    "tooltip.mcrgb.give_command" : "The command MCRGB will use to give you items.\nThe following delimiters will be substituted for the respective fields:\n%p - Player Name\n%i  - Item ID\n%c - Item Components\n%q - Quantity\n\nUseful on servers with custom commands.",
+    "tooltip.mcrgb.give_command" : "The command MCRGB will use to give you items.\nThe following delimiters will be substituted for the respective fields:\n%p - Player Name\n%i  - Item ID\n%c - NBT Data\n%q - Quantity\n\nUseful on servers with custom commands.",
     "tooltip.mcrgb.bypass_op" : "Bypass checks for creative mode and operator status when giving items to the player. Useful on servers with custom permissions.",
     "warning.mcrgb.noclothconfig" : "Cloth Config is required to access settings in-game. Edit the config.json manually or install Cloth Config."
 }
