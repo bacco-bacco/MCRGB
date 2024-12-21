@@ -1,9 +1,9 @@
 package com.bacco.gui;
 
+import com.bacco.Palette;
 import io.github.cottonmc.cotton.gui.client.BackgroundPainter;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WButton;
-import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
 import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
@@ -19,8 +19,7 @@ public class WPaletteWidget extends WPlainPanel {
     ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
     Identifier colourIdentifier = Identifier.of("mcrgb", "square.png");
     int slotsWidth = 9;
-
-    int index = 0;
+    Palette palette;
     Identifier editIdentifier = Identifier.of("mcrgb", "edit.png");
     TextureIcon editIcon = new TextureIcon(editIdentifier);
     WButton editButton = new WButton(editIcon){
@@ -34,7 +33,6 @@ public class WPaletteWidget extends WPlainPanel {
     Identifier deleteIdentifier = Identifier.of("mcrgb", "delete.png");
     TextureIcon deleteIcon = new TextureIcon(deleteIdentifier);
 
-    WLabel numberLabel = new WLabel(Text.literal("N"));
     WButton deleteButton = new WButton(deleteIcon){
         @Environment(EnvType.CLIENT)
         @Override
@@ -66,15 +64,8 @@ public class WPaletteWidget extends WPlainPanel {
         deleteButton.setSize(10,10);
         deleteButton.setIconSize(9);
         deleteButton.setAlignment(HorizontalAlignment.LEFT);
-        deleteButton.setOnClick(() -> {cg.DeletePalette(index);});
+        deleteButton.setOnClick(() -> {cg.DeletePalette(this);});
 
-        this.add(numberLabel,1,1);
-        numberLabel.setText(Text.literal(Integer.toString(index)));
-    }
-
-    public void setIndex(int in){
-        index = in;
-        numberLabel.setText(Text.literal(Integer.toString(index)));
     }
 
 }

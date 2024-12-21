@@ -113,8 +113,8 @@ public class ColourGui extends LightweightGuiDescription {
     WButton savePaletteButton = new WButton(savePaletteIcon);
     WListPanel<Palette,WPaletteWidget> paletteList;
     BiConsumer<Palette,WPaletteWidget> configurator = (Palette p, WPaletteWidget pwig) -> {
+        pwig.palette = p;
         pwig.buildPaletteWidget(cg);
-        pwig.setIndex(p.getIndex());
         for(int i = 0; i < pwig.SavedColours.size(); i++) {
             String hex = p.getColour(i).getHex().replace("#","");
             int c = Integer.parseInt(hex,16);
@@ -610,7 +610,6 @@ public class ColourGui extends LightweightGuiDescription {
         for(int i = 0; i < SavedColours.size(); i++){
             newPallet.addColour(new ColourVector(SavedColours.get(i).colour));
         }
-        newPallet.setIndex(mcrgbClient.palettes.size());
         return  newPallet;
     }
 
@@ -620,14 +619,10 @@ public class ColourGui extends LightweightGuiDescription {
         mainPanel.validate(this);
     }
 
-    public void DeletePalette(int i){
-        mcrgbClient.palettes.remove(i);
-        mcrgbClient.palettes.forEach(palette -> {
-            palette.setIndex(mcrgbClient.palettes.indexOf(palette));
-            System.out.println(palette.getIndex());
-        });
-        paletteList.layout();
-        mainPanel.validate(this);
+    public void DeletePalette(WPaletteWidget pwig){
+
+        mcrgbClient.palettes.remove(pwig.palette);
+        root.validate(this);
     }
 
 }
