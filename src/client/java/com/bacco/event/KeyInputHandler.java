@@ -22,7 +22,6 @@ public class KeyInputHandler {
         ClientTickEvents.END_CLIENT_TICK.register(client ->{
             if(colourInvKey.wasPressed()){
                 if (client.currentScreen == null) {
-					//client.setScreen(MCRGBClient.colourInvScreen);
                     client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient)));
 				} else {
 					client.setScreen(null);

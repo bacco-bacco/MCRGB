@@ -1,6 +1,7 @@
 package com.bacco;
 
 import com.bacco.event.KeyInputHandler;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +40,11 @@ import java.util.Set;
 @Environment(EnvType.CLIENT)
 public class MCRGBClient implements ClientModInitializer {
 	public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
+
+	static Type listType = new TypeToken<ArrayList<Palette>>() {}.getType();
+
+	public static final ArrayList<Palette> loadedPalettes = new Gson().fromJson(readJson("./mcrgb_colours/palettes.json"), listType);
+
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
 	public net.minecraft.client.MinecraftClient client;
@@ -46,6 +53,7 @@ public class MCRGBClient implements ClientModInitializer {
 	int successes = 0;
 	boolean scanned = false;
 	public ArrayList<Palette> palettes = new ArrayList<>();
+
 	//public static ColourInventoryScreen colourInvScreen;
 
 	@Override
@@ -75,7 +83,7 @@ public class MCRGBClient implements ClientModInitializer {
 				RefreshColours();
 			}
 		});
-
+		LoadPalettes();
 		//Override item tooltips to display the colour.
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
 			if(!MCRGBConfig.instance.alwaysShowToolTips) return;
@@ -347,5 +355,9 @@ public class MCRGBClient implements ClientModInitializer {
 			writeJson(blockColoursJson, "./mcrgb_colours/", "palettes.json");
 		} catch (IOException e) {
 		}
+	}
+
+	public void LoadPalettes(){
+			palettes = loadedPalettes;
 	}
 }

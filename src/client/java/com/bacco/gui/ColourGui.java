@@ -111,8 +111,11 @@ public class ColourGui extends LightweightGuiDescription {
     Identifier savePaletteIdentifier = Identifier.of("mcrgb", "save.png");
     TextureIcon savePaletteIcon = new TextureIcon(savePaletteIdentifier);
     WButton savePaletteButton = new WButton(savePaletteIcon);
+
+    WPaletteWidget editingPalette = null;
     WListPanel<Palette,WPaletteWidget> paletteList;
     BiConsumer<Palette,WPaletteWidget> configurator = (Palette p, WPaletteWidget pwig) -> {
+        pwig.cg = this;
         pwig.palette = p;
         pwig.buildPaletteWidget(cg);
         for(int i = 0; i < pwig.SavedColours.size(); i++) {
@@ -121,6 +124,7 @@ public class ColourGui extends LightweightGuiDescription {
             pwig.SavedColours.get(i).setColour(c);
         }
     };
+
     boolean enableSliderListeners = true;
 
     enum ColourMode {
@@ -613,8 +617,24 @@ public class ColourGui extends LightweightGuiDescription {
         return  newPallet;
     }
 
+    WPaletteWidget UpdatePalette(WPaletteWidget updatingPalette){
+        for(int i = 0; i < SavedColours.size(); i++){
+            updatingPalette.SavedColours.get(i).setColour(SavedColours.get(i).colour);
+            updatingPalette.palette.setColour(i,new ColourVector(SavedColours.get(i).colour));
+        }
+        return updatingPalette;
+    }
+
     void SavePalette(){
-        mcrgbClient.palettes.add(CreatePalette());
+        if(editingPalette == null) {
+            mcrgbClient.palettes.add(CreatePalette());
+        }else{
+            UpdatePalette(editingPalette);
+            editingPalette = null;
+        }
+        for(int i = 0; i < SavedColours.size(); i++){
+            SavedColours.get(i).setColour(0xffffffff);
+        }
         mcrgbClient.SavePalettes();
         mainPanel.validate(this);
     }
@@ -622,7 +642,27 @@ public class ColourGui extends LightweightGuiDescription {
     public void DeletePalette(WPaletteWidget pwig){
 
         mcrgbClient.palettes.remove(pwig.palette);
+        editingPalette = null;
         root.validate(this);
+        mcrgbClient.SavePalettes();
+    }
+
+    public void EditPalette(WPaletteWidget pwig){
+        if(editingPalette == pwig){
+            editingPalette = null;
+            for(int i = 0; i < SavedColours.size(); i++){
+                SavedColours.get(i).setColour(0xffffffff);
+            }
+            return;
+        }
+        for(int i = 0; i < SavedColours.size(); i++){
+            SavedColours.get(i).setColour(pwig.SavedColours.get(i).colour);
+        }
+        editingPalette = pwig;
+    }
+
+    public void OpenBlockInfoGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ItemStack stack){
+        client.setScreen(new ColourScreen(new BlockInfoGui(client,mcrgbClient,stack)));
     }
 
 }

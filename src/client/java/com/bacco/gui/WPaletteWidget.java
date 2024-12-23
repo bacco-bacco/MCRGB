@@ -1,5 +1,6 @@
 package com.bacco.gui;
 
+import com.bacco.MCRGBClient;
 import com.bacco.Palette;
 import io.github.cottonmc.cotton.gui.client.BackgroundPainter;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
@@ -9,6 +10,7 @@ import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -22,6 +24,11 @@ public class WPaletteWidget extends WPlainPanel {
     Palette palette;
     Identifier editIdentifier = Identifier.of("mcrgb", "edit.png");
     TextureIcon editIcon = new TextureIcon(editIdentifier);
+
+    ColourGui cg;
+
+    MCRGBClient mcrgbClient;
+    public Boolean editing = false;
     WButton editButton = new WButton(editIcon){
         @Environment(EnvType.CLIENT)
         @Override
@@ -58,6 +65,7 @@ public class WPaletteWidget extends WPlainPanel {
         editButton.setSize(10,10);
         editButton.setIconSize(9);
         editButton.setAlignment(HorizontalAlignment.LEFT);
+        editButton.setOnClick(() -> {cg.EditPalette(this);});
 
         this.add(deleteButton,(int)(8.6f*18),9,1,1);
         deleteIcon.setColor(0xFF_FC5454);
@@ -65,6 +73,14 @@ public class WPaletteWidget extends WPlainPanel {
         deleteButton.setIconSize(9);
         deleteButton.setAlignment(HorizontalAlignment.LEFT);
         deleteButton.setOnClick(() -> {cg.DeletePalette(this);});
+
+
+    }
+    @Override
+    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
+        super.paint(context, x, y, mouseX, mouseY);
+        if(cg.editingPalette == this) context.drawBorder(x,y,this.width,this.height,0xFF00ff00);
+
 
     }
 

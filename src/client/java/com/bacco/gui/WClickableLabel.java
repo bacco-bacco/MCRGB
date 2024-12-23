@@ -9,15 +9,15 @@ public class WClickableLabel extends WLabel {
 
     ColourVector colour;
     ColourGui gui;
-    public WClickableLabel(Text text, ColourVector colour, ColourGui gui) {
+    public WClickableLabel(Text text, ColourVector colour) {
         super(text);
         this.colour = colour;
-        this.gui = gui;
+        //this.gui = gui;
     }
 
     @Override
     public InputResult onClick(int x, int y, int button) {
-        gui.SetColour(colour);
+        //gui.SetColour(colour);
         return super.onClick(x, y, button);
     }
 }

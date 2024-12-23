@@ -5,7 +5,6 @@ import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
 import io.github.cottonmc.cotton.gui.impl.LibGuiCommon;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
-import io.github.cottonmc.cotton.gui.widget.data.Axis;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,7 +36,7 @@ public class WColourGuiSlot extends WWidget{
    }
 
    @Override
-	public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
+   public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
       context.drawItem(stack, x+1, y+1);
       //context.drawTexture(SLOT_TEXTURE, x,y, 0, 0,0, 18, 18, 64, 64);
       ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
@@ -59,17 +58,18 @@ public class WColourGuiSlot extends WWidget{
             break;
          case 1:
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
-            IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
+            //IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
             /*if(item.getLength() <= 0) break;
             ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
             ColourVector colour = colours.get(0);
             gui.SetColour(colour);*/
-            gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
+            /*gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
 
             //gui.mainPanel.add(this.gui.infoBox,this.getAbsoluteX()/18+1,this.getAbsoluteY()/18+1);
             gui.mainPanel.add(this.gui.infoBox,19,0);
             gui.mainPanel.validate(gui);
-            gui.PlaceSlots();
+            gui.PlaceSlots();*/
+            gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
             break;
          case 2:
             if(!player.hasPermissionLevel(2) || !player.isCreative()) return InputResult.PROCESSED;

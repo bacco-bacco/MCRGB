@@ -3,6 +3,7 @@ package com.bacco.gui;
 import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import io.github.cottonmc.cotton.gui.client.BackgroundPainter;
+import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WBox;
 import io.github.cottonmc.cotton.gui.widget.data.Axis;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
@@ -25,14 +26,14 @@ public class WBlockInfoBox extends WBox {
      * @throws NullPointerException if the axis is null
      */
 
-    ColourGui gui;
+    LightweightGuiDescription gui;
     @Override
     public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
         setBackgroundPainter(BackgroundPainter.VANILLA);
         super.paint(context, x, y, mouseX, mouseY);
         //context.getMatrices().translate(0,0,-1000f);
     }
-    public WBlockInfoBox(Axis axis, IItemBlockColourSaver item, ColourGui gui) {
+    public WBlockInfoBox(Axis axis, IItemBlockColourSaver item, LightweightGuiDescription gui) {
         super(axis);
         this.gui = gui;
         setInsets(Insets.ROOT_PANEL);
@@ -51,7 +52,7 @@ public class WBlockInfoBox extends WBox {
                     }
                     TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
                     int width = textRenderer.getWidth(text2);
-                    WClickableLabel newLabel = new WClickableLabel(text2,new ColourVector(colours.get(j)),gui);
+                    WClickableLabel newLabel = new WClickableLabel(text2,new ColourVector(colours.get(j)));
                     add(newLabel,width,1);
                     lineCount++;
                 }
