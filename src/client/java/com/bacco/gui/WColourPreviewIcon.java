@@ -8,9 +8,9 @@ import net.minecraft.util.Identifier;
 public class WColourPreviewIcon extends WSprite {
 
     int colour = 0xFFFFFF;
-    ColourGui gui;
+    MCRGBBaseGui gui;
     boolean interactable = true;
-    public WColourPreviewIcon(Identifier image,ColourGui gui) {
+    public WColourPreviewIcon(Identifier image,MCRGBBaseGui gui) {
         super(image);
         this.gui = gui;
     }
@@ -34,6 +34,7 @@ public class WColourPreviewIcon extends WSprite {
                 break;
             case 2:
                 gui.SetColour(new ColourVector(colour));
+                gui.colourDisplay.setOpaqueTint(colour);
                 break;
         }
         return InputResult.PROCESSED;

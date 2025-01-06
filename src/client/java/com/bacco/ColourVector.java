@@ -137,6 +137,14 @@ public class ColourVector {
     }
     public int getLight(){return Math.round(100f*(new RGB(this.r,this.g,this.b).getLightness()/255f));}
 
+    public int asInt() {
+        // Ensure each component is within the 0-255 range
+        this.r = Math.max(0, Math.min(255, this.r));
+        this.g = Math.max(0, Math.min(255, this.g));
+        this.b = Math.max(0, Math.min(255, this.b));
+        return (255 << 24) | (this.r << 16) | (this.g << 8) | this.b;
+    }
+
     public double distance(ColourVector otherVector){
         return Math.sqrt(Math.pow((this.r - otherVector.r),2) + Math.pow((this.g - otherVector.g),2) + Math.pow((this.b - otherVector.b),2));
     }

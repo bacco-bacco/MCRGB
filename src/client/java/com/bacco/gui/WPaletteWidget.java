@@ -25,7 +25,7 @@ public class WPaletteWidget extends WPlainPanel {
     Identifier editIdentifier = Identifier.of("mcrgb", "edit.png");
     TextureIcon editIcon = new TextureIcon(editIdentifier);
 
-    ColourGui cg;
+    MCRGBBaseGui cg;
 
     MCRGBClient mcrgbClient;
     public Boolean editing = false;
@@ -53,7 +53,7 @@ public class WPaletteWidget extends WPlainPanel {
 
     }
 
-    public void buildPaletteWidget(ColourGui cg){
+    public void buildPaletteWidget(MCRGBBaseGui cg){
 
         this.setBackgroundPainter(BackgroundPainter.createColorful(0xFFFFFF));
         for(int i = 0; i < slotsWidth; i++) {
@@ -65,21 +65,21 @@ public class WPaletteWidget extends WPlainPanel {
         editButton.setSize(10,10);
         editButton.setIconSize(9);
         editButton.setAlignment(HorizontalAlignment.LEFT);
-        editButton.setOnClick(() -> {cg.EditPalette(this);});
+        editButton.setOnClick(() -> {cg.savedPalettesArea.EditPalette(this);});
 
         this.add(deleteButton,(int)(8.6f*18),9,1,1);
         deleteIcon.setColor(0xFF_FC5454);
         deleteButton.setSize(10,10);
         deleteButton.setIconSize(9);
         deleteButton.setAlignment(HorizontalAlignment.LEFT);
-        deleteButton.setOnClick(() -> {cg.DeletePalette(this);});
+        deleteButton.setOnClick(() -> {cg.savedPalettesArea.DeletePalette(this);});
 
 
     }
     @Override
     public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
         super.paint(context, x, y, mouseX, mouseY);
-        if(cg.editingPalette == this) context.drawBorder(x,y,this.width,this.height,0xFF00ff00);
+        if(cg.savedPalettesArea.editingPalette == this) context.drawBorder(x,y,this.width,this.height,0xFF00ff00);
 
 
     }

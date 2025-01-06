@@ -1,8 +1,8 @@
 package com.bacco.gui;
 
+import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import com.bacco.MCRGBClient;
-import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
 import io.github.cottonmc.cotton.gui.widget.data.Axis;
 import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
@@ -14,10 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class BlockInfoGui extends LightweightGuiDescription {
-
-    WGridPanel root = new WGridPanel();
-    WGridPanel mainPanel = new WGridPanel();
+public class BlockInfoGui extends MCRGBBaseGui {
 
     WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
 
@@ -25,10 +22,15 @@ public class BlockInfoGui extends LightweightGuiDescription {
 
     WScrollPanel infoScrollPanel;
 
-    public BlockInfoGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ItemStack stack){
+
+    public BlockInfoGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ItemStack stack, ColourVector launchColour){
+
+        this.client = client;
+        this.mcrgbClient = mcrgbClient;
 
         Identifier backIdentifier = Identifier.of("mcrgb", "back.png");
         TextureIcon backIcon = new TextureIcon(backIdentifier);
+        savedPalettesArea = new WSavedPalettesArea(this, 9, 7, mcrgbClient);
         WButton backButton = new WButton(backIcon){
             @Environment(EnvType.CLIENT)
             @Override
@@ -42,6 +44,11 @@ public class BlockInfoGui extends LightweightGuiDescription {
         root.add(mainPanel, 0,0);
         mainPanel.setSize(320, 220);
         mainPanel.setInsets(Insets.ROOT_PANEL);
+        mainPanel.add(hexInput, 11, 1, 5, 1);
+        hexInput.setChangedListener((String value) -> HexTyped(value,false));
+        mainPanel.add(colourDisplay,16,1,2,2);
+        colourDisplay.setLocation(colourDisplay.getAbsoluteX()+1,colourDisplay.getAbsoluteY()-1);
+
 
 
         mainPanel.add(label, 0, 0, 2, 1);
@@ -53,17 +60,36 @@ public class BlockInfoGui extends LightweightGuiDescription {
         backButton.setAlignment(HorizontalAlignment.LEFT);
 
         backButton.setOnClick(() -> {
-            client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient)));
+            client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient,inputColour)));
         });
 
-        infoBox = new WBlockInfoBox(Axis.VERTICAL,(IItemBlockColourSaver) stack.getItem(),this);
+        infoBox = new WBlockInfoBox(Axis.VERTICAL,(IItemBlockColourSaver) stack.getItem(), this);
         infoScrollPanel = new WScrollPanel(infoBox);
 
+        mainPanel.add(this.infoScrollPanel,11,3,7,9);
 
+        mainPanel.add(savedPalettesArea,0,7);
 
-        //gui.mainPanel.add(this.gui.infoBox,this.getAbsoluteX()/18+1,this.getAbsoluteY()/18+1);
-        mainPanel.add(this.infoScrollPanel,10,0,7,12);
-
+        SetColour(launchColour);
+        colourDisplay.setOpaqueTint(inputColour.asInt());
         root.validate(this);
     }
+
+    public void HexTyped(String value, boolean modeChanged){
+        try{
+            ColourVector colour = new ColourVector(value);
+            if(!hexInput.isFocused()){
+                return;
+            }
+            if(value == inputColour.getHex()){
+                return;
+            }
+
+            inputColour = colour;
+            colourDisplay.setOpaqueTint(inputColour.asInt());
+
+
+        }catch(Exception e){}
+    }
+
 }
