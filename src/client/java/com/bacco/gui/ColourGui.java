@@ -2,10 +2,11 @@ package com.bacco.gui;
 
 
 import com.bacco.*;
-import io.github.cottonmc.cotton.gui.client.BackgroundPainter;
-import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
-import io.github.cottonmc.cotton.gui.widget.data.*;
+import io.github.cottonmc.cotton.gui.widget.data.Axis;
+import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
+import io.github.cottonmc.cotton.gui.widget.data.InputResult;
+import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,20 +23,11 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.function.BiConsumer;
 
-public class ColourGui extends LightweightGuiDescription {
+public class ColourGui extends MCRGBBaseGui {
     ColourGui cg = this;
     static int slotsHeight = 7;
     static int slotsWidth = 9;
-    ColourVector inputColour = new ColourVector(255,255,255);
-    /*int r = 255;
-    int g = 255; 
-    int b = 255;*/
-    //String hex = "#FFFFFF";
-
-    WGridPanel root = new WGridPanel();
-    WGridPanel mainPanel = new WGridPanel();
 
     WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
 
@@ -58,7 +50,6 @@ public class ColourGui extends LightweightGuiDescription {
             //return super.onMouseScroll(x, y, hAmount, vAmount);
         }
     };
-    WTextField hexInput = new WTextField(Text.literal("#FFFFFF"));
     WPlainPanel labels = new WPlainPanel();
     WLabel rLabel = new WLabel(Text.translatable("ui.mcrgb.r_for_red"),0xFF0000);
     WLabel gLabel = new WLabel(Text.translatable("ui.mcrgb.g_for_green"),0x00FF00);
@@ -89,8 +80,6 @@ public class ColourGui extends LightweightGuiDescription {
     WButton hslButton = new WButton(Text.translatable("ui.mcrgb.hsl"));
     private ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
     private ArrayList<WColourGuiSlot> wColourGuiSlots = new ArrayList<WColourGuiSlot>();
-    net.minecraft.client.MinecraftClient client;
-    MCRGBClient mcrgbClient;
     ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
     ItemStack chestplate = new ItemStack(Items.LEATHER_CHESTPLATE);
     ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
@@ -103,28 +92,6 @@ public class ColourGui extends LightweightGuiDescription {
     WColourGuiSlot bootSlot = new WColourGuiSlot(boots, cg);
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse, cg);
     WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf, cg);
-    WLabel savedColoursLabel = new WLabel(Text.translatable("ui.mcrgb.saved_colours"));
-    Identifier colourIdentifier = Identifier.of("mcrgb", "square.png");
-
-    ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
-
-    Identifier savePaletteIdentifier = Identifier.of("mcrgb", "save.png");
-    TextureIcon savePaletteIcon = new TextureIcon(savePaletteIdentifier);
-    WButton savePaletteButton = new WButton(savePaletteIcon);
-
-    WPaletteWidget editingPalette = null;
-    WListPanel<Palette,WPaletteWidget> paletteList;
-    BiConsumer<Palette,WPaletteWidget> configurator = (Palette p, WPaletteWidget pwig) -> {
-        pwig.cg = this;
-        pwig.palette = p;
-        pwig.buildPaletteWidget(cg);
-        for(int i = 0; i < pwig.SavedColours.size(); i++) {
-            String hex = p.getColour(i).getHex().replace("#","");
-            int c = Integer.parseInt(hex,16);
-            pwig.SavedColours.get(i).setColour(c);
-        }
-    };
-
     boolean enableSliderListeners = true;
 
     enum ColourMode {
@@ -135,15 +102,18 @@ public class ColourGui extends LightweightGuiDescription {
     ColourMode mode = ColourMode.RGB;
 
     @Environment(value=EnvType.CLIENT)
-    public ColourGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient){
+    public ColourGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ColourVector launchColour){
         this.client = client;
         this.mcrgbClient = mcrgbClient;
+        savedPalettesArea = new WSavedPalettesArea(this, slotsWidth, slotsHeight, mcrgbClient);
         ColourSort();
         setRootPanel(root);
         root.add(mainPanel, 0,0);
         mainPanel.setSize(320, 220);
         mainPanel.setInsets(Insets.ROOT_PANEL);
         mainPanel.add(hexInput, 11, 1, 5, 1);
+        mainPanel.add(colourDisplay,16,1,2,2);
+        colourDisplay.setLocation(colourDisplay.getAbsoluteX()+1,colourDisplay.getAbsoluteY()-1);
         mainPanel.add(scrollBar,9,1,1,slotsHeight-1);
         mainPanel.add(refreshButton,17,11,1,1);
         refreshButton.setSize(20,20);
@@ -170,27 +140,7 @@ public class ColourGui extends LightweightGuiDescription {
         hslButton.setAlignment(HorizontalAlignment.CENTER);
 
         mainPanel.add(label, 0, 0, 2, 1);
-        mainPanel.add(savedColoursLabel, 0,slotsHeight,2,1);
-        savedColoursLabel.setVerticalAlignment(VerticalAlignment.BOTTOM);
-
-        for(int i = 0; i < slotsWidth; i++) {
-            SavedColours.add(new WColourPreviewIcon(colourIdentifier,cg));
-
-            mainPanel.add(SavedColours.get(i), i, slotsHeight + 1, 1, 1);
-        }
-
-        mainPanel.add(savePaletteButton,slotsWidth,slotsHeight+1,1,1);
-        savePaletteButton.setSize(20,20);
-        savePaletteButton.setIconSize(18);
-        savePaletteButton.setAlignment(HorizontalAlignment.LEFT);
-
-        paletteList = new WListPanel<>(mcrgbClient.palettes, WPaletteWidget::new, configurator);
-
-        paletteList.setBackgroundPainter(BackgroundPainter.createColorful(0x999999));
-        paletteList.setListItemHeight(19);
-        mainPanel.add(paletteList,0,slotsHeight+2, 10, 3);
-        paletteList.setLocation(9,(int)(18*(slotsHeight+2.7)));
-        paletteList.setSize(10*18,(int)(2.8f*18));
+        mainPanel.add(savedPalettesArea,0,slotsHeight);
 
         mainPanel.add(labels, 11,2,6,1);
 
@@ -231,8 +181,6 @@ public class ColourGui extends LightweightGuiDescription {
         hsvButton.setOnClick(() -> {SetColourMode(ColourMode.HSV);});
         hslButton.setOnClick(() -> {SetColourMode(ColourMode.HSL);});
 
-        savePaletteButton.setOnClick(() -> {SavePalette();});
-
         if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
             settingsButton.setOnClick(() -> {
                 MinecraftClient.getInstance().setScreen(ClothConfigIntegration.getConfigScreen(client.currentScreen));
@@ -252,6 +200,7 @@ public class ColourGui extends LightweightGuiDescription {
         mainPanel.add(wolfSlot, 17, 8);
 
 
+        SetColour(launchColour);
         mainPanel.validate(this);
     }
 
@@ -490,6 +439,7 @@ public class ColourGui extends LightweightGuiDescription {
         boots.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
         horse.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
         wolf.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
+        colourDisplay.setOpaqueTint(hexint);
     }
 
     public void ColourSort(){
@@ -563,11 +513,7 @@ public class ColourGui extends LightweightGuiDescription {
         mainPanel.validate(this);
     }
 
-    int GetColour(){
-        String hex = inputColour.getHex().replace("#","");
-        return Integer.parseInt(hex,16);
-    }
-
+    @Override
     void SetColour(ColourVector colour){
         switch(mode) {
             case RGB:
@@ -609,60 +555,8 @@ public class ColourGui extends LightweightGuiDescription {
         PlaceSlots();
     }
 
-    Palette CreatePalette(){
-        Palette newPallet = new Palette();
-        for(int i = 0; i < SavedColours.size(); i++){
-            newPallet.addColour(new ColourVector(SavedColours.get(i).colour));
-        }
-        return  newPallet;
-    }
-
-    WPaletteWidget UpdatePalette(WPaletteWidget updatingPalette){
-        for(int i = 0; i < SavedColours.size(); i++){
-            updatingPalette.SavedColours.get(i).setColour(SavedColours.get(i).colour);
-            updatingPalette.palette.setColour(i,new ColourVector(SavedColours.get(i).colour));
-        }
-        return updatingPalette;
-    }
-
-    void SavePalette(){
-        if(editingPalette == null) {
-            mcrgbClient.palettes.add(CreatePalette());
-        }else{
-            UpdatePalette(editingPalette);
-            editingPalette = null;
-        }
-        for(int i = 0; i < SavedColours.size(); i++){
-            SavedColours.get(i).setColour(0xffffffff);
-        }
-        mcrgbClient.SavePalettes();
-        mainPanel.validate(this);
-    }
-
-    public void DeletePalette(WPaletteWidget pwig){
-
-        mcrgbClient.palettes.remove(pwig.palette);
-        editingPalette = null;
-        root.validate(this);
-        mcrgbClient.SavePalettes();
-    }
-
-    public void EditPalette(WPaletteWidget pwig){
-        if(editingPalette == pwig){
-            editingPalette = null;
-            for(int i = 0; i < SavedColours.size(); i++){
-                SavedColours.get(i).setColour(0xffffffff);
-            }
-            return;
-        }
-        for(int i = 0; i < SavedColours.size(); i++){
-            SavedColours.get(i).setColour(pwig.SavedColours.get(i).colour);
-        }
-        editingPalette = pwig;
-    }
-
     public void OpenBlockInfoGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ItemStack stack){
-        client.setScreen(new ColourScreen(new BlockInfoGui(client,mcrgbClient,stack)));
+        client.setScreen(new ColourScreen(new BlockInfoGui(client,mcrgbClient,stack, inputColour)));
     }
 
 }

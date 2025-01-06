@@ -54,6 +54,7 @@ public class MCRGBClient implements ClientModInitializer {
 	boolean scanned = false;
 	public ArrayList<Palette> palettes = new ArrayList<>();
 
+
 	//public static ColourInventoryScreen colourInvScreen;
 
 	@Override

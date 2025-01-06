@@ -13,6 +13,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
@@ -77,7 +78,8 @@ public class WColourGuiSlot extends WWidget{
             gui.mainPanel.add(this.gui.infoBox,19,0);
             gui.mainPanel.validate(gui);
             gui.PlaceSlots();*/
-            gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
+            if(stack.getItem() instanceof BlockItem)
+               gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
             break;
          case 2:
              if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;

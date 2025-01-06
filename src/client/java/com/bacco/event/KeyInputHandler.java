@@ -1,5 +1,6 @@
 package com.bacco.event;
 
+import com.bacco.ColourVector;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
@@ -22,7 +23,7 @@ public class KeyInputHandler {
         ClientTickEvents.END_CLIENT_TICK.register(client ->{
             if(colourInvKey.wasPressed()){
                 if (client.currentScreen == null) {
-                    client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient)));
+                    client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient, new ColourVector(0xFFFFFFFF))));
 				} else {
 					client.setScreen(null);
 				}
