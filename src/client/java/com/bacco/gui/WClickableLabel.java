@@ -47,7 +47,6 @@ public class WClickableLabel extends WLabel {
     @Override
     public InputResult onClick(int x, int y, int button) {
         gui.SetColour(colour);
-        gui.colourDisplay.setOpaqueTint(colour.asInt());
         //client.setScreen(new ColourScreen(gui));
         return super.onClick(x, y, button);
     }

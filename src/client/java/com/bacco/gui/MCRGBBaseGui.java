@@ -29,7 +29,6 @@ public class MCRGBBaseGui extends LightweightGuiDescription {
 
 
     MCRGBBaseGui(){
-        //colourDisplay.setSize(18,22);
     }
 
 
@@ -42,6 +41,8 @@ public class MCRGBBaseGui extends LightweightGuiDescription {
 
         inputColour = colour;
         hexInput.setText(inputColour.getHex());
+        colourDisplay.setOpaqueTint(inputColour.asInt());
+
 
     }
 

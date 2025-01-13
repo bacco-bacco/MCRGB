@@ -22,6 +22,7 @@
     "ui.mcrgb.edit_palette_info" : "Edit Palette",
     "ui.mcrgb.delete_palette_info" : "Delete Palette",
     "ui.mcrgb.saved_colours" : "Saved Palettes",
+    "ui.mcrgb.refine" : "Refine...",
     "options.mcrgb.all_contexts" : "All Contexts",
     "options.mcrgb.picker_only" : "Color Picker Only",
     "title.mcrgb.config" : "MCRGB Options",

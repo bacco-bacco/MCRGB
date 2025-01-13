@@ -12,6 +12,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.item.ItemStack;
@@ -92,6 +93,42 @@ public class ColourGui extends MCRGBBaseGui {
     WColourGuiSlot bootSlot = new WColourGuiSlot(boots, cg);
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse, cg);
     WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf, cg);
+
+    WToggleButton colourWheelToggle = new WToggleButton();
+
+    WTextField searchField = new WTextField(Text.translatable("ui.mcrgb.refine")){
+
+        @Override
+        public void setSize(int x, int y) {
+            this.width = x;
+            this.height = y;
+        }
+
+        @Override
+        @Environment(EnvType.CLIENT)
+        protected void renderText(DrawContext context, int x, int y, String visibleText) {
+            super.renderText(context, x, y-4, visibleText);
+        }
+
+        @Override
+        @Environment(EnvType.CLIENT)
+        protected void renderCursor(DrawContext context, int x, int y, String visibleText) {
+            super.renderCursor(context, x, y-4, visibleText);
+        }
+        @Override
+        @Environment(EnvType.CLIENT)
+        protected void renderSelection(DrawContext context, int x, int y, String visibleText) {
+            super.renderSelection(context, x, y-4, visibleText);
+        }
+
+        @Override
+        @Environment(EnvType.CLIENT)
+        protected void renderSuggestion(DrawContext context, int x, int y) {
+            super.renderSuggestion(context, x, y-4);
+        }
+
+    };
+
     boolean enableSliderListeners = true;
 
     enum ColourMode {
@@ -119,6 +156,8 @@ public class ColourGui extends MCRGBBaseGui {
         refreshButton.setSize(20,20);
         refreshButton.setIconSize(18);
         refreshButton.setAlignment(HorizontalAlignment.LEFT);
+        mainPanel.add(searchField,6,0,4,1);
+        searchField.setSize(4*18,11);
 
         mainPanel.add(settingsButton,17,0,1,1);
         settingsButton.setSize(20,20);
@@ -174,12 +213,15 @@ public class ColourGui extends MCRGBBaseGui {
         bInput.setChangedListener((String value) -> RGBTyped('b',value));
 
         hexInput.setChangedListener((String value) -> HexTyped(value,false));
+        searchField.setChangedListener((String value) -> ColourSort());
 
         refreshButton.setOnClick(() -> {mcrgbClient.RefreshColours(); ColourSort();});
 
         rgbButton.setOnClick(() -> {SetColourMode(ColourMode.RGB);});
         hsvButton.setOnClick(() -> {SetColourMode(ColourMode.HSV);});
         hslButton.setOnClick(() -> {SetColourMode(ColourMode.HSL);});
+
+        colourWheelToggle.setOnToggle(isToggled -> {});
 
         if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
             settingsButton.setOnClick(() -> {
@@ -198,6 +240,9 @@ public class ColourGui extends MCRGBBaseGui {
         mainPanel.add(bootSlot, 17, 6);
         mainPanel.add(horseSlot, 17, 7);
         mainPanel.add(wolfSlot, 17, 8);
+
+
+        mainPanel.add(colourWheelToggle,17,9);
 
 
         SetColour(launchColour);
@@ -381,6 +426,7 @@ public class ColourGui extends MCRGBBaseGui {
     }
     public void HexTyped(String value, boolean modeChanged){
         enableSliderListeners = false;
+
         try{
             ColourVector colour = new ColourVector(value);
             if(!modeChanged && !hexInput.isFocused()){
@@ -467,7 +513,7 @@ public class ColourGui extends MCRGBBaseGui {
                         ((IItemBlockColourSaver) block.asItem()).setScore(distance);
                     }
                 }
-                if(block.asItem() != null && ((IItemBlockColourSaver) block.asItem()).getLength() > 0 && block.isEnabled(client.world.getEnabledFeatures())){
+                if(block.getName().getString().toUpperCase().contains(searchField.getText().toUpperCase()) && block.asItem() != null && ((IItemBlockColourSaver) block.asItem()).getLength() > 0 && block.isEnabled(client.world.getEnabledFeatures())){
                     stacks.add(new ItemStack(block)); 
                 }  
                                                 
@@ -557,6 +603,10 @@ public class ColourGui extends MCRGBBaseGui {
 
     public void OpenBlockInfoGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ItemStack stack){
         client.setScreen(new ColourScreen(new BlockInfoGui(client,mcrgbClient,stack, inputColour)));
+    }
+
+    public void ToggleColourWheel(Boolean isToggled){
+
     }
 
 }
