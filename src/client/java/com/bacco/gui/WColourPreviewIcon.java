@@ -34,7 +34,6 @@ public class WColourPreviewIcon extends WSprite {
                 break;
             case 2:
                 gui.SetColour(new ColourVector(colour));
-                gui.colourDisplay.setOpaqueTint(colour);
                 break;
         }
         return InputResult.PROCESSED;
