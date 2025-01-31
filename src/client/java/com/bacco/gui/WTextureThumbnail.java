@@ -17,7 +17,6 @@ public class WTextureThumbnail extends WSprite {
     @Override
     public InputResult onClick(int x, int y, int button) {
         bigui.ChangeSprite(index);
-        System.out.println(this.frames[currentFrame]);
         return super.onClick(x, y, button);
     }
 }

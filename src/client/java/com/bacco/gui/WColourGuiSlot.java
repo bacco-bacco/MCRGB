@@ -1,6 +1,5 @@
 package com.bacco.gui;
 
-import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import com.bacco.MCRGBConfig;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
@@ -55,14 +54,17 @@ public class WColourGuiSlot extends WWidget{
          nbt = "dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) ;//stack.getOrCreateNbt().toString();
 
       }
+      String command = MCRGBConfig.instance.command;
+
       command = command.replace("%c",nbt);
       switch (button){
          case 0:
              if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
-             String command = MCRGBConfig.instance.command;
              command = command.replace("%p",player.getName().getString());
              command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
-            command = command.replace("%q","1");
+             command = command.replace("%q","1");
+             player.networkHandler.sendCommand(command);
+
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
@@ -83,14 +85,14 @@ public class WColourGuiSlot extends WWidget{
             break;
          case 2:
              if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
-             String command = MCRGBConfig.instance.command;
              command = command.replace("%p",player.getName().getString());
              command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
-            command = command.replace("%q",Integer.toString(stack.getMaxCount()));
+             command = command.replace("%q",Integer.toString(stack.getMaxCount()));
+             player.networkHandler.sendCommand(command);
+
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;
       }
-      player.networkHandler.sendCommand(command);
       return InputResult.PROCESSED;
     }
 
