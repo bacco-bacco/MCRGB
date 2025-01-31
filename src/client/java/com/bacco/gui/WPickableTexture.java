@@ -4,6 +4,7 @@ import com.bacco.ColourVector;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.BufferUtils;
@@ -19,6 +20,8 @@ public class WPickableTexture extends WSprite {
     float texV2;
     int atlasWidth;
     int atlasHeight;
+
+    int tint = 0xFFFFFF;
 
     MCRGBBaseGui gui;
 
@@ -48,6 +51,11 @@ public class WPickableTexture extends WSprite {
         pickColour(x,y);
         return super.onMouseDrag(x, y, button, deltaX, deltaY);
     }
+    @Override
+    public WSprite setOpaqueTint(int tint){
+        this.tint = tint;
+        return super.setOpaqueTint(tint);
+    }
 
     public void pickColour(int x, int y){
         if(x < 0 || y < 0 || x >= width || y >= height) return;
@@ -66,7 +74,13 @@ public class WPickableTexture extends WSprite {
 
         int pos = (((int)trueY*atlasWidth + (int)trueX)*4);
 
+        if(pixels[pos+3] == 0){
+            //return if fully transparent pixel
+            return;
+        }
+
         int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+        pixelColour = ColorHelper.Argb.mixColor(pixelColour,tint);
         gui.SetColour(new ColourVector(pixelColour));
     }
 
@@ -77,5 +91,10 @@ public class WPickableTexture extends WSprite {
         texU2 = u2*atlasWidth;
         texV2 = v2*atlasHeight;
         return super.setUv(u1, v1, u2, v2);
+    }
+
+    @Override
+    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
+        super.paint(context, x, y, mouseX, mouseY);
     }
 }
