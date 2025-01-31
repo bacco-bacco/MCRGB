@@ -39,11 +39,11 @@ import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public class MCRGBClient implements ClientModInitializer {
-	public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
+	//public static final BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
 
 	static Type listType = new TypeToken<ArrayList<Palette>>() {}.getType();
 
-	public static final ArrayList<Palette> loadedPalettes = new Gson().fromJson(readJson("./mcrgb_colours/palettes.json"), listType);
+	//public static final ArrayList<Palette> loadedPalettes = new Gson().fromJson(readJson("./mcrgb_colours/palettes.json"), listType);
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
@@ -359,6 +359,17 @@ public class MCRGBClient implements ClientModInitializer {
 	}
 
 	public void LoadPalettes(){
-			palettes = loadedPalettes;
+		ArrayList<Palette> loadedPalettes = new ArrayList<Palette>();
+		try{
+			loadedPalettes = new Gson().fromJson(readJson("./mcrgb_colours/palettes.json"), listType);
+		}catch (Exception e){
+			loadedPalettes = new ArrayList<Palette>();
+		}
+		if(loadedPalettes == null){
+			loadedPalettes = new ArrayList<Palette>();
+		}
+
+		palettes = loadedPalettes;
+
 	}
 }
