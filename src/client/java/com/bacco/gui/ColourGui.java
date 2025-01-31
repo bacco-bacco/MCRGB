@@ -3,10 +3,7 @@ package com.bacco.gui;
 
 import com.bacco.*;
 import io.github.cottonmc.cotton.gui.widget.*;
-import io.github.cottonmc.cotton.gui.widget.data.Axis;
-import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
-import io.github.cottonmc.cotton.gui.widget.data.InputResult;
-import io.github.cottonmc.cotton.gui.widget.data.Insets;
+import io.github.cottonmc.cotton.gui.widget.data.*;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,6 +17,7 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +85,8 @@ public class ColourGui extends MCRGBBaseGui {
     ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
     ItemStack horse = new ItemStack(Items.LEATHER_HORSE_ARMOR);
     ItemStack wolf = new ItemStack(Items.WOLF_ARMOR);
+
+    WGridPanel armourSlots = new WGridPanel();
     WColourGuiSlot helmSlot = new WColourGuiSlot(helmet, cg);
     WColourGuiSlot chestSlot = new WColourGuiSlot(chestplate, cg);
     WColourGuiSlot legsSlot = new WColourGuiSlot(leggings, cg);
@@ -95,6 +95,24 @@ public class ColourGui extends MCRGBBaseGui {
     WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf, cg);
 
     WToggleButton colourWheelToggle = new WToggleButton();
+
+    WPlainPanel sliderArea = new WSliderArea();
+
+    Identifier wheelIdentifier = Identifier.of("mcrgb", "wheel.png");
+
+    WColourWheel colourWheel;
+
+    Identifier wheelIconIdentifier = Identifier.of("mcrgb", "wheel_small.png");
+
+    Texture wheelTex = new Texture(wheelIconIdentifier);
+
+    WGradientSlider wheelValueSlider = new WGradientSlider(0, 255, Axis.VERTICAL);
+
+    Identifier sliderIconIdentifier = Identifier.of("mcrgb", "sliders.png");
+
+    Texture sliderTex = new Texture(sliderIconIdentifier);
+
+
 
     WTextField searchField = new WTextField(Text.translatable("ui.mcrgb.refine")){
 
@@ -142,6 +160,7 @@ public class ColourGui extends MCRGBBaseGui {
     public ColourGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ColourVector launchColour){
         this.client = client;
         this.mcrgbClient = mcrgbClient;
+        colourWheel = new WColourWheel(wheelIdentifier,0,0,1,1,client,this);
         savedPalettesArea = new WSavedPalettesArea(this, slotsWidth, slotsHeight, mcrgbClient);
         ColourSort();
         setRootPanel(root);
@@ -181,17 +200,22 @@ public class ColourGui extends MCRGBBaseGui {
         mainPanel.add(label, 0, 0, 2, 1);
         mainPanel.add(savedPalettesArea,0,slotsHeight);
 
-        mainPanel.add(labels, 11,2,6,1);
+        mainPanel.add(sliderArea,11,2,6,7);
 
-        labels.add(rLabel, 6, 7, 1, 1);
-        labels.add(gLabel, 42, 7, 1, 1);
-        labels.add(bLabel, 78, 7, 1, 1);
+        //mainPanel.add(labels, 11,2,6,1);
 
-        mainPanel.add(rSlider, 11, 3, 1, 6);
+        mainPanel.add(rLabel, 6, 7, 1, 1);
+        mainPanel.add(gLabel, 6, 7, 1, 1);
+        mainPanel.add(bLabel, 6, 7, 1, 1);
+        rLabel.setLocation(211,50);
+        gLabel.setLocation(247,50);
+        bLabel.setLocation(283,50);
+
+        sliderArea.add(rSlider, 0, 18, 18, 108);
         rSlider.setValue(inputColour.r);
-        mainPanel.add(gSlider, 13, 3, 1, 6);
+        sliderArea.add(gSlider, 36, 18, 18, 108);
         gSlider.setValue(inputColour.g);
-        mainPanel.add(bSlider, 15, 3, 1, 6);
+        sliderArea.add(bSlider, 72, 18, 18, 108);
         bSlider.setValue(inputColour.b);
 
         mainPanel.add(inputs,10,9,2,1);
@@ -207,6 +231,10 @@ public class ColourGui extends MCRGBBaseGui {
         gSlider.setDraggingFinishedListener((int value) -> {if(!MCRGBConfig.instance.sliderConstantUpdate) ColourSort();});
         bSlider.setDraggingFinishedListener((int value) -> {if(!MCRGBConfig.instance.sliderConstantUpdate) ColourSort();});
 
+        wheelValueSlider.setValueChangeListener((int value) ->{
+            colourWheel.setOpaqueTint(ColorHelper.Argb.getArgb(255,value,value,value));
+            colourWheel.pickAtCursor();
+        });
 
         rInput.setChangedListener((String value) -> RGBTyped('r',value));
         gInput.setChangedListener((String value) -> RGBTyped('g',value));
@@ -221,7 +249,7 @@ public class ColourGui extends MCRGBBaseGui {
         hsvButton.setOnClick(() -> {SetColourMode(ColourMode.HSV);});
         hslButton.setOnClick(() -> {SetColourMode(ColourMode.HSL);});
 
-        colourWheelToggle.setOnToggle(isToggled -> {});
+        colourWheelToggle.setOnToggle(isToggled -> {ToggleColourWheel(isToggled);});
 
         if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
             settingsButton.setOnClick(() -> {
@@ -233,16 +261,22 @@ public class ColourGui extends MCRGBBaseGui {
             });
         }
         UpdateArmour();
-        
-        mainPanel.add(helmSlot, 17, 3);
-        mainPanel.add(chestSlot, 17, 4);
-        mainPanel.add(legsSlot, 17, 5);
-        mainPanel.add(bootSlot, 17, 6);
-        mainPanel.add(horseSlot, 17, 7);
-        mainPanel.add(wolfSlot, 17, 8);
+
+        mainPanel.add(armourSlots,17,3);
+
+        armourSlots.add(helmSlot, 0, 0);
+        armourSlots.add(chestSlot, 0, 1);
+        armourSlots.add(legsSlot, 0, 2);
+        armourSlots.add(bootSlot, 0, 3);
+        armourSlots.add(horseSlot, 0, 4);
+        armourSlots.add(wolfSlot, 0, 5);
 
 
-        mainPanel.add(colourWheelToggle,17,9);
+        colourWheelToggle.setOffImage(wheelTex);
+        colourWheelToggle.setOnImage(sliderTex);
+        mainPanel.add(colourWheelToggle,17,10);
+        colourWheelToggle.setLocation(314,180);
+
 
 
         SetColour(launchColour);
@@ -347,6 +381,7 @@ public class ColourGui extends MCRGBBaseGui {
         hexInput.setText(inputColour.getHex());
         UpdateArmour();
         if(MCRGBConfig.instance.sliderConstantUpdate) ColourSort();
+        //colourWheel.setOpaqueTint(new ColourVector(inputColour.getVal(),inputColour.getVal(),inputColour.getVal()).asInt());
     }
     public void RGBTyped(char d, String value){
         try{
@@ -420,6 +455,10 @@ public class ColourGui extends MCRGBBaseGui {
             }
             hexInput.setText(inputColour.getHex());
             UpdateArmour();
+            if(colourWheelToggle.getToggle()){
+                int val = Math.max(Math.max(inputColour.r, inputColour.g),inputColour.b);
+                colourWheel.setOpaqueTint(new ColourVector(val,val,val).asInt());
+            }
         }catch(Exception e){
 
         }
@@ -606,7 +645,29 @@ public class ColourGui extends MCRGBBaseGui {
     }
 
     public void ToggleColourWheel(Boolean isToggled){
+        if(isToggled){
+            mainPanel.remove(sliderArea);
+            mainPanel.remove(armourSlots);
+            mainPanel.add(colourWheel,11,2,6,6);
+            mainPanel.add(wheelValueSlider,17,2,1,6);
+            wheelValueSlider.setValue(wheelValueSlider.getMaxValue());
+            colourWheel.setLocation(198,47);
+            wheelValueSlider.setLocation(314,47);
+            wheelValueSlider.setSize(18,128);
+            rLabel.setLocation(211,165);
+            gLabel.setLocation(247,165);
+            bLabel.setLocation(283,165);
+        }else{
+            mainPanel.add(sliderArea,11,2,6,7);
+            mainPanel.add(armourSlots,17,3);
+            mainPanel.remove(colourWheel);
+            mainPanel.remove(wheelValueSlider);
+            rLabel.setLocation(211,50);
+            gLabel.setLocation(247,50);
+            bLabel.setLocation(283,50);
 
+        }
+        root.validate(this);
     }
 
 }

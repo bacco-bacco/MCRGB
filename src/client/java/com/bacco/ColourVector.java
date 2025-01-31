@@ -125,6 +125,10 @@ public class ColourVector {
         return Math.round(100f*(new RGB(this.r,this.g,this.b).getValue()/255f));
     }
 
+    public int getVal255(){
+        return new RGB(this.r,this.g,this.b).getValue();
+    }
+
     public int getSatL(){
         float r = this.r/255f;
         float g = this.g/255f;
