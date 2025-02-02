@@ -26,7 +26,7 @@ public class WGradientSlider extends WSlider {
         int thumbX, thumbY;
         // thumbXOffset: thumb texture x offset in pixels
         int thumbXOffset;
-        Identifier texture = new Identifier("mcrgb","circle4.png");
+        Identifier texture = Identifier.of("mcrgb","circle4.png");
 
         if (axis == Axis.VERTICAL) {
             thumbX = width / 2 - THUMB_SIZE / 2;

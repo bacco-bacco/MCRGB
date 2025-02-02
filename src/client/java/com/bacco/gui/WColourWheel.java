@@ -22,7 +22,7 @@ public class WColourWheel extends WPickableTexture{
     @Override
     public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
         super.paint(context, x, y, mouseX, mouseY);
-        Identifier texture = new Identifier("mcrgb","circle4.png");
+        Identifier texture = Identifier.of("mcrgb","circle4.png");
         if(!beenClicked){
             cursorX = (width)/2;
             cursorY = (height)/2;
