@@ -99,7 +99,7 @@ public class WColourGuiSlot extends WWidget{
    @Environment(EnvType.CLIENT)
    @Override
    public void addTooltip(TooltipBuilder tooltip) {
-      tooltip.add(Text.translatable(stack.getTranslationKey()));
+      tooltip.add(stack.getItemName());
       IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
