@@ -10,8 +10,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -84,15 +82,12 @@ public class ColourGui extends MCRGBBaseGui {
     ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
     ItemStack boots = new ItemStack(Items.LEATHER_BOOTS);
     ItemStack horse = new ItemStack(Items.LEATHER_HORSE_ARMOR);
-    ItemStack wolf = new ItemStack(Items.WOLF_ARMOR);
-
     WGridPanel armourSlots = new WGridPanel();
     WColourGuiSlot helmSlot = new WColourGuiSlot(helmet, cg);
     WColourGuiSlot chestSlot = new WColourGuiSlot(chestplate, cg);
     WColourGuiSlot legsSlot = new WColourGuiSlot(leggings, cg);
     WColourGuiSlot bootSlot = new WColourGuiSlot(boots, cg);
     WColourGuiSlot horseSlot = new WColourGuiSlot(horse, cg);
-    WColourGuiSlot wolfSlot = new WColourGuiSlot(wolf, cg);
 
     WToggleButton colourWheelToggle = new WToggleButton();
 
@@ -269,7 +264,6 @@ public class ColourGui extends MCRGBBaseGui {
         armourSlots.add(legsSlot, 0, 2);
         armourSlots.add(bootSlot, 0, 3);
         armourSlots.add(horseSlot, 0, 4);
-        armourSlots.add(wolfSlot, 0, 5);
 
 
         colourWheelToggle.setOffImage(wheelTex);
@@ -517,13 +511,11 @@ public class ColourGui extends MCRGBBaseGui {
 
     public void UpdateArmour(){
         int hexint = GetColour();
-        DyedColorComponent dyedColorComponent = new DyedColorComponent(hexint,true);
-        helmet.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
-        chestplate.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
-        leggings.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
-        boots.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
-        horse.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
-        wolf.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
+        helmet.getOrCreateSubNbt("display").putInt("color", hexint);
+        chestplate.getOrCreateSubNbt("display").putInt("color", hexint);
+        leggings.getOrCreateSubNbt("display").putInt("color", hexint);
+        boots.getOrCreateSubNbt("display").putInt("color", hexint);
+        horse.getOrCreateSubNbt("display").putInt("color", hexint);
         colourDisplay.setOpaqueTint(hexint);
     }
 

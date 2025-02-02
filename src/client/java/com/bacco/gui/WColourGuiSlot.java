@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -49,11 +48,11 @@ public class WColourGuiSlot extends WWidget{
    public InputResult onClick(int x, int y, int button) {
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
-      String nbt = "";
-      if(stack.contains(DataComponentTypes.DYED_COLOR)) {
-         nbt = "dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) ;//stack.getOrCreateNbt().toString();
+       String nbt = "";
+       if(stack.hasNbt()) {
+           nbt = stack.getOrCreateNbt().toString();
 
-      }
+       }
       String command = MCRGBConfig.instance.command;
 
       command = command.replace("%c",nbt);

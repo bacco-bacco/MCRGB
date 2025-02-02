@@ -86,7 +86,7 @@ public class MCRGBClient implements ClientModInitializer {
 		});
 		LoadPalettes();
 		//Override item tooltips to display the colour.
-		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
+		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
 			if(!MCRGBConfig.instance.alwaysShowToolTips) return;
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
