@@ -79,8 +79,8 @@ public class WPickableTexture extends WSprite {
             return;
         }
 
-        int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-        pixelColour = ColorHelper.Argb.mixColor(pixelColour,tint);
+        int pixelColour = ColorHelper.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+        pixelColour = ColorHelper.mix(pixelColour,tint);
         gui.SetColour(new ColourVector(pixelColour));
     }
 
