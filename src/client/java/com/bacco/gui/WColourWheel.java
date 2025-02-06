@@ -35,21 +35,30 @@ public class WColourWheel extends WPickableTexture{
     @Override
     public InputResult onClick(int containerX, int containerY, int button) {
         beenClicked = true;
-        cursorX = containerX;
-        cursorY = containerY;
-        return super.onClick(containerX,containerY,button);
+        InputResult ret = super.onClick(containerX,containerY,button);
+        if(isTransparent) return ret;
+        if(!(containerX < 0 || containerY < 0 || containerX >= width || containerY >= height)) {
+            cursorX = containerX;
+            cursorY = containerY;
+        }
+        return ret;
     }
     @Environment(EnvType.CLIENT)
     @Override
     public InputResult onMouseDrag(int containerX, int containerY, int mouseButton, double deltaX, double deltaY) {
         beenClicked = true;
-        cursorX = containerX;
-        cursorY = containerY;
-        return super.onMouseDrag(containerX, containerY, mouseButton, deltaX, deltaY);
+        InputResult ret = super.onMouseDrag(containerX, containerY, mouseButton, deltaX, deltaY);
+        if(isTransparent) return ret;
+        if(!(containerX < 0 || containerY < 0 || containerX >= width || containerY >= height)) {
+            cursorX = containerX;
+            cursorY = containerY;
+        }
+
+        return ret;
     }
 
     public void pickAtCursor(){
-        pickColour(cursorX,cursorY);
+        isTransparent = pickColour(cursorX,cursorY);
     }
 
     /*@Override

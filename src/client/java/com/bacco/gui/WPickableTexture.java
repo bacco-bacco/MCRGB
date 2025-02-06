@@ -22,6 +22,9 @@ public class WPickableTexture extends WSprite {
     int atlasHeight;
 
     int tint = 0xFFFFFF;
+    int pixelColour = 0xFFFFFFFF;
+
+    Boolean isTransparent = false;
 
     MCRGBBaseGui gui;
 
@@ -42,13 +45,13 @@ public class WPickableTexture extends WSprite {
 
     @Override
     public InputResult onClick(int x, int y, int button) {
-        pickColour(x,y);
+        isTransparent = pickColour(x,y);
         return super.onClick(x, y, button);
     }
 
     @Override
     public InputResult onMouseDrag(int x, int y, int button, double deltaX, double deltaY){
-        pickColour(x,y);
+        isTransparent = pickColour(x,y);
         return super.onMouseDrag(x, y, button, deltaX, deltaY);
     }
     @Override
@@ -57,8 +60,8 @@ public class WPickableTexture extends WSprite {
         return super.setOpaqueTint(tint);
     }
 
-    public void pickColour(int x, int y){
-        if(x < 0 || y < 0 || x >= width || y >= height) return;
+    public Boolean pickColour(int x, int y){
+        if(x < 0 || y < 0 || x >= width || y >= height) return false;
 
         double trueX = texU1+ Math.floor(((float) x / width)*(texU2-texU1));
         double trueY = texV1+ Math.floor(((float) y / height)*(texV2-texV1));
@@ -76,13 +79,15 @@ public class WPickableTexture extends WSprite {
 
         if(pixels[pos+3] == 0){
             //return if fully transparent pixel
-            return;
+            return true;
         }
 
         int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
         pixelColour = ColorHelper.Argb.mixColor(pixelColour,tint);
         gui.SetColour(new ColourVector(pixelColour));
+        return false;
     }
+
 
     @Override
     public WSprite setUv(float u1, float v1, float u2, float v2){
