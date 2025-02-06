@@ -51,7 +51,6 @@ public class WColourWheel extends WPickableTexture{
     public InputResult onMouseDrag(int containerX, int containerY, int mouseButton, double deltaX, double deltaY) {
         beenClicked = true;
         InputResult ret = super.onMouseDrag(containerX, containerY, mouseButton, deltaX, deltaY);
-        System.out.println(isTransparent);
         if(isTransparent) return ret;
         if(!(containerX < 0 || containerY < 0 || containerX >= width || containerY >= height)) {
             cursorX = containerX;
