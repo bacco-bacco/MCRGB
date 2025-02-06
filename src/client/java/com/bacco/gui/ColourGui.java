@@ -232,7 +232,7 @@ public class ColourGui extends MCRGBBaseGui {
         bSlider.setDraggingFinishedListener((int value) -> {if(!MCRGBConfig.instance.sliderConstantUpdate) ColourSort();});
 
         wheelValueSlider.setValueChangeListener((int value) ->{
-            colourWheel.setOpaqueTint(ColorHelper.getArgb(255,value,value,value));
+            colourWheel.setOpaqueTint(ColorHelper.Argb.getArgb(255,value,value,value));
             colourWheel.pickAtCursor();
         });
 
