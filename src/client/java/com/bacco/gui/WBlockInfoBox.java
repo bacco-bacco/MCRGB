@@ -39,12 +39,12 @@ public class WBlockInfoBox extends WBox {
             ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
             if(strings.size() > 0){
                 for(int j = 0; j < strings.size(); j++){
-                    var text = Text.literal(strings.get(j)).withColor(0x707070);
+                    var text = Text.literal(strings.get(j));//.getWithStyle(Style.EMPTY.withColor(0x707070)).get(0);//.withColor(0x707070);
                     MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
                     if(j > 0){
-                        text2.append(text);
+                        text2.append(text.getWithStyle(Style.EMPTY.withColor(0x707070)).get(0));
                     }else{
-                        text2 = text.withColor(0x444444);
+                        text2 = (MutableText) text.getWithStyle(Style.EMPTY.withColor(0x444444)).get(0);//.withColor(0x444444);
                     }
                     TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
                     int width = textRenderer.getWidth(text2);
