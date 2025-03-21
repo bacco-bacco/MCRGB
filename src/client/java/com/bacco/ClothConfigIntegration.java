@@ -14,6 +14,13 @@ public class ClothConfigIntegration {
         return Internal.getConfigScreen();
     }
 
+    public enum ColourFindMode{
+        MCRGB,
+        MEANSHIFT,
+        MEAN,
+        MEDIAN
+    }
+
     private static class Internal {
         private static final Function<Boolean, Text> alwaysShowToolTipsTextSupplier = bool -> {
             if (bool) return Text.translatable("options.mcrgb.all_contexts");
@@ -57,6 +64,13 @@ public class ClothConfigIntegration {
                     .setSaveConsumer(newValue -> MCRGBConfig.instance.bypassOP = newValue)
                     .setTooltip(Text.translatable("tooltip.mcrgb.bypass_op"))
                     .build());
+
+            configs.addEntry(entryBuilder.startSelector(Text.literal("Test"),ColourFindMode.values(), MCRGBConfig.instance.mode)
+                    .setDefaultValue(ColourFindMode.MCRGB)
+                    .setSaveConsumer(newValue -> MCRGBConfig.instance.mode = newValue)
+                    .setTooltip(Text.literal("Test"))
+                    .build());
+
 
 
             builder.setSavingRunnable(MCRGBConfig::save);

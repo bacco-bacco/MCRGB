@@ -17,6 +17,7 @@ repositories {
     }
 	maven { url "https://maven.shedaniel.me/" }
 	maven { url "https://maven.terraformersmc.com/releases/" }
+	mavenCentral()
 }
 
 loom {

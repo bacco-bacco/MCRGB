@@ -36,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 @Environment(EnvType.CLIENT)
 public class MCRGBClient implements ClientModInitializer {
@@ -168,10 +169,10 @@ public class MCRGBClient implements ClientModInitializer {
         }
     }
 
-	//Calculate the dominant colours in a list of colours
-	public static Set<ColourGroup> GroupColours(ArrayList<ColourVector> rgblist){
+
+	public static Set<ColourGroup> Algo_MCRGB(ArrayList<ColourVector> rgblist){
 		Set<ColourGroup> groups = new HashSet<ColourGroup>();
-		
+
 		//Loop through every pixel
 		for (int i = 0; i < rgblist.size(); i++){
 			ColourVector iPix = new ColourVector(rgblist.get(i).r,rgblist.get(i).g,rgblist.get(i).b);
@@ -215,20 +216,97 @@ public class MCRGBClient implements ClientModInitializer {
 		}
 		//calculate the average rgb value of each group, convert to hex and calculate weight
 		for (ColourGroup group : groups){
-			ColourVector sum = new ColourVector(0, 0, 0);
-			int counter = 0;
-			for (ColourVector colour : group.pixels){
-				sum.add(colour);
-				counter ++;
-			}
-			if(counter == 0){return null;}
-			ColourVector avg = sum.div(counter);
-			group.meanColour = new ColourVector(avg.r, avg.g, avg.b);
-			group.meanHex = group.meanColour.getHex();
-			group.weight = (int)((float)counter/(float)rgblist.size() * 100);
+			group.repColour = group.CalculateMean();
+			group.repHex = group.repColour.getHex();
+			group.weight = (int)((float)group.pixels.size()/(float)rgblist.size() * 100);
 		}
 
 		return groups;
+	}
+
+	public static Set<ColourGroup> Algo_Mean(ArrayList<ColourVector> rgblist){
+		Set<ColourGroup> groups = new HashSet<ColourGroup>();
+		ColourGroup group = new ColourGroup();
+		for (int i = 0; i < rgblist.size(); i++){
+			group.pixels.add(new ColourVector(rgblist.get(i).r,rgblist.get(i).g,rgblist.get(i).b));
+		}
+
+		group.repColour = group.CalculateMean();
+		group.repHex = group.repColour.getHex();
+		group.weight = (int)((float)group.pixels.size()/(float)rgblist.size() * 100);
+		groups.add(group);
+		return groups;
+	}
+
+	public static Set<ColourGroup> Algo_Median(ArrayList<ColourVector> rgblist){
+		Set<ColourGroup> groups = new HashSet<ColourGroup>();
+		ColourGroup group = new ColourGroup();
+		for (int i = 0; i < rgblist.size(); i++){
+			group.pixels.add(new ColourVector(rgblist.get(i).r,rgblist.get(i).g,rgblist.get(i).b));
+		}
+
+		group.repColour = group.CalculateMedian();
+		group.repHex = group.repColour.getHex();
+		group.weight = (int)((float)group.pixels.size()/(float)rgblist.size() * 100);
+		groups.add(group);
+		return groups;
+	}
+
+
+	public static Set<ColourGroup> Algo_MeanShift(ArrayList<ColourVector> rgblist){
+		int window = 10;
+		int counter = 0;
+		int threshold = 10;
+		ArrayList<ColourVector> means = new ArrayList<>();
+		ArrayList<ColourGroup> groups = new ArrayList<ColourGroup>();
+		ColourVector newMean = new ColourVector(0xFFFFFF);
+		do {
+			for (int i = 0; i < rgblist.size(); i++) {
+				counter = 0;
+				ColourVector iPix = rgblist.get(i);
+				ColourGroup tempGroup = new ColourGroup();
+				for (int j = 0; j < rgblist.size(); j++) {
+					ColourVector jPix = rgblist.get(j);
+					if (iPix.distance(jPix) < window) {
+						tempGroup.pixels.add(jPix);
+					}
+				}
+				newMean = tempGroup.CalculateMean();
+				if (newMean.distance(iPix) < threshold) break;
+				counter += 1;
+				tempGroup = new ColourGroup();
+				tempGroup.pixels.add(newMean);
+				tempGroup.pixels.add(iPix);
+				rgblist.set(i,tempGroup.CalculateMean());
+			}
+		}while(counter > 0);
+		rgblist.forEach(shiftedPixel -> {
+			for(int i = 0; i < groups.size(); i++){
+				if(groups.get(i).repColour.distance(shiftedPixel) < threshold){
+					break;
+				}
+
+			}
+			ColourGroup newGroup = new ColourGroup();
+			newGroup.repColour = shiftedPixel;
+			groups.add(newGroup);
+		});
+		return new HashSet<>(groups);
+	}
+
+	public static Set<ColourGroup> GroupColours(ArrayList<ColourVector> rgblist){
+		switch (MCRGBConfig.instance.mode){
+			case MCRGB:
+				return Algo_MCRGB(rgblist);
+			case MEANSHIFT:
+				return Algo_MeanShift(rgblist);
+			case MEAN:
+				return Algo_Mean(rgblist);
+			case MEDIAN:
+				return Algo_Median(rgblist);
+			default:
+				return Algo_MCRGB(rgblist);
+		}
 	}
 
 	public void RefreshColours(){
@@ -327,7 +405,7 @@ public class MCRGBClient implements ClientModInitializer {
 				String name = namesplit[namesplit.length-1];
 				spriteDetails.name = name;
 				colourGroups.forEach(cg -> {	
-					spriteDetails.colourinfo.add(cg.meanColour);
+					spriteDetails.colourinfo.add(cg.repColour);
 					spriteDetails.weights.add(cg.weight);
 				});
 				storage.block = block.asItem().getTranslationKey();
@@ -372,4 +450,20 @@ public class MCRGBClient implements ClientModInitializer {
 		palettes = loadedPalettes;
 
 	}
+
+	public static int median(int[] values){
+		int mid = values.length/2;
+		if (values.length % 2 == 0){
+			return (values[mid-1]+values[mid])/2;
+		}else{
+			return values[mid];
+		}
+	}
+
+	public static int mean(int[] values){
+		int sum = IntStream.of(values).sum();
+		return sum/values.length;
+	}
+
+
 }
