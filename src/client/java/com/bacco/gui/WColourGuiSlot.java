@@ -9,6 +9,7 @@ import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.component.DataComponentTypes;
@@ -46,7 +47,7 @@ public class WColourGuiSlot extends WWidget{
    }
 
    @Override
-   public InputResult onClick(int x, int y, int button) {
+   public InputResult onClick(Click click, boolean doubled) {
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
       String nbt = "";
@@ -57,7 +58,7 @@ public class WColourGuiSlot extends WWidget{
       String command = MCRGBConfig.instance.command;
 
       command = command.replace("%c",nbt);
-      switch (button){
+      switch (click.button()){
          case 0:
              if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
              command = command.replace("%p",player.getName().getString());

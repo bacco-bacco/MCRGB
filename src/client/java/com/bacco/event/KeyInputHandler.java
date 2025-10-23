@@ -1,16 +1,15 @@
 package com.bacco.event;
 
 import com.bacco.ColourVector;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
-
 import com.bacco.MCRGBClient;
 import com.bacco.gui.ColourGui;
 import com.bacco.gui.ColourScreen;
-
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 public class KeyInputHandler {
     public static final String KEY_CATEGORY_MCRGB = "key.category.mcrgb.mcrgb";
@@ -36,7 +35,7 @@ public class KeyInputHandler {
             KEY_COLOUR_INV_OPEN, 
             InputUtil.Type.KEYSYM,
             GLFW.GLFW_KEY_I,
-            KEY_CATEGORY_MCRGB
+            KeyBinding.Category.create(Identifier.of(KEY_CATEGORY_MCRGB))
             ));
             registerKeyInputs(mcrgbClient);
     }

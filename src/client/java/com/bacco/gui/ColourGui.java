@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
@@ -35,9 +36,9 @@ public class ColourGui extends MCRGBBaseGui {
     WScrollBar scrollBar = new WScrollBar(Axis.VERTICAL){
         @Environment(EnvType.CLIENT)
         @Override
-        public InputResult onMouseDrag(int x, int y, int button, double deltaX, double deltaY) {
+        public InputResult onMouseDrag(Click click, double deltaX, double deltaY) {
             PlaceSlots();
-            return super.onMouseDrag(x, y, button, deltaX, deltaY);
+            return super.onMouseDrag(click, deltaX, deltaY);
         }
 
         @Environment(EnvType.CLIENT)

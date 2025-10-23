@@ -4,6 +4,7 @@ import com.bacco.ColourVector;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.GlTexture;
 import net.minecraft.util.Identifier;
@@ -50,15 +51,15 @@ public class WPickableTexture extends WSprite {
     }
 
     @Override
-    public InputResult onClick(int x, int y, int button) {
-        isTransparent = pickColour(x,y);
-        return super.onClick(x, y, button);
+    public InputResult onClick(Click click, boolean doubled) {
+        isTransparent = pickColour((int) click.x(), (int) click.y());
+        return super.onClick(click, doubled);
     }
 
     @Override
-    public InputResult onMouseDrag(int x, int y, int button, double deltaX, double deltaY){
-        isTransparent = pickColour(x,y);
-        return super.onMouseDrag(x, y, button, deltaX, deltaY);
+    public InputResult onMouseDrag(Click click, double deltaX, double deltaY){
+        isTransparent = pickColour((int) click.x(), (int) click.y());
+        return super.onMouseDrag(click, deltaX, deltaY);
     }
     @Override
     public WSprite setOpaqueTint(int tint){
