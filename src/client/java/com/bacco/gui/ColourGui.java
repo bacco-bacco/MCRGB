@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
@@ -35,9 +36,9 @@ public class ColourGui extends MCRGBBaseGui {
     WScrollBar scrollBar = new WScrollBar(Axis.VERTICAL){
         @Environment(EnvType.CLIENT)
         @Override
-        public InputResult onMouseDrag(int x, int y, int button, double deltaX, double deltaY) {
+        public InputResult onMouseDrag(Click click, double deltaX, double deltaY) {
             PlaceSlots();
-            return super.onMouseDrag(x, y, button, deltaX, deltaY);
+            return super.onMouseDrag(click, deltaX, deltaY);
         }
 
         @Environment(EnvType.CLIENT)
@@ -50,9 +51,9 @@ public class ColourGui extends MCRGBBaseGui {
         }
     };
     WPlainPanel labels = new WPlainPanel();
-    WLabel rLabel = new WLabel(Text.translatable("ui.mcrgb.r_for_red"),0xFF0000);
-    WLabel gLabel = new WLabel(Text.translatable("ui.mcrgb.g_for_green"),0x00FF00);
-    WLabel bLabel = new WLabel(Text.translatable("ui.mcrgb.b_for_blue"),0x0000FF);
+    WLabel rLabel = new WLabel(Text.translatable("ui.mcrgb.r_for_red"),0xFFFF0000);
+    WLabel gLabel = new WLabel(Text.translatable("ui.mcrgb.g_for_green"),0xFF00FF00);
+    WLabel bLabel = new WLabel(Text.translatable("ui.mcrgb.b_for_blue"),0xFF0000FF);
     WSlider rSlider = new WSlider(0, 255, Axis.VERTICAL);
     WSlider gSlider = new WSlider(0, 255, Axis.VERTICAL);
     WSlider bSlider = new WSlider(0, 255, Axis.VERTICAL);
@@ -204,12 +205,13 @@ public class ColourGui extends MCRGBBaseGui {
 
         //mainPanel.add(labels, 11,2,6,1);
 
-        mainPanel.add(rLabel, 6, 7, 1, 1);
-        mainPanel.add(gLabel, 6, 7, 1, 1);
-        mainPanel.add(bLabel, 6, 7, 1, 1);
+        mainPanel.add(rLabel, 1, 0, 1, 1);
+        mainPanel.add(gLabel, 2, 0, 1, 1);
+        mainPanel.add(bLabel, 3, 0, 1, 1);
         rLabel.setLocation(211,50);
         gLabel.setLocation(247,50);
         bLabel.setLocation(283,50);
+
 
         sliderArea.add(rSlider, 0, 18, 18, 108);
         rSlider.setValue(inputColour.r);
@@ -281,6 +283,7 @@ public class ColourGui extends MCRGBBaseGui {
 
         SetColour(launchColour);
         mainPanel.validate(this);
+        root.validate(this);
     }
 
     public  void SetColourMode(ColourMode cm){
@@ -291,11 +294,11 @@ public class ColourGui extends MCRGBBaseGui {
         switch (mode){
             case RGB:
                 rLabel.setText(Text.translatable("ui.mcrgb.r_for_red"));
-                rLabel.setColor(0xFF0000);
+                rLabel.setColor(0xFFFF0000);
                 gLabel.setText(Text.translatable("ui.mcrgb.g_for_green"));
-                gLabel.setColor(0x00FF00);
+                gLabel.setColor(0xFF00FF00);
                 bLabel.setText(Text.translatable("ui.mcrgb.b_for_blue"));
-                bLabel.setColor(0x0000FF);
+                bLabel.setColor(0xFF0000FF);
 
                 rSlider.setMinValue(0);
                 gSlider.setMinValue(0);
@@ -309,11 +312,11 @@ public class ColourGui extends MCRGBBaseGui {
                 break;
             case HSV:
                 rLabel.setText(Text.translatable("ui.mcrgb.h_for_hue_hsv"));
-                rLabel.setColor(0x3F3F3F);
+                rLabel.setColor(0xFF3F3F3F);
                 gLabel.setText(Text.translatable("ui.mcrgb.s_for_sat_hsv"));
-                gLabel.setColor(0x3F3F3F);
+                gLabel.setColor(0xFF3F3F3F);
                 bLabel.setText(Text.translatable("ui.mcrgb.v_for_val_hsv"));
-                bLabel.setColor(0x3F3F3F);
+                bLabel.setColor(0xFF3F3F3F);
                 rSlider.setMinValue(0);
                 gSlider.setMinValue(0);
                 bSlider.setMinValue(0);
@@ -326,11 +329,11 @@ public class ColourGui extends MCRGBBaseGui {
                 break;
             case HSL:
                 rLabel.setText(Text.translatable("ui.mcrgb.h_for_hue_hsl"));
-                rLabel.setColor(0x3F3F3F);
+                rLabel.setColor(0xFF3F3F3F);
                 gLabel.setText(Text.translatable("ui.mcrgb.s_for_sat_hsl"));
-                gLabel.setColor(0x3F3F3F);
+                gLabel.setColor(0xFF3F3F3F);
                 bLabel.setText(Text.translatable("ui.mcrgb.l_for_lit_hsl"));
-                bLabel.setColor(0x3F3F3F);
+                bLabel.setColor(0xFF3F3F3F);
                 rSlider.setMinValue(0);
                 gSlider.setMinValue(0);
                 bSlider.setMinValue(0);
@@ -517,7 +520,7 @@ public class ColourGui extends MCRGBBaseGui {
 
     public void UpdateArmour(){
         int hexint = GetColour();
-        DyedColorComponent dyedColorComponent = new DyedColorComponent(hexint,true);
+        DyedColorComponent dyedColorComponent = new DyedColorComponent(hexint);
         helmet.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
         chestplate.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
         leggings.set(DataComponentTypes.DYED_COLOR,dyedColorComponent);
@@ -669,5 +672,6 @@ public class ColourGui extends MCRGBBaseGui {
         }
         root.validate(this);
     }
+
 
 }

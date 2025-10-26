@@ -94,18 +94,14 @@ public class BlockInfoGui extends MCRGBBaseGui {
 
         Set<Sprite> sprites = new HashSet<Sprite>();
         //try to get the default top texture sprite. if fails, report error and skip this block
-
+        Direction[] directions = {Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST,null};
         block.getStateManager().getStates().forEach(state -> {
-            try{
-                var model = client.getBakedModelManager().getBlockModels().getModel(state);
-                sprites.add(model.getQuads(state, Direction.UP, Random.create()).get(0).getSprite());
-                sprites.add(model.getQuads(state, Direction.DOWN, Random.create()).get(0).getSprite());
-                sprites.add(model.getQuads(state, Direction.NORTH, Random.create()).get(0).getSprite());
-                sprites.add(model.getQuads(state, Direction.SOUTH, Random.create()).get(0).getSprite());
-                sprites.add(model.getQuads(state, Direction.EAST, Random.create()).get(0).getSprite());
-                sprites.add(model.getQuads(state, Direction.WEST, Random.create()).get(0).getSprite());
-            }catch(Exception e){
-                return;
+            for(int i = 0; i < directions.length; i++){
+                try{
+                    var model = client.getBakedModelManager().getBlockModels().getModel(state);
+                    sprites.add(model.getParts(Random.create()).getFirst().getQuads(directions[i]).get(0).sprite());
+                }catch(Exception e){
+                }
             }
         });
         if(sprites.isEmpty()){

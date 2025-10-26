@@ -9,6 +9,8 @@ import io.github.cottonmc.cotton.gui.widget.WWidget;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.component.DataComponentTypes;
@@ -39,14 +41,14 @@ public class WColourGuiSlot extends WWidget{
 
    @Override
    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
-      context.drawItem(stack, x+1, y+1);
+       ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
+       context.drawItem(stack, x+1, y+1);
       //context.drawTexture(SLOT_TEXTURE, x,y, 0, 0,0, 18, 18, 64, 64);
-      ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
       //context.drawTexture();
    }
 
    @Override
-   public InputResult onClick(int x, int y, int button) {
+   public InputResult onClick(Click click, boolean doubled) {
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
       String nbt = "";
@@ -57,14 +59,16 @@ public class WColourGuiSlot extends WWidget{
       String command = MCRGBConfig.instance.command;
 
       command = command.replace("%c",nbt);
-      switch (button){
+      switch (click.button()){
          case 0:
+            player.getInventory().setStack(44-36, stack);
+            MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,44);
+/*
              if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
              command = command.replace("%p",player.getName().getString());
              command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
              command = command.replace("%q","1");
-             player.networkHandler.sendCommand(command);
-
+             player.networkHandler.sendChatCommand(command);*/
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
@@ -88,7 +92,7 @@ public class WColourGuiSlot extends WWidget{
              command = command.replace("%p",player.getName().getString());
              command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
              command = command.replace("%q",Integer.toString(stack.getMaxCount()));
-             player.networkHandler.sendCommand(command);
+             player.networkHandler.sendChatCommand(command);
 
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
             break;

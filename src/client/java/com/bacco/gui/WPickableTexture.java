@@ -1,10 +1,12 @@
 package com.bacco.gui;
 
 import com.bacco.ColourVector;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.texture.GlTexture;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.BufferUtils;
@@ -28,14 +30,19 @@ public class WPickableTexture extends WSprite {
 
     MCRGBBaseGui gui;
 
+    GlTexture gpuTexture;
     int glID;
     public WPickableTexture(Identifier image, float u1, float v1, float u2, float v2, net.minecraft.client.MinecraftClient client, MCRGBBaseGui gui) {
         super(image, u1, v1, u2, v2);
-        glID = client.getTextureManager().getTexture(image).getGlId();
+        gpuTexture = (GlTexture) client.getTextureManager().getTexture(image).getGlTexture();
+        glID = gpuTexture.getGlId();
+
         //get width and height from OpenGL by binding texture
-        RenderSystem.bindTexture(glID);
-        atlasWidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-        atlasHeight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+        //RenderSystem.bindTexture(glID);
+        atlasWidth = gpuTexture.getWidth(0);
+        atlasHeight = gpuTexture.getHeight(0);
+        //atlasWidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+        //atlasHeight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
         texU1 = u1*atlasWidth;
         texV1 = v1*atlasHeight;
         texU2 = u2*atlasWidth;
@@ -44,15 +51,15 @@ public class WPickableTexture extends WSprite {
     }
 
     @Override
-    public InputResult onClick(int x, int y, int button) {
-        isTransparent = pickColour(x,y);
-        return super.onClick(x, y, button);
+    public InputResult onClick(Click click, boolean doubled) {
+        isTransparent = pickColour((int) click.x(), (int) click.y());
+        return super.onClick(click, doubled);
     }
 
     @Override
-    public InputResult onMouseDrag(int x, int y, int button, double deltaX, double deltaY){
-        isTransparent = pickColour(x,y);
-        return super.onMouseDrag(x, y, button, deltaX, deltaY);
+    public InputResult onMouseDrag(Click click, double deltaX, double deltaY){
+        isTransparent = pickColour((int) click.x(), (int) click.y());
+        return super.onMouseDrag(click, deltaX, deltaY);
     }
     @Override
     public WSprite setOpaqueTint(int tint){
@@ -67,7 +74,8 @@ public class WPickableTexture extends WSprite {
         double trueY = texV1+ Math.floor(((float) y / height)*(texV2-texV1));
         int size = atlasHeight*atlasWidth;
 
-        RenderSystem.bindTexture(glID);
+        GlStateManager._bindTexture(glID);
+        //RenderSystem.bindTexture(glID);
         //Make byte buffer and load full atlas into buffer.
         ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
         GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);

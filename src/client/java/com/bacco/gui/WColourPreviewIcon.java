@@ -3,6 +3,7 @@ package com.bacco.gui;
 import com.bacco.ColourVector;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
+import net.minecraft.client.gui.Click;
 import net.minecraft.util.Identifier;
 
 public class WColourPreviewIcon extends WSprite {
@@ -20,8 +21,8 @@ public class WColourPreviewIcon extends WSprite {
     }
 
     @Override
-    public InputResult onClick(int x, int y, int button) {
-        switch (button){
+    public InputResult onClick(Click click, boolean doubled) {
+        switch (click.button()){
             case 0:
                 if (!interactable) return InputResult.PROCESSED;
                 colour = gui.GetColour();

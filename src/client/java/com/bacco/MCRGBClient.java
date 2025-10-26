@@ -4,14 +4,15 @@ import com.bacco.event.KeyInputHandler;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.GlTexture;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -94,7 +95,7 @@ public class MCRGBClient implements ClientModInitializer {
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 				ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 				if(strings.size() > 0){
-					if(Screen.hasShiftDown()){
+					if(MinecraftClient.getInstance().isShiftPressed()){
 						for(int j = 0; j < strings.size(); j++){
 							var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
 							MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
@@ -252,11 +253,11 @@ public class MCRGBClient implements ClientModInitializer {
 		return groups;
 	}
 
-
+/*
 	public static Set<ColourGroup> Algo_MeanShift(ArrayList<ColourVector> rgblist){
 		int window = 10;
 		int counter = 0;
-		int threshold = 10;
+		int threshold = 1;
 		ArrayList<ColourVector> means = new ArrayList<>();
 		ArrayList<ColourGroup> groups = new ArrayList<ColourGroup>();
 		ColourVector newMean = new ColourVector(0xFFFFFF);
@@ -293,13 +294,11 @@ public class MCRGBClient implements ClientModInitializer {
 		});
 		return new HashSet<>(groups);
 	}
-
+*/
 	public static Set<ColourGroup> GroupColours(ArrayList<ColourVector> rgblist){
 		switch (MCRGBConfig.instance.mode){
 			case MCRGB:
 				return Algo_MCRGB(rgblist);
-			case MEANSHIFT:
-				return Algo_MeanShift(rgblist);
 			case MEAN:
 				return Algo_Mean(rgblist);
 			case MEDIAN:
@@ -312,17 +311,17 @@ public class MCRGBClient implements ClientModInitializer {
 	public void RefreshColours(){
 		if (client == null) return;
 		//get top sprite of stone block default state
-		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
+		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParts(Random.create()).get(0).getQuads(Direction.UP).getFirst().sprite();
 		//get id of the atlas containing above
 		var atlas = defSprite.getAtlasId();
 		//use atlas id to get OpenGL ID. Atlas contains ALL blocks
-		int glID = client.getTextureManager().getTexture(atlas).getGlId();
+		GlTexture glTexture = (GlTexture) client.getTextureManager().getTexture(atlas).getGlTexture();
 		//get width and height from OpenGL by binding texture
-		RenderSystem.bindTexture(glID);
-		int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-		int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+		int width = glTexture.getWidth(0);
+		int height = glTexture.getHeight(0);
 		int size = width * height;
 		//Make byte buffer and load full atlas into buffer.
+		GlStateManager._bindTexture(glTexture.getGlId());
 		ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
 		GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 		//convert buffer to an array of bytes
@@ -337,20 +336,16 @@ public class MCRGBClient implements ClientModInitializer {
 			totalBlocks +=1;
 			Set<Sprite> sprites = new HashSet<Sprite>();
 			//try to get the default top texture sprite. if fails, report error and skip this block
-			
+			Direction[] directions = {Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST,null};
 			block.getStateManager().getStates().forEach(state -> {
-				try{
-					var model = client.getBakedModelManager().getBlockModels().getModel(state);						
-					sprites.add(model.getQuads(state, Direction.UP, Random.create()).get(0).getSprite());
-					sprites.add(model.getQuads(state, Direction.DOWN, Random.create()).get(0).getSprite());
-					sprites.add(model.getQuads(state, Direction.NORTH, Random.create()).get(0).getSprite());
-					sprites.add(model.getQuads(state, Direction.SOUTH, Random.create()).get(0).getSprite());
-					sprites.add(model.getQuads(state, Direction.EAST, Random.create()).get(0).getSprite());
-					sprites.add(model.getQuads(state, Direction.WEST, Random.create()).get(0).getSprite());
-					successes +=1;
-				}catch(Exception e){	
-					fails +=1;						
-					return;
+				for(int i = 0; i < directions.length; i++){
+					try{
+						var model = client.getBakedModelManager().getBlockModels().getModel(state);
+						sprites.add(model.getParts(Random.create()).getFirst().getQuads(directions[i]).get(0).sprite());
+						successes +=1;
+					}catch(Exception e){
+						fails +=1;
+					}
 				}
 			});
 			if(sprites.size() < 1){

@@ -16,7 +16,6 @@ public class ClothConfigIntegration {
 
     public enum ColourFindMode{
         MCRGB,
-        MEANSHIFT,
         MEAN,
         MEDIAN
     }
