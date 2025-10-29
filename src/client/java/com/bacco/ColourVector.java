@@ -15,7 +15,13 @@ public class ColourVector {
 
     public ColourVector(String hex){
         hex = "#" + hex.replace("#","");
-        Color c = Color.decode(hex);
+        Color c = new Color(0xFFFFFFFF);
+        try {
+            c = Color.decode(hex);
+        }catch(Exception e){
+
+        }
+
         this.r = c.getRed();
         this.g = c.getGreen();
         this.b = c.getBlue();

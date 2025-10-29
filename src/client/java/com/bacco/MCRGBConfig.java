@@ -17,6 +17,8 @@ public final class MCRGBConfig {
 
     public boolean bypassOP = false;
 
+    public boolean creativeGive = true;
+
 
 
     public ClothConfigIntegration.ColourFindMode mode = ClothConfigIntegration.ColourFindMode.MCRGB;

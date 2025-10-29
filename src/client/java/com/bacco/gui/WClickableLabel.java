@@ -6,8 +6,10 @@ import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -47,8 +49,20 @@ public class WClickableLabel extends WLabel {
 
     @Override
     public InputResult onClick(Click click, boolean doubled) {
-        gui.SetColour(colour);
-        //client.setScreen(new ColourScreen(gui));
+        switch (click.button()){
+            case 0:
+                gui.SetColour(colour);
+                break;
+            case 1:
+                gui.SetColour(colour);
+                break;
+            case 2:
+                client.keyboard.setClipboard(colour.getHex());
+                SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.copied_hex_to_clipboard").append(Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colour.asInt())).get(0)).append(colour.getHex()));
+                MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+                break;
+        }
+
         return super.onClick(click,doubled);
     }
 

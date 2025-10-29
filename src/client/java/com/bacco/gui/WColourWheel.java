@@ -62,7 +62,7 @@ public class WColourWheel extends WPickableTexture{
     }
 
     public void pickAtCursor(){
-        isTransparent = pickColour(cursorX,cursorY);
+        isTransparent = pickColour(cursorX,cursorY,0);
     }
 
     /*@Override

@@ -29,6 +29,11 @@ public class ClothConfigIntegration {
             if (bool) return Text.translatable("options.mcrgb.while_scrolling");
             else return Text.translatable("options.mcrgb.after_scrolling");
         };
+
+        private static final Function<Boolean, Text> creativeGiveTextSupplier = bool -> {
+            if (bool) return Text.translatable("creative");
+            else return Text.translatable("give");
+        };
         protected static Screen getConfigScreen() {
             ConfigBuilder builder = ConfigBuilder.create()
                     .setParentScreen(MinecraftClient.getInstance().currentScreen)
@@ -58,17 +63,25 @@ public class ClothConfigIntegration {
                     .setTooltip(Text.translatable("tooltip.mcrgb.give_command"))
                     .build());
 
-            configs.addEntry(entryBuilder.startBooleanToggle(Text.translatable("Bypass Operator Check"),MCRGBConfig.instance.bypassOP)
+            configs.addEntry(entryBuilder.startBooleanToggle(Text.translatable("option.mcrgb.bypass_op"),MCRGBConfig.instance.bypassOP)
                     .setDefaultValue(false)
                     .setSaveConsumer(newValue -> MCRGBConfig.instance.bypassOP = newValue)
                     .setTooltip(Text.translatable("tooltip.mcrgb.bypass_op"))
                     .build());
 
-            configs.addEntry(entryBuilder.startSelector(Text.literal("Test"),ColourFindMode.values(), MCRGBConfig.instance.mode)
+            configs.addEntry(entryBuilder.startSelector(Text.translatable("option.mcrgb.colour_mode"),ColourFindMode.values(), MCRGBConfig.instance.mode)
                     .setDefaultValue(ColourFindMode.MCRGB)
                     .setSaveConsumer(newValue -> MCRGBConfig.instance.mode = newValue)
-                    .setTooltip(Text.literal("Test"))
+                    .setTooltip(Text.translatable("tooltip.mcrgb.colour_mode"))
                     .build());
+
+            configs.addEntry(entryBuilder.startBooleanToggle(Text.translatable("Creative Give"),MCRGBConfig.instance.creativeGive)
+                    .setDefaultValue(true)
+                    .setSaveConsumer(newValue -> MCRGBConfig.instance.creativeGive = newValue)
+                    .setTooltip(Text.translatable("creativegive"))
+                    .setYesNoTextSupplier(creativeGiveTextSupplier)
+                    .build());
+
 
 
 

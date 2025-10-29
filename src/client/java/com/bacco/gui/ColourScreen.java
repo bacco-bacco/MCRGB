@@ -13,7 +13,9 @@ public class ColourScreen extends CottonClientScreen{
         this.description = (MCRGBBaseGui) description;
     }
 
-
+    public MCRGBBaseGui getGuiDescription(){
+        return  description;
+    }
 
 
     @Override

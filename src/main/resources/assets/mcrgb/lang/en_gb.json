@@ -6,5 +6,7 @@
     "ui.mcrgb.saved_colours" : "Saved Colours:",
     "options.mcrgb.picker_only" : "Colour Picker Only",
     "option.mcrgb.always_show_in_tooltips" : "Show Block Colours in Tooltips",
-    "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether colour info is displayed in item tooltips outside of the colour picker UI."
+    "option.mcrgb.colour_mode" : "Colour Averaging Method",
+    "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether colour info is displayed in item tooltips outside of the colour picker UI.",
+    "tooltip.mcrgb.colour_mode" : "The method MCRGB uses to determine average/dominant block colours.\n You must refresh colours after changing this for it to take effect."
 }

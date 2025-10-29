@@ -4,9 +4,13 @@ import com.bacco.ColourVector;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.GlTexture;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.BufferUtils;
@@ -52,13 +56,13 @@ public class WPickableTexture extends WSprite {
 
     @Override
     public InputResult onClick(Click click, boolean doubled) {
-        isTransparent = pickColour((int) click.x(), (int) click.y());
+        isTransparent = pickColour((int) click.x(), (int) click.y(), click.button());
         return super.onClick(click, doubled);
     }
 
     @Override
     public InputResult onMouseDrag(Click click, double deltaX, double deltaY){
-        isTransparent = pickColour((int) click.x(), (int) click.y());
+        isTransparent = pickColour((int) click.x(), (int) click.y(), click.button());
         return super.onMouseDrag(click, deltaX, deltaY);
     }
     @Override
@@ -67,7 +71,8 @@ public class WPickableTexture extends WSprite {
         return super.setOpaqueTint(tint);
     }
 
-    public Boolean pickColour(int x, int y){
+    public Boolean pickColour(int x, int y, int clickButton){
+
         if(x < 0 || y < 0 || x >= width || y >= height) return false;
 
         double trueX = texU1+ Math.floor(((float) x / width)*(texU2-texU1));
@@ -90,9 +95,26 @@ public class WPickableTexture extends WSprite {
             return true;
         }
 
-        pixelColour = ColorHelper.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-        pixelColour = ColorHelper.mix(pixelColour,tint);
-        gui.SetColour(new ColourVector(pixelColour));
+        int tempColour = ColorHelper.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+        tempColour = ColorHelper.mix(tempColour,tint);
+
+        if(pixelColour == tempColour){  return false;   } else pixelColour = tempColour;
+
+        ColourVector pixelColourVector = new ColourVector(pixelColour);
+
+        switch (clickButton){
+            case 0:
+                gui.SetColour(pixelColourVector);
+                break;
+            case 1:
+                gui.SetColour(pixelColourVector);
+                break;
+            case 2:
+                MinecraftClient.getInstance().keyboard.setClipboard(pixelColourVector.getHex());
+                SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.copied_hex_to_clipboard").append(Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(pixelColour)).get(0)).append(pixelColourVector.getHex()));
+                MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+                break;
+        }
         return false;
     }
 

@@ -74,41 +74,41 @@ public class WColourGuiSlot extends WWidget {
       command = command.replace("%c",nbt);
       switch (click.button()){
          case 0:
-            if(player.isCreative()){
-            if(gui.cursorStack == ItemStack.EMPTY){
-               ItemStack stack2 = stack.copy();
-               gui.cursorStack = stack2;
-               if(hotbarSlot >= 0){
-                  stack = ItemStack.EMPTY;
-                  player.getInventory().setStack(hotbarSlot, stack);
-                  MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
-               }
-            }else{
-               if(hotbarSlot >= 0){
+            if(MCRGBConfig.instance.creativeGive){
+               if(player.isCreative()){
+               if(gui.cursorStack == ItemStack.EMPTY){
                   ItemStack stack2 = stack.copy();
-
-                  stack = gui.cursorStack.copy();
-                  player.getInventory().setStack(hotbarSlot, stack);
-                  MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
-
                   gui.cursorStack = stack2;
+                  if(hotbarSlot >= 0){
+                     stack = ItemStack.EMPTY;
+                     player.getInventory().setStack(hotbarSlot, stack);
+                     MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
+                  }
+               }else{
+                  if(hotbarSlot >= 0){
+                     ItemStack stack2 = stack.copy();
+
+                     stack = gui.cursorStack.copy();
+                     player.getInventory().setStack(hotbarSlot, stack);
+                     MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
+
+                     gui.cursorStack = stack2;
+                  }else{
+                     gui.cursorStack = ItemStack.EMPTY;
+                  }
+               }
                }else{
                   gui.cursorStack = ItemStack.EMPTY;
                }
-            }
             }else{
-               gui.cursorStack = ItemStack.EMPTY;
+               if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+               command = command.replace("%p",player.getName().getString());
+               command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
+               command = command.replace("%q","1");
+               player.networkHandler.sendChatCommand(command);
             }
-
-             /*if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
-             command = command.replace("%p",player.getName().getString());
-             command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
-             command = command.replace("%q","1");
-             player.networkHandler.sendChatCommand(command);*/
-            //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
-            //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
             if(item.getLength() <= 0) break;
             ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
@@ -116,7 +116,6 @@ public class WColourGuiSlot extends WWidget {
             gui.SetColour(colour);
             gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
 
-            //gui.mainPanel.add(this.gui.infoBox,this.getAbsoluteX()/18+1,this.getAbsoluteY()/18+1);
             gui.mainPanel.add(this.gui.infoBox,19,0);
             gui.mainPanel.validate(gui);
             gui.PlaceSlots();
@@ -124,13 +123,40 @@ public class WColourGuiSlot extends WWidget {
                gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
             break;
          case 2:
-             if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
-             command = command.replace("%p",player.getName().getString());
-             command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
-             command = command.replace("%q",Integer.toString(stack.getMaxCount()));
-             player.networkHandler.sendChatCommand(command);
+            if(MCRGBConfig.instance.creativeGive){
+               if(player.isCreative()){
+                  if(gui.cursorStack == ItemStack.EMPTY){
+                     ItemStack stack2 = stack.copy();
+                     stack2.setCount(stack2.getMaxCount());
+                     gui.cursorStack = stack2;
+                     if(hotbarSlot >= 0){
+                        stack = ItemStack.EMPTY;
+                        player.getInventory().setStack(hotbarSlot, stack);
+                        MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
+                     }
+                  }else{
+                     if(hotbarSlot >= 0){
+                        ItemStack stack2 = stack.copy();
 
-            //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt + " " + stack.getMaxCount());
+                        stack = gui.cursorStack.copy();
+                        player.getInventory().setStack(hotbarSlot, stack);
+                        MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
+
+                        gui.cursorStack = stack2;
+                     }else{
+                        gui.cursorStack = ItemStack.EMPTY;
+                     }
+                  }
+               }else{
+                  gui.cursorStack = ItemStack.EMPTY;
+               }
+            }else{
+               if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+               command = command.replace("%p",player.getName().getString());
+               command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
+               command = command.replace("%q",Integer.toString(stack.getMaxCount()));
+               player.networkHandler.sendChatCommand(command);
+            }
             break;
       }
       return InputResult.PROCESSED;
