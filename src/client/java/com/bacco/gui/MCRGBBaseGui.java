@@ -6,6 +6,7 @@ import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -22,6 +23,8 @@ public class MCRGBBaseGui extends LightweightGuiDescription {
 
     net.minecraft.client.MinecraftClient client;
     MCRGBClient mcrgbClient;
+    public ItemStack cursorStack = ItemStack.EMPTY;
+
 
     WSprite colourDisplay = new WSprite(Identifier.of("mcrgb", "rect.png"));
 

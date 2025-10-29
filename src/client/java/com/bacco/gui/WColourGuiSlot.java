@@ -1,11 +1,13 @@
 package com.bacco.gui;
 
+import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import com.bacco.MCRGBConfig;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
 import io.github.cottonmc.cotton.gui.impl.LibGuiCommon;
 import io.github.cottonmc.cotton.gui.widget.TooltipBuilder;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
+import io.github.cottonmc.cotton.gui.widget.data.Axis;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,26 +28,37 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 
 
-public class WColourGuiSlot extends WWidget{
+public class WColourGuiSlot extends WWidget {
 	public static final Identifier SLOT_TEXTURE = Identifier.of(LibGuiCommon.MOD_ID, "textures/widget/item_slot.png");
    ClientPlayerEntity player = net.minecraft.client.MinecraftClient.getInstance().player;
    ItemStack stack;
-
-
+   MinecraftClient client = MinecraftClient.getInstance();
    ColourGui gui;
+   int hotbarSlot = -1;
    public WColourGuiSlot(ItemStack stack, ColourGui gui){
-
+      super();
       this.stack = stack;
       this.gui = gui;
+      this.hotbarSlot = -1;
+   }
+
+   public WColourGuiSlot(ItemStack stack, ColourGui gui, int hotbarSlot){
+      super();
+      this.stack = stack;
+      this.gui = gui;
+      this.hotbarSlot = hotbarSlot;
    }
 
    @Override
    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
-       ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
-       context.drawItem(stack, x+1, y+1);
-      //context.drawTexture(SLOT_TEXTURE, x,y, 0, 0,0, 18, 18, 64, 64);
-      //context.drawTexture();
+      ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
+      if(stack!=null)   context.drawItem(stack, x+1, y+1);
+
    }
+
+
+
+
 
    @Override
    public InputResult onClick(Click click, boolean doubled) {
@@ -61,29 +74,52 @@ public class WColourGuiSlot extends WWidget{
       command = command.replace("%c",nbt);
       switch (click.button()){
          case 0:
-            player.getInventory().setStack(44-36, stack);
-            MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,44);
-/*
-             if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+            if(player.isCreative()){
+            if(gui.cursorStack == ItemStack.EMPTY){
+               ItemStack stack2 = stack.copy();
+               gui.cursorStack = stack2;
+               if(hotbarSlot >= 0){
+                  stack = ItemStack.EMPTY;
+                  player.getInventory().setStack(hotbarSlot, stack);
+                  MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
+               }
+            }else{
+               if(hotbarSlot >= 0){
+                  ItemStack stack2 = stack.copy();
+
+                  stack = gui.cursorStack.copy();
+                  player.getInventory().setStack(hotbarSlot, stack);
+                  MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack,hotbarSlot+36);
+
+                  gui.cursorStack = stack2;
+               }else{
+                  gui.cursorStack = ItemStack.EMPTY;
+               }
+            }
+            }else{
+               gui.cursorStack = ItemStack.EMPTY;
+            }
+
+             /*if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
              command = command.replace("%p",player.getName().getString());
-             command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
+             command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
              command = command.replace("%q","1");
              player.networkHandler.sendChatCommand(command);*/
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
             break;
          case 1:
             //player.networkHandler.sendCommand("give @s " + Registries.ITEM.getId(stack.getItem()).toString()+nbt);
-            //IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
-            /*if(item.getLength() <= 0) break;
+            IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
+            if(item.getLength() <= 0) break;
             ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
             ColourVector colour = colours.get(0);
-            gui.SetColour(colour);*/
-            /*gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
+            gui.SetColour(colour);
+            gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
 
             //gui.mainPanel.add(this.gui.infoBox,this.getAbsoluteX()/18+1,this.getAbsoluteY()/18+1);
             gui.mainPanel.add(this.gui.infoBox,19,0);
             gui.mainPanel.validate(gui);
-            gui.PlaceSlots();*/
+            gui.PlaceSlots();
             if(stack.getItem() instanceof BlockItem)
                gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
             break;
@@ -103,6 +139,7 @@ public class WColourGuiSlot extends WWidget{
    @Environment(EnvType.CLIENT)
    @Override
    public void addTooltip(TooltipBuilder tooltip) {
+      if(stack.isEmpty()) return;
       tooltip.add(stack.getItemName());
       IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){

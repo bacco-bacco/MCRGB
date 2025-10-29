@@ -29,6 +29,7 @@ public class ColourGui extends MCRGBBaseGui {
     static int slotsHeight = 7;
     static int slotsWidth = 9;
 
+
     WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
 
     public WBlockInfoBox infoBox;
@@ -113,6 +114,7 @@ public class ColourGui extends MCRGBBaseGui {
 
     Texture sliderTex = new Texture(sliderIconIdentifier);
 
+    WColourGuiHotbar hotbar = new WColourGuiHotbar(this);
 
 
     WTextField searchField = new WTextField(Text.translatable("ui.mcrgb.refine")){
@@ -279,7 +281,7 @@ public class ColourGui extends MCRGBBaseGui {
         mainPanel.add(colourWheelToggle,17,10);
         colourWheelToggle.setLocation(314,180);
 
-
+        mainPanel.add(hotbar,0,slotsHeight+5,10,1);
 
         SetColour(launchColour);
         mainPanel.validate(this);
@@ -672,6 +674,5 @@ public class ColourGui extends MCRGBBaseGui {
         }
         root.validate(this);
     }
-
 
 }
