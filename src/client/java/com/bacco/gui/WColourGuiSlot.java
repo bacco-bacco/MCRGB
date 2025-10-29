@@ -74,7 +74,8 @@ public class WColourGuiSlot extends WWidget {
       command = command.replace("%c",nbt);
       switch (click.button()){
          case 0:
-            if(MCRGBConfig.instance.creativeGive){
+            switch(MCRGBConfig.instance.creativeGive){
+               case CREATIVE_DRAG:
                if(player.isCreative()){
                if(gui.cursorStack == ItemStack.EMPTY){
                   ItemStack stack2 = stack.copy();
@@ -100,12 +101,14 @@ public class WColourGuiSlot extends WWidget {
                }else{
                   gui.cursorStack = ItemStack.EMPTY;
                }
-            }else{
+               break;
+               case GIVE_COMMAND:
                if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
                command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q","1");
                player.networkHandler.sendChatCommand(command);
+               break;
             }
             break;
          case 1:
@@ -123,7 +126,9 @@ public class WColourGuiSlot extends WWidget {
                gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
             break;
          case 2:
-            if(MCRGBConfig.instance.creativeGive){
+            switch(MCRGBConfig.instance.creativeGive){
+               case CREATIVE_DRAG:
+
                if(player.isCreative()){
                   if(gui.cursorStack == ItemStack.EMPTY){
                      ItemStack stack2 = stack.copy();
@@ -150,12 +155,14 @@ public class WColourGuiSlot extends WWidget {
                }else{
                   gui.cursorStack = ItemStack.EMPTY;
                }
-            }else{
+               break;
+               case GIVE_COMMAND:
                if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
                command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q",Integer.toString(stack.getMaxCount()));
                player.networkHandler.sendChatCommand(command);
+               break;
             }
             break;
       }

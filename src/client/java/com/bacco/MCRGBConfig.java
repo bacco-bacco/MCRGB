@@ -17,7 +17,7 @@ public final class MCRGBConfig {
 
     public boolean bypassOP = false;
 
-    public boolean creativeGive = true;
+    public ClothConfigIntegration.ItemSpawningMode creativeGive = ClothConfigIntegration.ItemSpawningMode.CREATIVE_DRAG;
 
 
 
