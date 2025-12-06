@@ -276,6 +276,7 @@ public class ColourGui extends MCRGBBaseGui {
 
         SetColour(launchColour);
         mainPanel.validate(this);
+        root.validate(this);
     }
 
     public  void SetColourMode(ColourMode cm){
