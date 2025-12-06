@@ -1,6 +1,6 @@
 {
     "key.mcrgb.colour_inv_open" : "Open Colour Picker",
-    "message.mcrgb.reloaded" : "MCRGB: Reloaded Colours",
+    "toast.mcrgb.reloaded" : "Reloaded Colours",
     "tooltip.mcrgb.shift_prompt" : "Hold SHIFT to view colour info",
     "ui.mcrgb.header" : "MCRGB Colour Picker",
     "ui.mcrgb.saved_colours" : "Saved Colours:",

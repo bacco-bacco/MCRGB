@@ -30,6 +30,9 @@ public final class MCRGBConfig {
             writeJson(blockColoursJson, "./config/mcrgb/", "config.json");
         } catch (IOException e) {
         }
+
+        MCRGBClient.RefreshColours();
+
     }
 
     public static void load(){

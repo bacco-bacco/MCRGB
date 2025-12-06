@@ -12,7 +12,11 @@ public class SpriteDetails {
         ArrayList<String> strings = new ArrayList<String>();
         strings.add(name+":");
         for(int i = 0; i < colourinfo.size(); i++){
-            strings.add(colourinfo.get(i).getHex()+"  "+weights.get(i)+"%");
+            if(weights.get(i)==100){
+                strings.add(colourinfo.get(i).getHex());
+            }else{
+                strings.add(colourinfo.get(i).getHex()+"  "+weights.get(i)+"%");
+            }
         }
         return strings;
     }

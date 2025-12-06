@@ -14,6 +14,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.GlTexture;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
@@ -49,7 +50,7 @@ public class MCRGBClient implements ClientModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
-	public net.minecraft.client.MinecraftClient client;
+	public static net.minecraft.client.MinecraftClient client;
 	int totalBlocks = 0;			
 	int fails = 0;
 	int successes = 0;
@@ -308,7 +309,7 @@ public class MCRGBClient implements ClientModInitializer {
 		}
 	}
 
-	public void RefreshColours(){
+	public static void RefreshColours(){
 		if (client == null) return;
 		//get top sprite of stone block default state
 		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParts(Random.create()).get(0).getQuads(Direction.UP).getFirst().sprite();
@@ -333,7 +334,6 @@ public class MCRGBClient implements ClientModInitializer {
 			if(block.asItem().getTranslationKey() == Items.AIR.getTranslationKey()) return;
 			((IItemBlockColourSaver) block.asItem()).clearSpriteDetails();
 			BlockColourStorage storage = new BlockColourStorage();
-			totalBlocks +=1;
 			Set<Sprite> sprites = new HashSet<Sprite>();
 			//try to get the default top texture sprite. if fails, report error and skip this block
 			Direction[] directions = {Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST,null};
@@ -342,9 +342,7 @@ public class MCRGBClient implements ClientModInitializer {
 					try{
 						var model = client.getBakedModelManager().getBlockModels().getModel(state);
 						sprites.add(model.getParts(Random.create()).getFirst().getQuads(directions[i]).get(0).sprite());
-						successes +=1;
 					}catch(Exception e){
-						fails +=1;
 					}
 				}
 			});
@@ -419,7 +417,9 @@ public class MCRGBClient implements ClientModInitializer {
 			writeJson(blockColoursJson, "./mcrgb_colours/", "file.json");
 		} catch (IOException e) {
 		}
-		client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"), false);
+		SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.reloaded"));
+		MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+		//client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"), false);
 	}
 
 	public void SavePalettes(){
