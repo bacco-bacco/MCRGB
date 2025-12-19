@@ -66,22 +66,26 @@ public class MCRGBClient implements ClientModInitializer {
 			client = _client;
 			//colourInvScreen = new ColourInventoryScreen(client);
 			if (scanned) return;
-			//Read from JSON
-			try{
-			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
-			Registries.BLOCK.forEach(block -> {
-				for(BlockColourStorage storage : loadedBlockColourArray){
-					if(storage.block.equals(block.asItem().getTranslationKey())){
-						storage.spriteDetails.forEach(details -> {	
-							((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
-						});
-						break;
-					};
+			if(MCRGBConfig.instance.readJsonFile){
+				//Read from JSON
+				try{
+				BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
+				Registries.BLOCK.forEach(block -> {
+					for(BlockColourStorage storage : loadedBlockColourArray){
+						if(storage.block.equals(block.asItem().getTranslationKey())){
+							storage.spriteDetails.forEach(details -> {
+								((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
+							});
+							break;
+						};
+					}
+
+				});
+				scanned = true;
+				}catch(Exception e){
+					RefreshColours();
 				}
-				
-			});
-			scanned = true;
-			}catch(Exception e){
+			}else{
 				RefreshColours();
 			}
 		});
@@ -278,8 +282,13 @@ public class MCRGBClient implements ClientModInitializer {
 			sprites.forEach(sprite -> {
 				if(sprite.getContents().getId().getPath().equals("block/grass_block_side")) return;
 				//get coords of sprite in atlas
-				int spriteX = sprite.getX();
-				int spriteY = sprite.getY();
+
+				//x and y Buffer of 17 required as workaround for Minecraft 1.21.11 bug: MC-303675
+				int xBuffer = 17;
+				int yBuffer = 17;
+
+				int spriteX = sprite.getX()+xBuffer;
+				int spriteY = sprite.getY()+yBuffer;
 				int spriteW = sprite.getContents().getWidth();
 				int spriteH = sprite.getContents().getHeight();
 				//convert coords to byte position
