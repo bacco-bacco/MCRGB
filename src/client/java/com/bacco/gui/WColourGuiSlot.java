@@ -12,6 +12,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
@@ -60,7 +62,7 @@ public class WColourGuiSlot extends WWidget{
       command = command.replace("%c",nbt);
       switch (click.button()){
          case 0:
-             if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+             if(!((player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
              command = command.replace("%p",player.getName().getString());
              command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
              command = command.replace("%q","1");
@@ -84,7 +86,7 @@ public class WColourGuiSlot extends WWidget{
                gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
             break;
          case 2:
-             if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+             if(!((player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
              command = command.replace("%p",player.getName().getString());
              command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
              command = command.replace("%q",Integer.toString(stack.getMaxCount()));
