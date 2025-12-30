@@ -15,6 +15,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
@@ -28,11 +30,12 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 
 
-public class WColourGuiSlot extends WWidget {
+public class WColourGuiSlot extends WWidget{
 	public static final Identifier SLOT_TEXTURE = Identifier.of(LibGuiCommon.MOD_ID, "textures/widget/item_slot.png");
    ClientPlayerEntity player = net.minecraft.client.MinecraftClient.getInstance().player;
    ItemStack stack;
-   MinecraftClient client = MinecraftClient.getInstance();
+
+
    ColourGui gui;
    int hotbarSlot = -1;
    public WColourGuiSlot(ItemStack stack, ColourGui gui){
@@ -103,7 +106,7 @@ public class WColourGuiSlot extends WWidget {
                }
                break;
                case GIVE_COMMAND:
-               if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+               if(!((player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
                command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q","1");
@@ -157,7 +160,7 @@ public class WColourGuiSlot extends WWidget {
                }
                break;
                case GIVE_COMMAND:
-               if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+               if(!(player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
                command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q",Integer.toString(stack.getMaxCount()));

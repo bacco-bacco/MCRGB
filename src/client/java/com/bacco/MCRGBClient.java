@@ -51,9 +51,7 @@ public class MCRGBClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
 	public static net.minecraft.client.MinecraftClient client;
-	int totalBlocks = 0;			
-	int fails = 0;
-	int successes = 0;
+
 	boolean scanned = false;
 	public ArrayList<Palette> palettes = new ArrayList<>();
 
@@ -70,6 +68,7 @@ public class MCRGBClient implements ClientModInitializer {
 			if (scanned) return;
 			//Read from JSON
 			try{
+			long startTime = System.nanoTime();
 			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
 			Registries.BLOCK.forEach(block -> {
 				for(BlockColourStorage storage : loadedBlockColourArray){
@@ -83,8 +82,11 @@ public class MCRGBClient implements ClientModInitializer {
 				
 			});
 			scanned = true;
+			System.out.println("Parsed JSON in: " + (System.nanoTime()-startTime));
 			}catch(Exception e){
+				long startTime = System.nanoTime();
 				RefreshColours();
+				System.out.println("Refreshed colours in: " + (System.nanoTime()-startTime));
 			}
 		});
 		LoadPalettes();
@@ -310,7 +312,9 @@ public class MCRGBClient implements ClientModInitializer {
 	}
 
 	public static void RefreshColours(){
+
 		if (client == null) return;
+
 		//get top sprite of stone block default state
 		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParts(Random.create()).get(0).getQuads(Direction.UP).getFirst().sprite();
 		//get id of the atlas containing above
@@ -352,8 +356,13 @@ public class MCRGBClient implements ClientModInitializer {
 			sprites.forEach(sprite -> {
 				if(sprite.getContents().getId().getPath().equals("block/grass_block_side")) return;
 				//get coords of sprite in atlas
-				int spriteX = sprite.getX();
-				int spriteY = sprite.getY();
+
+				//x and y Buffer of 17 required as workaround for Minecraft 1.21.11 bug: MC-303675
+				int xBuffer = 17;
+				int yBuffer = 17;
+
+				int spriteX = sprite.getX()+xBuffer;
+				int spriteY = sprite.getY()+yBuffer;
 				int spriteW = sprite.getContents().getWidth();
 				int spriteH = sprite.getContents().getHeight();
 				//convert coords to byte position
