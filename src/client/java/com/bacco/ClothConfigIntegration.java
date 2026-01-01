@@ -23,6 +23,7 @@ public class ClothConfigIntegration {
             if (bool) return Text.translatable("options.mcrgb.while_scrolling");
             else return Text.translatable("options.mcrgb.after_scrolling");
         };
+
         protected static Screen getConfigScreen() {
             ConfigBuilder builder = ConfigBuilder.create()
                     .setParentScreen(MinecraftClient.getInstance().currentScreen)
@@ -56,6 +57,12 @@ public class ClothConfigIntegration {
                     .setDefaultValue(false)
                     .setSaveConsumer(newValue -> MCRGBConfig.instance.bypassOP = newValue)
                     .setTooltip(Text.translatable("tooltip.mcrgb.bypass_op"))
+                    .build());
+
+            configs.addEntry(entryBuilder.startBooleanToggle(Text.translatable("option.mcrgb.readJsonFile"), MCRGBConfig.instance.readJsonFile)
+                    .setDefaultValue(false)
+                    .setSaveConsumer(newValue -> MCRGBConfig.instance.readJsonFile = newValue)
+                    .setTooltip(Text.translatable("tooltip.mcrgb.readJsonFile"))
                     .build());
 
 

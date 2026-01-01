@@ -98,9 +98,15 @@ public class WColourGuiSlot extends WWidget{
    @Environment(EnvType.CLIENT)
    @Override
    public void addTooltip(TooltipBuilder tooltip) {
+       int numLines = 0;
       tooltip.add(Text.translatable(stack.getTranslationKey()));
       IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
+                if(numLines >= 15){
+                    tooltip.add(Text.literal(" "));
+                    tooltip.add(Text.translatable("tooltip.mcrgb.show_more"));
+                    break;
+                }
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 					ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 					if(strings.size() > 0){
@@ -112,8 +118,9 @@ public class WColourGuiSlot extends WWidget{
                      }else{
                         text2 = text.formatted(Formatting.DARK_GRAY);
                      }
-                     
+
                      tooltip.add(text2);
+                     numLines ++;
                      }
 			         }
                }

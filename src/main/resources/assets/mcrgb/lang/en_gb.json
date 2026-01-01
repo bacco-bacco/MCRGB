@@ -1,10 +1,12 @@
 {
     "key.mcrgb.colour_inv_open" : "Open Colour Picker",
-    "message.mcrgb.reloaded" : "MCRGB: Reloaded Colours",
+    "toast.mcrgb.reloaded" : "Reloaded Colours",
     "tooltip.mcrgb.shift_prompt" : "Hold SHIFT to view colour info",
     "ui.mcrgb.header" : "MCRGB Colour Picker",
     "ui.mcrgb.saved_colours" : "Saved Colours:",
     "options.mcrgb.picker_only" : "Colour Picker Only",
+    "option.mcrgb.readJsonFile" : "Read Colour Info from JSON File",
     "option.mcrgb.always_show_in_tooltips" : "Show Block Colours in Tooltips",
+    "tooltip.mcrgb.readJsonFile" : "False: Disables reading colour info from JSON file at launch. \nLeave this set to False, unless you notice issues with loading.",
     "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether colour info is displayed in item tooltips outside of the colour picker UI."
 }
