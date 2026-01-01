@@ -32,6 +32,7 @@
     "option.mcrgb.give_command" : "Give Command",
     "option.mcrgb.bypass_op" : "Bypass Operator Check",
     "option.mcrgb.readJsonFile" : "Read Colour Info from JSON File",
+    "option.mcrgb.maxTooltipLines" : "Maximum Tooltip Lines",
     "options.mcrgb.while_scrolling" : "Update While Scrolling",
     "options.mcrgb.after_scrolling" : "Update After Scrolling",
     "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether color info is displayed in item tooltips outside of the color picker UI.",
@@ -40,6 +41,8 @@
     "tooltip.mcrgb.bypass_op" : "Bypass checks for creative mode and operator status when giving items to the player. Useful on servers with custom permissions.",
     "tooltip.mcrgb.readJsonFile" : "False: Disables reading colour info from JSON file at launch. \nLeave this set to False, unless you notice issues with loading.",
     "tooltip.mcrgb.show_more" : "Right-click to show more...",
+    "tooltip.mcrgb.item_show_more" : "View more in MCRGB GUI",
+    "tooltip.mcrgb.maxTooltipLines" : "The maximum number of lines to display in the tooltip when hovering over an item.\nNote: The actual number of lines may slightly exceed this number. This is intended behaviour.",
     "warning.mcrgb.noclothconfig" : "Cloth Config is required to access settings in-game. Edit the config.json manually or install Cloth Config.",
     "toast.mcrgb.generic_toast_title" : "MCRGB",
     "toast.mcrgb.reloaded" : "Reloaded Colors"

@@ -98,13 +98,16 @@ public class MCRGBClient implements ClientModInitializer {
 			if(!MCRGBConfig.instance.alwaysShowToolTips) return;
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
+				if(lines.size() >= MCRGBConfig.instance.maxTooltipLines){
+					lines.add(Text.literal(" "));
+					lines.add(Text.translatable("tooltip.mcrgb.item_show_more").formatted(Formatting.GRAY));
+					break;
+				}
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 				ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 				if(strings.size() > 0){
 					if(Screen.hasShiftDown()){
 						for(int j = 0; j < strings.size(); j++){
-
-
 							var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
 							MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
 							if(j > 0){

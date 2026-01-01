@@ -102,9 +102,9 @@ public class WColourGuiSlot extends WWidget{
       tooltip.add(Text.translatable(stack.getTranslationKey()));
       IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
-                if(numLines >= 15){
+                if(numLines >= MCRGBConfig.instance.maxTooltipLines){
                     tooltip.add(Text.literal(" "));
-                    tooltip.add(Text.translatable("tooltip.mcrgb.show_more"));
+                    tooltip.add(Text.translatable("tooltip.mcrgb.show_more").formatted(Formatting.GRAY));
                     break;
                 }
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();

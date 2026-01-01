@@ -19,6 +19,8 @@ public final class MCRGBConfig {
 
     public boolean bypassOP = false;
 
+    public int maxTooltipLines = 15;
+
     public static void save(){
         Gson gson = new Gson();
         String blockColoursJson = gson.toJson(instance);
