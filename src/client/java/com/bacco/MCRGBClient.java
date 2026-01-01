@@ -11,8 +11,10 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
@@ -47,11 +49,9 @@ public class MCRGBClient implements ClientModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
-	public net.minecraft.client.MinecraftClient client;
-	int totalBlocks = 0;			
-	int fails = 0;
-	int successes = 0;
-	boolean scanned = false;
+	public static net.minecraft.client.MinecraftClient client;
+
+	static boolean scanned = false;
 	public ArrayList<Palette> palettes = new ArrayList<>();
 
 
@@ -65,24 +65,32 @@ public class MCRGBClient implements ClientModInitializer {
 			client = _client;
 			//colourInvScreen = new ColourInventoryScreen(client);
 			if (scanned) return;
-			//Read from JSON
-			try{
-			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
-			Registries.BLOCK.forEach(block -> {
-				for(BlockColourStorage storage : loadedBlockColourArray){
-					if(storage.block.equals(block.asItem().getTranslationKey())){
-						storage.spriteDetails.forEach(details -> {	
-							((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
-						});
-						break;
-					};
+			if(MCRGBConfig.instance.readJsonFile){
+				//Read from JSON
+				try{
+				long parseStartTime = System.nanoTime();
+				BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
+				Registries.BLOCK.forEach(block -> {
+					for(BlockColourStorage storage : loadedBlockColourArray){
+						if(storage.block.equals(block.asItem().getTranslationKey())){
+							storage.spriteDetails.forEach(details -> {
+								((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
+							});
+							break;
+						};
+					}
+
+				});
+
+				LOGGER.info("Parsed JSON in: " + (System.nanoTime()-parseStartTime)/1000000 + " ms");
+				}catch(Exception e){
+					RefreshColours();
+
 				}
-				
-			});
-			scanned = true;
-			}catch(Exception e){
+			}else{
 				RefreshColours();
 			}
+			scanned = true;
 		});
 		LoadPalettes();
 		//Override item tooltips to display the colour.
@@ -90,6 +98,11 @@ public class MCRGBClient implements ClientModInitializer {
 			if(!MCRGBConfig.instance.alwaysShowToolTips) return;
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
+				if(lines.size() >= MCRGBConfig.instance.maxTooltipLines){
+					lines.add(Text.literal(" "));
+					lines.add(Text.translatable("tooltip.mcrgb.item_show_more").formatted(Formatting.GRAY));
+					break;
+				}
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 				ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 				if(strings.size() > 0){
@@ -232,6 +245,7 @@ public class MCRGBClient implements ClientModInitializer {
 	}
 
 	public void RefreshColours(){
+		long refreshStartTime = System.nanoTime();
 		if (client == null) return;
 		//get top sprite of stone block default state
 		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
@@ -256,7 +270,6 @@ public class MCRGBClient implements ClientModInitializer {
 			if(block.asItem().getTranslationKey() == Items.AIR.getTranslationKey()) return;
 			((IItemBlockColourSaver) block.asItem()).clearSpriteDetails();
 			BlockColourStorage storage = new BlockColourStorage();
-			totalBlocks +=1;
 			Set<Sprite> sprites = new HashSet<Sprite>();
 			//try to get the default top texture sprite. if fails, report error and skip this block
 			Direction[] directions = {Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST,null};
@@ -265,9 +278,7 @@ public class MCRGBClient implements ClientModInitializer {
 					try{
 						var model = client.getBakedModelManager().getBlockModels().getModel(state);
 						sprites.add(model.getQuads(state, directions[i], Random.create()).get(0).getSprite());
-						successes +=1;
 					}catch(Exception e){
-						fails +=1;
 					}
 				}
 			});
@@ -335,14 +346,21 @@ public class MCRGBClient implements ClientModInitializer {
 			blockColourList.add(storage);
 		});
 
-		//Write arraylist to json
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String blockColoursJson = gson.toJson(blockColourList);
-		try {
-			writeJson(blockColoursJson, "./mcrgb_colours/", "file.json");
-		} catch (IOException e) {
+		if(MCRGBConfig.instance.readJsonFile) {
+			long saveStartTime = System.nanoTime();
+			//Write arraylist to json
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			String blockColoursJson = gson.toJson(blockColourList);
+			try {
+				writeJson(blockColoursJson, "./mcrgb_colours/", "file.json");
+			} catch (IOException e) {
+			}
+			LOGGER.info("Saved to JSON in: " + (System.nanoTime() - saveStartTime)/1000000 + " ms");
 		}
-		client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"), false);
+
+		SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.reloaded"));
+		MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+		LOGGER.info("Refreshed colours in: " + (System.nanoTime()-refreshStartTime)/1000000 + " ms");
 	}
 
 	public void SavePalettes(){

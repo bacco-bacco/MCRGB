@@ -14,9 +14,6 @@ public class WColourWheel extends WPickableTexture{
     int cursorY = (height)/2;
     Boolean beenClicked = false;
 
-
-
-
     public WColourWheel(Identifier image, float u1, float v1, float u2, float v2, MinecraftClient client, MCRGBBaseGui gui) {
         super(image, u1, v1, u2, v2, client, gui);
     }

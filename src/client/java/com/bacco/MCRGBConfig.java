@@ -12,10 +12,12 @@ public final class MCRGBConfig {
     public static MCRGBConfig instance = new MCRGBConfig();
     public boolean alwaysShowToolTips = false;
     public boolean sliderConstantUpdate = true;
-
+    public boolean readJsonFile = false;
     public String command = "give %p %i[%c] %q";
 
     public boolean bypassOP = false;
+
+    public int maxTooltipLines = 15;
 
     public static void save(){
         Gson gson = new Gson();
