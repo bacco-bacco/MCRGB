@@ -35,6 +35,8 @@ public class BlockInfoGui extends MCRGBBaseGui {
 
     WGridPanel textureThumbs = new WGridPanel();
 
+    WScrollPanel textureScrollPanel = new WScrollPanel(textureThumbs);
+
     ArrayList<Sprite> spritesAL = new ArrayList<>();
 
 
@@ -121,8 +123,7 @@ public class BlockInfoGui extends MCRGBBaseGui {
         blockTexture = new WPickableTexture(spritesAL.get(0).getAtlasId(),spritesAL.get(0).getMinU(), spritesAL.get(0).getMinV(), spritesAL.get(0).getMaxU(), spritesAL.get(0).getMaxV(), client, this);
 
         mainPanel.add(blockTexture,0,1,6,6);
-        mainPanel.add(textureThumbs,7,1,3,6);
-
+        mainPanel.add(textureScrollPanel,7,1,4,6);
 
         root.validate(this);
     }

@@ -212,7 +212,6 @@ public class ColourGui extends MCRGBBaseGui {
         gLabel.setLocation(247,50);
         bLabel.setLocation(283,50);
 
-
         sliderArea.add(rSlider, 0, 18, 18, 108);
         rSlider.setValue(inputColour.r);
         sliderArea.add(gSlider, 36, 18, 18, 108);
