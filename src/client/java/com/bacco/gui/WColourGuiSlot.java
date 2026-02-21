@@ -1,6 +1,5 @@
 package com.bacco.gui;
 
-import com.bacco.ColourVector;
 import com.bacco.IItemBlockColourSaver;
 import com.bacco.MCRGBConfig;
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
@@ -117,9 +116,9 @@ public class WColourGuiSlot extends WWidget{
          case 1:
             IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
             if(item.getLength() <= 0) break;
-            ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
+            /*ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
             ColourVector colour = colours.get(0);
-            gui.SetColour(colour);
+            gui.SetColour(colour);*/
             gui.infoBox = new WBlockInfoBox(Axis.VERTICAL,item,gui);
 
             gui.mainPanel.add(this.gui.infoBox,19,0);
