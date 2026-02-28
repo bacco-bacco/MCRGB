@@ -52,7 +52,7 @@ public class MCRGBClient implements ClientModInitializer {
 	public static final boolean readMode = false;
 	public static net.minecraft.client.MinecraftClient client;
 
-	boolean scanned = false;
+	static boolean scanned = false;
 	public ArrayList<Palette> palettes = new ArrayList<>();
 
 
@@ -66,28 +66,32 @@ public class MCRGBClient implements ClientModInitializer {
 			client = _client;
 			//colourInvScreen = new ColourInventoryScreen(client);
 			if (scanned) return;
-			//Read from JSON
-			try{
-			long startTime = System.nanoTime();
-			BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
-			Registries.BLOCK.forEach(block -> {
-				for(BlockColourStorage storage : loadedBlockColourArray){
-					if(storage.block.equals(block.asItem().getTranslationKey())){
-						storage.spriteDetails.forEach(details -> {	
-							((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
-						});
-						break;
-					};
+			if(MCRGBConfig.instance.readJsonFile){
+				//Read from JSON
+				try{
+				long parseStartTime = System.nanoTime();
+				BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
+				Registries.BLOCK.forEach(block -> {
+					for(BlockColourStorage storage : loadedBlockColourArray){
+						if(storage.block.equals(block.asItem().getTranslationKey())){
+							storage.spriteDetails.forEach(details -> {
+								((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
+							});
+							break;
+						};
+					}
+
+				});
+
+				LOGGER.info("Parsed JSON in: " + (System.nanoTime()-parseStartTime)/1000000 + " ms");
+				}catch(Exception e){
+					RefreshColours();
+
 				}
-				
-			});
-			scanned = true;
-			System.out.println("Parsed JSON in: " + (System.nanoTime()-startTime));
-			}catch(Exception e){
-				long startTime = System.nanoTime();
+			}else{
 				RefreshColours();
-				System.out.println("Refreshed colours in: " + (System.nanoTime()-startTime));
 			}
+			scanned = true;
 		});
 		LoadPalettes();
 		//Override item tooltips to display the colour.
@@ -95,6 +99,11 @@ public class MCRGBClient implements ClientModInitializer {
 			if(!MCRGBConfig.instance.alwaysShowToolTips) return;
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
+				if(lines.size() >= MCRGBConfig.instance.maxTooltipLines){
+					lines.add(Text.literal(" "));
+					lines.add(Text.translatable("tooltip.mcrgb.item_show_more").formatted(Formatting.GRAY));
+					break;
+				}
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 				ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 				if(strings.size() > 0){
@@ -234,7 +243,6 @@ public class MCRGBClient implements ClientModInitializer {
 		for (int i = 0; i < rgblist.size(); i++){
 			group.pixels.add(new ColourVector(rgblist.get(i).r,rgblist.get(i).g,rgblist.get(i).b));
 		}
-
 		group.repColour = group.CalculateMean();
 		group.repHex = group.repColour.getHex();
 		group.weight = (int)((float)group.pixels.size()/(float)rgblist.size() * 100);
@@ -312,9 +320,8 @@ public class MCRGBClient implements ClientModInitializer {
 	}
 
 	public static void RefreshColours(){
-
+		long refreshStartTime = System.nanoTime();
 		if (client == null) return;
-
 		//get top sprite of stone block default state
 		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParts(Random.create()).get(0).getQuads(Direction.UP).getFirst().sprite();
 		//get id of the atlas containing above
@@ -398,6 +405,9 @@ public class MCRGBClient implements ClientModInitializer {
 					}
 				}
 				//Calculate the dominant colours
+				if(rgbList.isEmpty()){
+					return;
+				}
 				Set<ColourGroup> colourGroups = GroupColours(rgbList);
 				if (colourGroups == null) return;
 
@@ -419,16 +429,21 @@ public class MCRGBClient implements ClientModInitializer {
 			blockColourList.add(storage);
 		});
 
-		//Write arraylist to json
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String blockColoursJson = gson.toJson(blockColourList);
-		try {
-			writeJson(blockColoursJson, "./mcrgb_colours/", "file.json");
-		} catch (IOException e) {
+		if(MCRGBConfig.instance.readJsonFile) {
+			long saveStartTime = System.nanoTime();
+			//Write arraylist to json
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			String blockColoursJson = gson.toJson(blockColourList);
+			try {
+				writeJson(blockColoursJson, "./mcrgb_colours/", "file.json");
+			} catch (IOException e) {
+			}
+			LOGGER.info("Saved to JSON in: " + (System.nanoTime() - saveStartTime)/1000000 + " ms");
 		}
+
 		SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.reloaded"));
 		MinecraftClient.getInstance().getToastManager().add(clipboardToast);
-		//client.player.sendMessage(Text.translatable("message.mcrgb.reloaded"), false);
+		LOGGER.info("Refreshed colours in: " + (System.nanoTime()-refreshStartTime)/1000000 + " ms");
 	}
 
 	public void SavePalettes(){

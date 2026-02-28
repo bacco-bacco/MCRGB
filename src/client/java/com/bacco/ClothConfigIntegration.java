@@ -45,7 +45,6 @@ public class ClothConfigIntegration {
             if (bool) return Text.translatable("options.mcrgb.while_scrolling");
             else return Text.translatable("options.mcrgb.after_scrolling");
         };
-
         protected static Screen getConfigScreen() {
             ConfigBuilder builder = ConfigBuilder.create()
                     .setParentScreen(MinecraftClient.getInstance().currentScreen)
@@ -61,6 +60,12 @@ public class ClothConfigIntegration {
                     .setYesNoTextSupplier(alwaysShowToolTipsTextSupplier)
                     .setSaveConsumer(newValue -> MCRGBConfig.instance.alwaysShowToolTips = newValue)
                     .setTooltip(Text.translatable("tooltip.mcrgb.always_show_in_tooltips"))
+                    .build());
+
+            configs.addEntry(entryBuilder.startIntField(Text.translatable("option.mcrgb.maxTooltipLines"), MCRGBConfig.instance.maxTooltipLines)
+                    .setDefaultValue(15)
+                    .setSaveConsumer(newValue -> MCRGBConfig.instance.maxTooltipLines = newValue)
+                    .setTooltip(Text.translatable("tooltip.mcrgb.maxTooltipLines"))
                     .build());
 
             configs.addEntry(entryBuilder.startBooleanToggle(Text.translatable("option.mcrgb.slider_constant_update"), MCRGBConfig.instance.sliderConstantUpdate)
@@ -99,7 +104,11 @@ public class ClothConfigIntegration {
                     .setTooltip(Text.translatable("tooltip.mcrgb.bypass_op"))
                     .build());
 
-
+            configs.addEntry(entryBuilder.startBooleanToggle(Text.translatable("option.mcrgb.readJsonFile"), MCRGBConfig.instance.readJsonFile)
+                    .setDefaultValue(false)
+                    .setSaveConsumer(newValue -> MCRGBConfig.instance.readJsonFile = newValue)
+                    .setTooltip(Text.translatable("tooltip.mcrgb.readJsonFile"))
+                    .build());
 
             keybinds.addEntry(entryBuilder.fillKeybindingField(Text.translatable("key.mcrgb.colour_inv_open"), KeyInputHandler.colourInvKey).build());
             keybinds.addEntry(entryBuilder.fillKeybindingField(Text.translatable("key.mcrgb.quick_search_from_clipboard"), KeyInputHandler.quickSearchKey).build());

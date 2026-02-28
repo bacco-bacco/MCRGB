@@ -58,10 +58,6 @@ public class WColourGuiSlot extends WWidget{
 
    }
 
-
-
-
-
    @Override
    public InputResult onClick(Click click, boolean doubled) {
       // x & y are the coordinates of the mouse when the event was triggered
@@ -107,7 +103,7 @@ public class WColourGuiSlot extends WWidget{
                case GIVE_COMMAND:
                if(!((player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
-               command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
+               command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q","1");
                player.networkHandler.sendChatCommand(command);
                break;
@@ -161,7 +157,7 @@ public class WColourGuiSlot extends WWidget{
                case GIVE_COMMAND:
                if(!(player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
-               command = command.replace("%i", Registries.ITEM.getId(stack.getItem()).toString());
+               command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q",Integer.toString(stack.getMaxCount()));
                player.networkHandler.sendChatCommand(command);
                break;
@@ -174,10 +170,16 @@ public class WColourGuiSlot extends WWidget{
    @Environment(EnvType.CLIENT)
    @Override
    public void addTooltip(TooltipBuilder tooltip) {
+      int numLines = 0;
       if(stack.isEmpty()) return;
       tooltip.add(stack.getItemName());
       IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
+                if(numLines >= MCRGBConfig.instance.maxTooltipLines){
+                    tooltip.add(Text.literal(" "));
+                    tooltip.add(Text.translatable("tooltip.mcrgb.show_more").formatted(Formatting.GRAY));
+                    break;
+                }
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 					ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 					if(strings.size() > 0){
@@ -189,8 +191,8 @@ public class WColourGuiSlot extends WWidget{
                      }else{
                         text2 = text.formatted(Formatting.DARK_GRAY);
                      }
-                     
                      tooltip.add(text2);
+                     numLines ++;
                      }
 			         }
                }

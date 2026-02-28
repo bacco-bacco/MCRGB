@@ -29,7 +29,6 @@ public class ColourGui extends MCRGBBaseGui {
     static int slotsHeight = 7;
     static int slotsWidth = 9;
 
-
     WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
 
     public WBlockInfoBox infoBox;
@@ -213,7 +212,6 @@ public class ColourGui extends MCRGBBaseGui {
         rLabel.setLocation(211,50);
         gLabel.setLocation(247,50);
         bLabel.setLocation(283,50);
-
 
         sliderArea.add(rSlider, 0, 18, 18, 108);
         rSlider.setValue(inputColour.r);
