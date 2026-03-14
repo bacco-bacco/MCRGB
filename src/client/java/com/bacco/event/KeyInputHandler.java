@@ -34,8 +34,6 @@ public class KeyInputHandler {
             }
 
             if(quickSearchKey.wasPressed()){
-                //client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient, new ColourVector(client.keyboard.getClipboard()))));
-
                 if (client.currentScreen == null) {
                     client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient, new ColourVector(client.keyboard.getClipboard()))));
                 }else{

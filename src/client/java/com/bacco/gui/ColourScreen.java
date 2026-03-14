@@ -1,8 +1,13 @@
 package com.bacco.gui;
 
+import com.bacco.ColourVector;
+import com.bacco.event.KeyInputHandler;
 import io.github.cottonmc.cotton.gui.GuiDescription;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
+import io.github.cottonmc.cotton.gui.widget.WTextField;
+import io.github.cottonmc.cotton.gui.widget.WWidget;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.input.KeyInput;
 
 public class ColourScreen extends CottonClientScreen{
 
@@ -29,6 +34,18 @@ public class ColourScreen extends CottonClientScreen{
         if (!description.cursorStack.isEmpty()) {
             context.drawItem(description.cursorStack, mouseX - 8, mouseY - 8);
         }
+    }
+
+    @Override
+    public boolean keyPressed(KeyInput input){
+        if(KeyInputHandler.quickSearchKey.matchesKey(input)){
+            WWidget focused = description.getFocus();
+            if(focused instanceof WTextField){
+                return super.keyPressed(input);
+            }
+            description.SetColour(new ColourVector(client.keyboard.getClipboard()));
+        }
+        return super.keyPressed(input);
     }
     
 }

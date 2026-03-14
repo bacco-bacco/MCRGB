@@ -264,6 +264,8 @@ public class MCRGBClient implements ClientModInitializer {
 		return groups;
 	}
 
+
+
 /*
 	public static Set<ColourGroup> Algo_MeanShift(ArrayList<ColourVector> rgblist){
 		int window = 10;
