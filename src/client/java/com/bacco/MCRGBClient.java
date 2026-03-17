@@ -4,7 +4,7 @@ import com.bacco.event.KeyInputHandler;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.GlTexture;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.item.Items;
@@ -107,7 +107,7 @@ public class MCRGBClient implements ClientModInitializer {
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 				ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 				if(strings.size() > 0){
-					if(MinecraftClient.getInstance().isShiftPressed()){
+					if(Screen.hasShiftDown()){
 						for(int j = 0; j < strings.size(); j++){
 							var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
 							MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
@@ -325,17 +325,17 @@ public class MCRGBClient implements ClientModInitializer {
 		long refreshStartTime = System.nanoTime();
 		if (client == null) return;
 		//get top sprite of stone block default state
-		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParts(Random.create()).get(0).getQuads(Direction.UP).getFirst().sprite();
+		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getQuads(Blocks.STONE.getDefaultState(), Direction.UP, Random.create()).get(0).getSprite();
 		//get id of the atlas containing above
 		var atlas = defSprite.getAtlasId();
 		//use atlas id to get OpenGL ID. Atlas contains ALL blocks
-		GlTexture glTexture = (GlTexture) client.getTextureManager().getTexture(atlas).getGlTexture();
+		int glID = client.getTextureManager().getTexture(atlas).getGlId();
 		//get width and height from OpenGL by binding texture
-		int width = glTexture.getWidth(0);
-		int height = glTexture.getHeight(0);
+		RenderSystem.bindTexture(glID);
+		int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+		int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
 		int size = width * height;
 		//Make byte buffer and load full atlas into buffer.
-		GlStateManager._bindTexture(glTexture.getGlId());
 		ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
 		GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 		//convert buffer to an array of bytes
@@ -354,7 +354,7 @@ public class MCRGBClient implements ClientModInitializer {
 				for(int i = 0; i < directions.length; i++){
 					try{
 						var model = client.getBakedModelManager().getBlockModels().getModel(state);
-						sprites.add(model.getParts(Random.create()).getFirst().getQuads(directions[i]).get(0).sprite());
+						sprites.add(model.getQuads(state, directions[i], Random.create()).get(0).getSprite());
 					}catch(Exception e){
 					}
 				}
@@ -365,13 +365,8 @@ public class MCRGBClient implements ClientModInitializer {
 			sprites.forEach(sprite -> {
 				if(sprite.getContents().getId().getPath().equals("block/grass_block_side")) return;
 				//get coords of sprite in atlas
-
-				//x and y Buffer of 17 required as workaround for Minecraft 1.21.11 bug: MC-303675
-				int xBuffer = 17;
-				int yBuffer = 17;
-
-				int spriteX = sprite.getX()+xBuffer;
-				int spriteY = sprite.getY()+yBuffer;
+				int spriteX = sprite.getX();
+				int spriteY = sprite.getY();
 				int spriteW = sprite.getContents().getWidth();
 				int spriteH = sprite.getContents().getHeight();
 				//convert coords to byte position
@@ -391,14 +386,14 @@ public class MCRGBClient implements ClientModInitializer {
 					for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
 						//retrieve bytes for RGBA values
 						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
-						int pixelColour = ColorHelper.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-						int alpha = ColorHelper.getAlpha(pixelColour);
+						int pixelColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+						int alpha = ColorHelper.Argb.getAlpha(pixelColour);
 						if(biomeColour != -1 & (!block.getDefaultState().isOf(Blocks.GRASS_BLOCK) || sprite.getContents().getId().getPath().equals("block/grass_block_top"))){
-							pixelColour = ColorHelper.mix(biomeColour, pixelColour);
+							pixelColour = ColorHelper.Argb.mixColor(biomeColour, pixelColour);
 						}
 						//if the pixel is not fully transparent, add to the list
 						if(alpha > 0) {
-							ColourVector c = new ColourVector(ColorHelper.getRed(pixelColour), ColorHelper.getGreen(pixelColour), ColorHelper.getBlue(pixelColour));
+							ColourVector c = new ColourVector(ColorHelper.Argb.getRed(pixelColour), ColorHelper.Argb.getGreen(pixelColour), ColorHelper.Argb.getBlue(pixelColour));
 							rgbList.add(c);
 						}
 

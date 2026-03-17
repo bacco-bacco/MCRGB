@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyInputHandler {
@@ -21,7 +20,7 @@ public class KeyInputHandler {
 
     public static KeyBinding quickSearchKey;
 
-    public static final KeyBinding.Category mcrgbKeyCategory = KeyBinding.Category.create(Identifier.of("mcrgb",KEY_CATEGORY_MCRGB));
+    //public static final KeyBinding.Category mcrgbKeyCategory = KeyBinding.Category.create(Identifier.of("mcrgb",KEY_CATEGORY_MCRGB));
 
     public static void registerKeyInputs(MCRGBClient mcrgbClient){
         ClientTickEvents.END_CLIENT_TICK.register(client ->{
@@ -48,14 +47,14 @@ public class KeyInputHandler {
                 KEY_COLOUR_INV_OPEN,
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_I,
-                mcrgbKeyCategory
+                KEY_CATEGORY_MCRGB
         ));
 
         quickSearchKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 KEY_QUICK_SEARCH_FROM_CLIPBOARD,
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
-                mcrgbKeyCategory
+                KEY_CATEGORY_MCRGB
         ));
             registerKeyInputs(mcrgbClient);
     }

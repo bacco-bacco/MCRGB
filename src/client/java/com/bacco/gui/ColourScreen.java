@@ -7,7 +7,6 @@ import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.input.KeyInput;
 
 public class ColourScreen extends CottonClientScreen{
 
@@ -37,15 +36,15 @@ public class ColourScreen extends CottonClientScreen{
     }
 
     @Override
-    public boolean keyPressed(KeyInput input){
-        if(KeyInputHandler.quickSearchKey.matchesKey(input)){
+    public boolean keyPressed(int ch, int keyCode, int modifiers){
+        if(KeyInputHandler.quickSearchKey.matchesKey(ch,keyCode)){
             WWidget focused = description.getFocus();
             if(focused instanceof WTextField){
-                return super.keyPressed(input);
+                return true;
             }
             description.SetColour(new ColourVector(client.keyboard.getClipboard()));
         }
-        return super.keyPressed(input);
+        return super.keyPressed(ch,keyCode,modifiers);
     }
     
 }

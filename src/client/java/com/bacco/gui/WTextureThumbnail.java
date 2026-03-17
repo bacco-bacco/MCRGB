@@ -2,7 +2,6 @@ package com.bacco.gui;
 
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
-import net.minecraft.client.gui.Click;
 import net.minecraft.util.Identifier;
 
 public class WTextureThumbnail extends WSprite {
@@ -16,8 +15,8 @@ public class WTextureThumbnail extends WSprite {
     }
 
     @Override
-    public InputResult onClick(Click click, boolean doubled) {
+    public InputResult onClick(int x, int y, int button) {
         bigui.ChangeSprite(index);
-        return super.onClick(click, doubled);
+        return super.onClick(x, y, button);
     }
 }

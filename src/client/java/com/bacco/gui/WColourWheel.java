@@ -5,7 +5,6 @@ import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Identifier;
 
@@ -34,25 +33,25 @@ public class WColourWheel extends WPickableTexture{
 
     @Environment(EnvType.CLIENT)
     @Override
-    public InputResult onClick(Click click,boolean doubled) {
+    public InputResult onClick(int containerX, int containerY, int button) {
         beenClicked = true;
-        InputResult ret = super.onClick(click, doubled);
+        InputResult ret = super.onClick(containerX,containerY,button);
         if(isTransparent) return ret;
-        if(!(click.x() < 0 || click.y() < 0 || click.x() >= width || click.y() >= height)) {
-            cursorX = (int) click.x();
-            cursorY = (int) click.y();
+        if(!(containerX < 0 || containerY < 0 || containerX >= width || containerY >= height)) {
+            cursorX = containerX;
+            cursorY = containerY;
         }
         return ret;
     }
     @Environment(EnvType.CLIENT)
     @Override
-    public InputResult onMouseDrag(Click click, double deltaX, double deltaY) {
+    public InputResult onMouseDrag(int containerX, int containerY, int mouseButton, double deltaX, double deltaY) {
         beenClicked = true;
-        InputResult ret = super.onMouseDrag(click, deltaX, deltaY);
+        InputResult ret = super.onMouseDrag(containerX, containerY, mouseButton, deltaX, deltaY);
         if(isTransparent) return ret;
-        if(!(click.x() < 0 || click.y() < 0 || click.x() >= width || click.y() >= height)) {
-            cursorX = (int) click.x();
-            cursorY = (int) click.y();
+        if(!(containerX < 0 || containerY < 0 || containerX >= width || containerY >= height)) {
+            cursorX = containerX;
+            cursorY = containerY;
         }
 
         return ret;

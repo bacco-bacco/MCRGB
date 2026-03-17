@@ -101,7 +101,7 @@ public class BlockInfoGui extends MCRGBBaseGui {
             for(int i = 0; i < directions.length; i++){
                 try{
                     var model = client.getBakedModelManager().getBlockModels().getModel(state);
-                    sprites.add(model.getParts(Random.create()).getFirst().getQuads(directions[i]).get(0).sprite());
+                    sprites.add(model.getQuads(state, directions[i], Random.create()).get(0).getSprite());
                 }catch(Exception e){
                 }
             }

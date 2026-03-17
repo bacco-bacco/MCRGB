@@ -1,13 +1,11 @@
 package com.bacco.gui;
 
 import com.bacco.ColourVector;
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.texture.GlTexture;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -34,19 +32,14 @@ public class WPickableTexture extends WSprite {
 
     MCRGBBaseGui gui;
 
-    GlTexture gpuTexture;
     int glID;
     public WPickableTexture(Identifier image, float u1, float v1, float u2, float v2, net.minecraft.client.MinecraftClient client, MCRGBBaseGui gui) {
         super(image, u1, v1, u2, v2);
-        gpuTexture = (GlTexture) client.getTextureManager().getTexture(image).getGlTexture();
-        glID = gpuTexture.getGlId();
-
+        glID = client.getTextureManager().getTexture(image).getGlId();
         //get width and height from OpenGL by binding texture
-        //RenderSystem.bindTexture(glID);
-        atlasWidth = gpuTexture.getWidth(0);
-        atlasHeight = gpuTexture.getHeight(0);
-        //atlasWidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-        //atlasHeight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+        RenderSystem.bindTexture(glID);
+        atlasWidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+        atlasHeight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
         texU1 = u1*atlasWidth;
         texV1 = v1*atlasHeight;
         texU2 = u2*atlasWidth;
@@ -55,15 +48,15 @@ public class WPickableTexture extends WSprite {
     }
 
     @Override
-    public InputResult onClick(Click click, boolean doubled) {
-        isTransparent = pickColour((int) click.x(), (int) click.y(), click.button());
-        return super.onClick(click, doubled);
+    public InputResult onClick(int x, int y, int button) {
+        isTransparent = pickColour(x,y, button);
+        return super.onClick(x, y, button);
     }
 
     @Override
-    public InputResult onMouseDrag(Click click, double deltaX, double deltaY){
-        isTransparent = pickColour((int) click.x(), (int) click.y(), click.button());
-        return super.onMouseDrag(click, deltaX, deltaY);
+    public InputResult onMouseDrag(int x, int y, int button, double deltaX, double deltaY){
+        isTransparent = pickColour(x,y, button);
+        return super.onMouseDrag(x, y, button, deltaX, deltaY);
     }
     @Override
     public WSprite setOpaqueTint(int tint){
@@ -72,15 +65,13 @@ public class WPickableTexture extends WSprite {
     }
 
     public Boolean pickColour(int x, int y, int clickButton){
-
         if(x < 0 || y < 0 || x >= width || y >= height) return false;
 
         double trueX = texU1+ Math.floor(((float) x / width)*(texU2-texU1));
         double trueY = texV1+ Math.floor(((float) y / height)*(texV2-texV1));
         int size = atlasHeight*atlasWidth;
 
-        GlStateManager._bindTexture(glID);
-        //RenderSystem.bindTexture(glID);
+        RenderSystem.bindTexture(glID);
         //Make byte buffer and load full atlas into buffer.
         ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
         GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
@@ -95,8 +86,8 @@ public class WPickableTexture extends WSprite {
             return true;
         }
 
-        int tempColour = ColorHelper.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-        tempColour = ColorHelper.mix(tempColour,tint);
+        int tempColour = ColorHelper.Argb.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+        tempColour = ColorHelper.Argb.mixColor(tempColour,tint);
 
         if(pixelColour == tempColour){  return false;   } else pixelColour = tempColour;
 

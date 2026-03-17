@@ -11,11 +11,8 @@ import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
@@ -59,7 +56,7 @@ public class WColourGuiSlot extends WWidget{
    }
 
    @Override
-   public InputResult onClick(Click click, boolean doubled) {
+   public InputResult onClick(int x, int y, int button) {
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
       String nbt = "";
@@ -70,7 +67,7 @@ public class WColourGuiSlot extends WWidget{
       String command = MCRGBConfig.instance.command;
 
       command = command.replace("%c",nbt);
-      switch (click.button()){
+      switch (button){
          case 0:
             switch(MCRGBConfig.instance.creativeGive){
                case CREATIVE_DRAG:
@@ -101,7 +98,7 @@ public class WColourGuiSlot extends WWidget{
                }
                break;
                case GIVE_COMMAND:
-               if(!((player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+               if(!((player.hasPermissionLevel(2) && player.isCreative()) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
                command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q","1");
@@ -155,7 +152,7 @@ public class WColourGuiSlot extends WWidget{
                }
                break;
                case GIVE_COMMAND:
-               if(!(player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL)) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
+               if(!(player.hasPermissionLevel(2) || MCRGBConfig.instance.bypassOP)) return InputResult.PROCESSED;
                command = command.replace("%p",player.getName().getString());
                command = command.replace("%i",Registries.ITEM.getId(stack.getItem()).toString());
                command = command.replace("%q",Integer.toString(stack.getMaxCount()));
@@ -172,7 +169,7 @@ public class WColourGuiSlot extends WWidget{
    public void addTooltip(TooltipBuilder tooltip) {
       int numLines = 0;
       if(stack.isEmpty()) return;
-      tooltip.add(stack.getItemName());
+      tooltip.add(Text.translatable(stack.getTranslationKey()));
       IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
                 if(numLines >= MCRGBConfig.instance.maxTooltipLines){

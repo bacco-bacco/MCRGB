@@ -79,7 +79,7 @@ public class WPaletteWidget extends WPlainPanel {
     @Override
     public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
         super.paint(context, x, y, mouseX, mouseY);
-        if(cg.savedPalettesArea.editingPalette == this) context.drawStrokedRectangle(x,y,this.width,this.height,0xFF00ff00);
+        if(cg.savedPalettesArea.editingPalette == this) context.drawBorder(x,y,this.width,this.height,0xFF00ff00);
 
 
     }

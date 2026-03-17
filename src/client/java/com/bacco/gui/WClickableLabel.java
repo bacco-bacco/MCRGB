@@ -7,7 +7,6 @@ import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.text.MutableText;
@@ -48,8 +47,8 @@ public class WClickableLabel extends WLabel {
     }
 
     @Override
-    public InputResult onClick(Click click, boolean doubled) {
-        switch (click.button()){
+    public InputResult onClick(int x, int y, int button) {
+        switch (button){
             case 0:
                 gui.SetColour(colour);
                 break;
@@ -63,7 +62,7 @@ public class WClickableLabel extends WLabel {
                 break;
         }
 
-        return super.onClick(click,doubled);
+        return super.onClick(x, y, button);
     }
 
 
