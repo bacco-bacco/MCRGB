@@ -33,6 +33,7 @@ public class ColourScreen extends CottonClientScreen{
         // Draw the cursor stack above everything
         if (!description.cursorStack.isEmpty()) {
             context.drawItem(description.cursorStack, mouseX - 8, mouseY - 8);
+            context.drawStackOverlay(textRenderer, description.cursorStack, mouseX - 8, mouseY - 8);
         }
     }
 

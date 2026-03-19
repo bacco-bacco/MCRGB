@@ -54,8 +54,10 @@ public class WColourGuiSlot extends WWidget{
    @Override
    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
       ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
-      if(stack!=null)   context.drawItem(stack, x+1, y+1);
-
+      if (stack != null){
+         context.drawItem(stack, x + 1, y + 1);
+         context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x+1, y+1);
+      }
    }
 
    @Override
