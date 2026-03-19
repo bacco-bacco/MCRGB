@@ -37,8 +37,8 @@ public class WClickableLabel extends WLabel {
         List<Text> components = text.getWithStyle(Style.EMPTY.withItalic(true).withUnderline(true));
         List<Text> componentsBase = text.getWithStyle(Style.EMPTY);
         if(components.size()>0)
-            components.removeFirst();
-            components.addFirst(componentsBase.getFirst());
+            components.remove(0);
+            components.add(0,componentsBase.get(0));
 
         for (Text component : components){
                 textHovered.append(component);

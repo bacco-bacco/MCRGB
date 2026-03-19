@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "mcrgb",
-	"version": "0.4+1.21.1",
+	"version": "0.4+1.20.1",
 	"name": "MCRGB",
 	"description": "Search for blocks based on the dominant colours in their textures.",
 	"authors": [
@@ -31,9 +31,9 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.18.3",
-		"minecraft": ">=1.21.1",
-		"java": ">=21",
+		"fabricloader": ">=0.18.4",
+		"minecraft": "=1.20.1",
+		"java": ">=17",
 		"fabric-api": "*"
 	},
 	"suggests": {

@@ -13,7 +13,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -51,7 +50,12 @@ public class WColourGuiSlot extends WWidget{
    @Override
    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
       ScreenDrawing.texturedRect(context, x, y, 18, 18, SLOT_TEXTURE, 0, 0, .28125f, .28125f, 0xFFFFFFFF);
-      if(stack!=null)   context.drawItem(stack, x+1, y+1);
+      if(stack!=null)   {
+         context.drawItem(stack, x+1, y+1);
+         context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x+1, y+1);
+      }
+
+
 
    }
 
@@ -59,9 +63,9 @@ public class WColourGuiSlot extends WWidget{
    public InputResult onClick(int x, int y, int button) {
       // x & y are the coordinates of the mouse when the event was triggered
       // int button is which button was pressed
-      String nbt = "";
-      if(stack.contains(DataComponentTypes.DYED_COLOR)) {
-         nbt = "dyed_color=" + String.valueOf(stack.get(DataComponentTypes.DYED_COLOR).rgb()) ;//stack.getOrCreateNbt().toString();
+       String nbt = "";
+       if(stack.hasNbt()) {
+           nbt = stack.getOrCreateNbt().toString();
 
       }
       String command = MCRGBConfig.instance.command;
@@ -75,6 +79,7 @@ public class WColourGuiSlot extends WWidget{
                if(gui.cursorStack == ItemStack.EMPTY){
                   ItemStack stack2 = stack.copy();
                   gui.cursorStack = stack2;
+
                   if(hotbarSlot >= 0){
                      stack = ItemStack.EMPTY;
                      player.getInventory().setStack(hotbarSlot, stack);

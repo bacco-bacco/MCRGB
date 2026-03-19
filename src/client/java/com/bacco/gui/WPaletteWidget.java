@@ -29,7 +29,7 @@ public class WPaletteWidget extends WPlainPanel {
 
     MCRGBClient mcrgbClient;
     public Boolean editing = false;
-    WButton editButton = new WButton(editIcon){
+    WSmallButton editButton = new WSmallButton(editIcon){
         @Environment(EnvType.CLIENT)
         @Override
         public void addTooltip(TooltipBuilder tooltip) {
@@ -40,7 +40,7 @@ public class WPaletteWidget extends WPlainPanel {
     Identifier deleteIdentifier = Identifier.of("mcrgb", "delete.png");
     TextureIcon deleteIcon = new TextureIcon(deleteIdentifier);
 
-    WButton deleteButton = new WButton(deleteIcon){
+    WSmallButton deleteButton = new WSmallButton(deleteIcon){
         @Environment(EnvType.CLIENT)
         @Override
         public void addTooltip(TooltipBuilder tooltip) {

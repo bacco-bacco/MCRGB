@@ -92,7 +92,7 @@ public class ClothConfigIntegration {
 
             configs.addEntry(entryBuilder.startStrField(Text.literal("    ").append(Text.translatable("option.mcrgb.give_command")),MCRGBConfig.instance.command)
                     .setRequirement(Requirement.isValue(itemSpawningMode,ItemSpawningMode.GIVE_COMMAND))
-                    .setDefaultValue("give %p %i[%c] %q")
+                    .setDefaultValue("give %p %i%c %q")
                     .setSaveConsumer(newValue -> MCRGBConfig.instance.command = newValue)
                     .setTooltip(Text.translatable("tooltip.mcrgb.give_command"))
                     .build());

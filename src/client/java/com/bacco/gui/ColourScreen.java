@@ -31,7 +31,11 @@ public class ColourScreen extends CottonClientScreen{
 
         // Draw the cursor stack above everything
         if (!description.cursorStack.isEmpty()) {
+            context.getMatrices().push();
+            context.getMatrices().translate(0, 0, 200);
             context.drawItem(description.cursorStack, mouseX - 8, mouseY - 8);
+            context.drawItemInSlot(textRenderer, description.cursorStack, mouseX - 8, mouseY - 8);
+            context.getMatrices().pop();
         }
     }
 
