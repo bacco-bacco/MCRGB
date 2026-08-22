@@ -10,19 +10,19 @@ import io.github.cottonmc.cotton.gui.widget.data.HorizontalAlignment;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 
 public class WPaletteWidget extends WPlainPanel {
 
     ArrayList<WColourPreviewIcon> SavedColours = new ArrayList<>();
-    Identifier colourIdentifier = Identifier.of("mcrgb", "square.png");
+    Identifier colourIdentifier = Identifier.fromNamespaceAndPath("mcrgb", "square.png");
     int slotsWidth = 9;
     Palette palette;
-    Identifier editIdentifier = Identifier.of("mcrgb", "edit.png");
+    Identifier editIdentifier = Identifier.fromNamespaceAndPath("mcrgb", "edit.png");
     TextureIcon editIcon = new TextureIcon(editIdentifier);
 
     MCRGBBaseGui cg;
@@ -33,18 +33,18 @@ public class WPaletteWidget extends WPlainPanel {
         @Environment(EnvType.CLIENT)
         @Override
         public void addTooltip(TooltipBuilder tooltip) {
-            tooltip.add(Text.translatable("ui.mcrgb.edit_palette_info"));
+            tooltip.add(Component.translatable("ui.mcrgb.edit_palette_info"));
             super.addTooltip(tooltip);
         }
     };
-    Identifier deleteIdentifier = Identifier.of("mcrgb", "delete.png");
+    Identifier deleteIdentifier = Identifier.fromNamespaceAndPath("mcrgb", "delete.png");
     TextureIcon deleteIcon = new TextureIcon(deleteIdentifier);
 
     WButton deleteButton = new WButton(deleteIcon){
         @Environment(EnvType.CLIENT)
         @Override
         public void addTooltip(TooltipBuilder tooltip) {
-            tooltip.add(Text.translatable("ui.mcrgb.delete_palette_info"));
+            tooltip.add(Component.translatable("ui.mcrgb.delete_palette_info"));
             super.addTooltip(tooltip);
         }
     };
@@ -77,9 +77,9 @@ public class WPaletteWidget extends WPlainPanel {
 
     }
     @Override
-    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
+    public void paint(GuiGraphicsExtractor context, int x, int y, int mouseX, int mouseY) {
         super.paint(context, x, y, mouseX, mouseY);
-        if(cg.savedPalettesArea.editingPalette == this) context.drawStrokedRectangle(x,y,this.width,this.height,0xFF00ff00);
+        if(cg.savedPalettesArea.editingPalette == this) context.outline(x,y,this.width,this.height,0xFF00ff00);
 
 
     }

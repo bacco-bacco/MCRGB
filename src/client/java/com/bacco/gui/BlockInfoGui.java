@@ -10,14 +10,15 @@ import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import io.github.cottonmc.cotton.gui.widget.icon.TextureIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Block;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,7 +26,7 @@ import java.util.Set;
 
 public class BlockInfoGui extends MCRGBBaseGui {
 
-    WLabel label = new WLabel(Text.translatable("ui.mcrgb.header"));
+    WLabel label = new WLabel(Component.translatable("ui.mcrgb.header"));
 
     WBlockInfoBox infoBox;
 
@@ -37,23 +38,23 @@ public class BlockInfoGui extends MCRGBBaseGui {
 
     WScrollPanel textureScrollPanel = new WScrollPanel(textureThumbs);
 
-    ArrayList<Sprite> spritesAL = new ArrayList<>();
+    ArrayList<TextureAtlasSprite> spritesAL = new ArrayList<>();
 
 
 
-    public BlockInfoGui(net.minecraft.client.MinecraftClient client, MCRGBClient mcrgbClient, ItemStack stack, ColourVector launchColour){
+    public BlockInfoGui(net.minecraft.client.Minecraft client, MCRGBClient mcrgbClient, ItemStack stack, ColourVector launchColour){
 
         this.client = client;
         this.mcrgbClient = mcrgbClient;
 
-        Identifier backIdentifier = Identifier.of("mcrgb", "back.png");
+        Identifier backIdentifier = Identifier.fromNamespaceAndPath("mcrgb", "back.png");
         TextureIcon backIcon = new TextureIcon(backIdentifier);
         savedPalettesArea = new WSavedPalettesArea(this, 9, 7, mcrgbClient);
         WButton backButton = new WButton(backIcon){
             @Environment(EnvType.CLIENT)
             @Override
             public void addTooltip(TooltipBuilder tooltip) {
-                tooltip.add(Text.translatable("ui.mcrgb.back_info"));
+                tooltip.add(Component.translatable("ui.mcrgb.back_info"));
                 super.addTooltip(tooltip);
             }
         };
@@ -70,7 +71,7 @@ public class BlockInfoGui extends MCRGBBaseGui {
 
 
         mainPanel.add(label, 0, 0, 2, 1);
-        label.setText(stack.getName());
+        label.setText(stack.getHoverName());
 
         mainPanel.add(backButton,17,0,1,1);
         backButton.setSize(20,20);
@@ -78,7 +79,7 @@ public class BlockInfoGui extends MCRGBBaseGui {
         backButton.setAlignment(HorizontalAlignment.LEFT);
 
         backButton.setOnClick(() -> {
-            client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient,inputColour)));
+            client.gui.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient,inputColour)));
         });
 
         infoBox = new WBlockInfoBox(Axis.VERTICAL,(IItemBlockColourSaver) stack.getItem(), this);
@@ -94,14 +95,16 @@ public class BlockInfoGui extends MCRGBBaseGui {
         BlockItem bi = (BlockItem) stack.getItem();
         Block block = bi.getBlock();
 
-        Set<Sprite> sprites = new HashSet<Sprite>();
+        Set<TextureAtlasSprite> sprites = new HashSet<TextureAtlasSprite>();
         //try to get the default top texture sprite. if fails, report error and skip this block
-        Direction[] directions = {Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST,null};
-        block.getStateManager().getStates().forEach(state -> {
+        Direction[] directions = {Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST,null};
+        block.getStateDefinition().getPossibleStates().forEach(state -> {
             for(int i = 0; i < directions.length; i++){
                 try{
-                    var model = client.getBakedModelManager().getBlockModels().getModel(state);
-                    sprites.add(model.getParts(Random.create()).getFirst().getQuads(directions[i]).get(0).sprite());
+                    var model = client.getModelManager().getBlockStateModelSet().get(state);
+                    ArrayList<BlockStateModelPart> blockStateList = new ArrayList<BlockStateModelPart>();
+                    model.collectParts(RandomSource.create(), blockStateList);
+                    sprites.add(blockStateList.getFirst().getQuads(directions[i]).get(0).materialInfo().sprite());
                 }catch(Exception e){
                 }
             }
@@ -116,11 +119,11 @@ public class BlockInfoGui extends MCRGBBaseGui {
 
         int length = sprites.size();
         for (int i = 0; i < length; i++){
-            WTextureThumbnail thumbnail = new WTextureThumbnail(spritesAL.get(i).getAtlasId(),spritesAL.get(i).getMinU(), spritesAL.get(i).getMinV(), spritesAL.get(i).getMaxU(), spritesAL.get(i).getMaxV(), i, this);
+            WTextureThumbnail thumbnail = new WTextureThumbnail(spritesAL.get(i).atlasLocation(),spritesAL.get(i).getU0(), spritesAL.get(i).getV0(), spritesAL.get(i).getU1(), spritesAL.get(i).getV1(), i, this);
             textureThumbs.add(thumbnail,i%3,Math.floorDiv(i,3));
         }
 
-        blockTexture = new WPickableTexture(spritesAL.get(0).getAtlasId(),spritesAL.get(0).getMinU(), spritesAL.get(0).getMinV(), spritesAL.get(0).getMaxU(), spritesAL.get(0).getMaxV(), client, this);
+        blockTexture = new WPickableTexture(spritesAL.get(0).atlasLocation(),spritesAL.get(0).getU0(), spritesAL.get(0).getV0(), spritesAL.get(0).getU1(), spritesAL.get(0).getV1(), client, this);
 
         mainPanel.add(blockTexture,0,1,6,6);
         mainPanel.add(textureScrollPanel,7,1,4,6);
@@ -130,8 +133,8 @@ public class BlockInfoGui extends MCRGBBaseGui {
 
     public void ChangeSprite(int i){
         //blockTexture = new WSprite(spritesAL.get(i).getAtlasId(),spritesAL.get(i).getMinU(), spritesAL.get(i).getMinV(), spritesAL.get(i).getMaxU(), spritesAL.get(i).getMaxV());
-        blockTexture.setImage(spritesAL.get(i).getAtlasId());
-        blockTexture.setUv(spritesAL.get(i).getMinU(), spritesAL.get(i).getMinV(), spritesAL.get(i).getMaxU(), spritesAL.get(i).getMaxV());
+        blockTexture.setImage(spritesAL.get(i).atlasLocation());
+        blockTexture.setUv(spritesAL.get(i).getU0(), spritesAL.get(i).getV0(), spritesAL.get(i).getU1(), spritesAL.get(i).getV1());
         root.validate(this);
     }
 

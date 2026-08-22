@@ -6,13 +6,13 @@ import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 import java.util.List;
 
@@ -21,13 +21,13 @@ public class WClickableLabel extends WLabel {
     ColourVector colour;
     MCRGBBaseGui gui;
 
-    net.minecraft.client.MinecraftClient client;
+    net.minecraft.client.Minecraft client;
     MCRGBClient mcrgbClient;
 
-    Text textUnhovered = text;
+    Component textUnhovered = text;
 
-    MutableText textHovered = (MutableText) Text.empty();
-    public WClickableLabel(Text text, ColourVector colour, MCRGBBaseGui gui) {
+    MutableComponent textHovered = (MutableComponent) Component.empty();
+    public WClickableLabel(Component text, ColourVector colour, MCRGBBaseGui gui) {
         super(text);
         this.colour = colour;
         this.client = gui.client;
@@ -35,20 +35,20 @@ public class WClickableLabel extends WLabel {
         this.gui = gui;
 
 
-        List<Text> components = text.getWithStyle(Style.EMPTY.withItalic(true).withUnderline(true));
-        List<Text> componentsBase = text.getWithStyle(Style.EMPTY);
+        List<Component> components = text.toFlatList(Style.EMPTY.withItalic(true).withUnderlined(true));
+        List<Component> componentsBase = text.toFlatList(Style.EMPTY);
         if(components.size()>0)
             components.removeFirst();
             components.addFirst(componentsBase.getFirst());
 
-        for (Text component : components){
+        for (Component component : components){
                 textHovered.append(component);
         }
 
     }
 
     @Override
-    public InputResult onClick(Click click, boolean doubled) {
+    public InputResult onClick(MouseButtonEvent click, boolean doubled) {
         switch (click.button()){
             case 0:
                 gui.SetColour(colour);
@@ -57,9 +57,9 @@ public class WClickableLabel extends WLabel {
                 gui.SetColour(colour);
                 break;
             case 2:
-                client.keyboard.setClipboard(colour.getHex());
-                SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.copied_hex_to_clipboard").append(Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colour.asInt())).get(0)).append(colour.getHex()));
-                MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+                client.keyboardHandler.setClipboard(colour.getHex());
+                SystemToast clipboardToast = new SystemToast(SystemToast.SystemToastId.PERIODIC_NOTIFICATION, Component.translatable("toast.mcrgb.generic_toast_title"), Component.translatable("toast.mcrgb.copied_hex_to_clipboard").append(Component.literal("⬛").toFlatList(Style.EMPTY.withColor(colour.asInt())).get(0)).append(colour.getHex()));
+                Minecraft.getInstance().gui.toastManager().addToast(clipboardToast);
                 break;
         }
 
@@ -69,7 +69,7 @@ public class WClickableLabel extends WLabel {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
+    public void paint(GuiGraphicsExtractor context, int x, int y, int mouseX, int mouseY) {
         super.paint(context,x,y,mouseX,mouseY);
         if(isWithinBounds(mouseX, mouseY)){
             setText(textHovered);

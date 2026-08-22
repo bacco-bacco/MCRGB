@@ -4,10 +4,10 @@ import io.github.cottonmc.cotton.gui.client.ScreenDrawing;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.resources.Identifier;
 
 public class WColourWheel extends WPickableTexture{
 
@@ -15,15 +15,15 @@ public class WColourWheel extends WPickableTexture{
     int cursorY = (height)/2;
     Boolean beenClicked = false;
 
-    public WColourWheel(Identifier image, float u1, float v1, float u2, float v2, MinecraftClient client, MCRGBBaseGui gui) {
+    public WColourWheel(Identifier image, float u1, float v1, float u2, float v2, Minecraft client, MCRGBBaseGui gui) {
         super(image, u1, v1, u2, v2, client, gui);
     }
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
+    public void paint(GuiGraphicsExtractor context, int x, int y, int mouseX, int mouseY) {
         super.paint(context, x, y, mouseX, mouseY);
-        Identifier texture = Identifier.of("mcrgb","circle4.png");
+        Identifier texture = Identifier.fromNamespaceAndPath("mcrgb","circle4.png");
         if(!beenClicked){
             cursorX = (width)/2;
             cursorY = (height)/2;
@@ -34,7 +34,7 @@ public class WColourWheel extends WPickableTexture{
 
     @Environment(EnvType.CLIENT)
     @Override
-    public InputResult onClick(Click click,boolean doubled) {
+    public InputResult onClick(MouseButtonEvent click, boolean doubled) {
         beenClicked = true;
         InputResult ret = super.onClick(click, doubled);
         if(isTransparent) return ret;
@@ -46,7 +46,7 @@ public class WColourWheel extends WPickableTexture{
     }
     @Environment(EnvType.CLIENT)
     @Override
-    public InputResult onMouseDrag(Click click, double deltaX, double deltaY) {
+    public InputResult onMouseDrag(MouseButtonEvent click, double deltaX, double deltaY) {
         beenClicked = true;
         InputResult ret = super.onMouseDrag(click, deltaX, deltaY);
         if(isTransparent) return ret;

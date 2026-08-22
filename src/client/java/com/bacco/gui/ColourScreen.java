@@ -6,8 +6,8 @@ import io.github.cottonmc.cotton.gui.GuiDescription;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
 import io.github.cottonmc.cotton.gui.widget.WWidget;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
 
 public class ColourScreen extends CottonClientScreen{
 
@@ -24,27 +24,27 @@ public class ColourScreen extends CottonClientScreen{
 
 
     @Override
-    public boolean shouldPause() {return false;}
+    public boolean isPauseScreen() {return false;}
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta); // draws your components
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(context, mouseX, mouseY, delta); // draws your components
 
         // Draw the cursor stack above everything
         if (!description.cursorStack.isEmpty()) {
-            context.drawItem(description.cursorStack, mouseX - 8, mouseY - 8);
-            context.drawStackOverlay(textRenderer, description.cursorStack, mouseX - 8, mouseY - 8);
+            context.item(description.cursorStack, mouseX - 8, mouseY - 8);
+            context.itemDecorations(font, description.cursorStack, mouseX - 8, mouseY - 8);
         }
     }
 
     @Override
-    public boolean keyPressed(KeyInput input){
-        if(KeyInputHandler.quickSearchKey.matchesKey(input)){
+    public boolean keyPressed(KeyEvent input){
+        if(KeyInputHandler.quickSearchKey.matches(input)){
             WWidget focused = description.getFocus();
             if(focused instanceof WTextField){
                 return super.keyPressed(input);
             }
-            description.SetColour(new ColourVector(client.keyboard.getClipboard()));
+            description.SetColour(new ColourVector(minecraft.keyboardHandler.getClipboard()));
         }
         return super.keyPressed(input);
     }

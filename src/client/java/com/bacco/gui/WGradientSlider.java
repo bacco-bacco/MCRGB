@@ -5,11 +5,11 @@ import io.github.cottonmc.cotton.gui.widget.WSlider;
 import io.github.cottonmc.cotton.gui.widget.data.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 
 public class WGradientSlider extends WSlider {
-    Identifier valueSliderIdentifier = Identifier.of("mcrgb", "value_slider.png");
+    Identifier valueSliderIdentifier = Identifier.fromNamespaceAndPath("mcrgb", "value_slider.png");
 
     public WGradientSlider(int min, int max, Axis axis) {
         super(min, max, axis);
@@ -17,7 +17,7 @@ public class WGradientSlider extends WSlider {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void paint(DrawContext context, int x, int y, int mouseX, int mouseY) {
+    public void paint(GuiGraphicsExtractor context, int x, int y, int mouseX, int mouseY) {
         //super.paint(context, x, y, mouseX, mouseY);
         ScreenDrawing.texturedRect(context,x+5,y,8,128,valueSliderIdentifier,0xFFFFFFFF);
 
@@ -26,7 +26,7 @@ public class WGradientSlider extends WSlider {
         int thumbX, thumbY;
         // thumbXOffset: thumb texture x offset in pixels
         int thumbXOffset;
-        Identifier texture = Identifier.of("mcrgb","circle4.png");
+        Identifier texture = Identifier.fromNamespaceAndPath("mcrgb","circle4.png");
 
         if (axis == Axis.VERTICAL) {
             thumbX = width / 2 - THUMB_SIZE / 2;

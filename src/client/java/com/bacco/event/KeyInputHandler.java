@@ -4,11 +4,11 @@ import com.bacco.ColourVector;
 import com.bacco.MCRGBClient;
 import com.bacco.gui.ColourGui;
 import com.bacco.gui.ColourScreen;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyInputHandler {
@@ -17,43 +17,43 @@ public class KeyInputHandler {
 
     public static final String KEY_QUICK_SEARCH_FROM_CLIPBOARD = "key.mcrgb.quick_search_from_clipboard";
 
-    public static KeyBinding colourInvKey;
+    public static KeyMapping colourInvKey;
 
-    public static KeyBinding quickSearchKey;
+    public static KeyMapping quickSearchKey;
 
-    public static final KeyBinding.Category mcrgbKeyCategory = KeyBinding.Category.create(Identifier.of("mcrgb",KEY_CATEGORY_MCRGB));
+    public static final KeyMapping.Category mcrgbKeyCategory = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("mcrgb",KEY_CATEGORY_MCRGB));
 
     public static void registerKeyInputs(MCRGBClient mcrgbClient){
         ClientTickEvents.END_CLIENT_TICK.register(client ->{
-            if(colourInvKey.wasPressed()){
-                if (client.currentScreen == null) {
-                    client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient, new ColourVector(0xFFFFFFFF))));
+            if(colourInvKey.consumeClick()){
+                if (client.gui.screen() == null) {
+                    client.setScreenAndShow(new ColourScreen(new ColourGui(client, mcrgbClient, new ColourVector(0xFFFFFFFF))));
 				} else {
-					client.setScreen(null);
+					client.setScreenAndShow(null);
 				}
             }
 
-            if(quickSearchKey.wasPressed()){
-                if (client.currentScreen == null) {
-                    client.setScreen(new ColourScreen(new ColourGui(client, mcrgbClient, new ColourVector(client.keyboard.getClipboard()))));
+            if(quickSearchKey.consumeClick()){
+                if (client.gui.screen() == null) {
+                    client.setScreenAndShow(new ColourScreen(new ColourGui(client, mcrgbClient, new ColourVector(client.keyboardHandler.getClipboard()))));
                 }else{
-                    client.setScreen(null);
+                    client.setScreenAndShow(null);
                 }
             }
         });
     }
 
     public static void register(MCRGBClient mcrgbClient){
-        colourInvKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        colourInvKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 KEY_COLOUR_INV_OPEN,
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_I,
                 mcrgbKeyCategory
         ));
 
-        quickSearchKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        quickSearchKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 KEY_QUICK_SEARCH_FROM_CLIPBOARD,
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
                 mcrgbKeyCategory
         ));

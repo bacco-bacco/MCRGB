@@ -9,7 +9,7 @@
     "option.mcrgb.always_show_in_tooltips" : "Show Block Colours in Tooltips",
     "option.mcrgb.colour_mode" : "Colour Averaging Method",
     "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether colour info is displayed in item tooltips outside of the colour picker UI.",
-    "tooltip.mcrgb.colour_mode" : "The method MCRGB uses to determine average/dominant block colours.\n You must refresh colours after changing this for it to take effect.",
+    "tooltip.mcrgb.colour_mode" : "The method used to determine block colours.\n\nMEAN - The average colour. (What the block looks like from a distance.)\nMEDIAN - The most prominent colour in the texture.\nMCRGB - A custom algorithm which displays multiple dominant colors, and the percentage which each color occupies in the texture.",
     "tooltip.mcrgb.readJsonFile" : "False: Disables reading colour info from JSON file at launch. \nLeave this set to False, unless you notice issues with loading.",
     "tooltip.mcrgb.always_show_in_tooltips" : "Controls whether colour info is displayed in item tooltips outside of the colour picker UI."
 }

@@ -1,6 +1,7 @@
 package com.bacco;
 
 import com.bacco.event.KeyInputHandler;
+import com.bacco.gui.ColourScreen;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,20 +11,21 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.GlTexture;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.opengl.GlTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.util.ARGB;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
@@ -50,7 +52,7 @@ public class MCRGBClient implements ClientModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("mcrgb");
 	public static final boolean readMode = false;
-	public static net.minecraft.client.MinecraftClient client;
+	public static net.minecraft.client.Minecraft client;
 
 	static boolean scanned = false;
 	public ArrayList<Palette> palettes = new ArrayList<>();
@@ -71,9 +73,9 @@ public class MCRGBClient implements ClientModInitializer {
 				try{
 				long parseStartTime = System.nanoTime();
 				BlockColourStorage[] loadedBlockColourArray = new Gson().fromJson(readJson("./mcrgb_colours/file.json"), BlockColourStorage[].class);
-				Registries.BLOCK.forEach(block -> {
+				BuiltInRegistries.BLOCK.forEach(block -> {
 					for(BlockColourStorage storage : loadedBlockColourArray){
-						if(storage.block.equals(block.asItem().getTranslationKey())){
+						if(storage.block.equals(block.asItem().getDescriptionId())){
 							storage.spriteDetails.forEach(details -> {
 								((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
 							});
@@ -100,28 +102,28 @@ public class MCRGBClient implements ClientModInitializer {
 			IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
 			for(int i = 0; i < item.getLength(); i++){
 				if(lines.size() >= MCRGBConfig.instance.maxTooltipLines){
-					lines.add(Text.literal(" "));
-					lines.add(Text.translatable("tooltip.mcrgb.item_show_more").formatted(Formatting.GRAY));
+					lines.add(Component.literal(" "));
+					lines.add(Component.translatable("tooltip.mcrgb.item_show_more").withStyle(ChatFormatting.GRAY));
 					break;
 				}
 				ArrayList<String> strings = item.getSpriteDetails(i).getStrings();
 				ArrayList<Integer> colours = item.getSpriteDetails(i).getTextColours();
 				if(strings.size() > 0){
-					if(MinecraftClient.getInstance().isShiftPressed()){
+					if(Minecraft.getInstance().hasShiftDown()){
 						for(int j = 0; j < strings.size(); j++){
-							var text = Text.literal(strings.get(j)).formatted(Formatting.GRAY);
-							MutableText text2 = (MutableText) Text.literal("⬛").getWithStyle(Style.EMPTY.withColor(colours.get(j))).get(0);
+							var text = Component.literal(strings.get(j)).withStyle(ChatFormatting.GRAY);
+							MutableComponent text2 = (MutableComponent) Component.literal("⬛").toFlatList(Style.EMPTY.withColor(colours.get(j))).get(0);
 							if(j > 0){
 								text2.append(text);
 							}else{
-								text2 = text.formatted(Formatting.DARK_GRAY);
+								text2 = text.withStyle(ChatFormatting.DARK_GRAY);
 							}
 							
 							lines.add(text2);
 						}
 					}else{
-					var text = Text.translatable("tooltip.mcrgb.shift_prompt");
-					var message = text.formatted(Formatting.GRAY);
+					var text = Component.translatable("tooltip.mcrgb.shift_prompt");
+					var message = text.withStyle(ChatFormatting.GRAY);
 					lines.add(message);
 					break;
 					}
@@ -325,17 +327,19 @@ public class MCRGBClient implements ClientModInitializer {
 		long refreshStartTime = System.nanoTime();
 		if (client == null) return;
 		//get top sprite of stone block default state
-		var defSprite = client.getBakedModelManager().getBlockModels().getModel(Blocks.STONE.getDefaultState()).getParts(Random.create()).get(0).getQuads(Direction.UP).getFirst().sprite();
+		ArrayList<BlockStateModelPart> blockStateList = new ArrayList<BlockStateModelPart>();
+		client.getModelManager().getBlockStateModelSet().get(Blocks.STONE.defaultBlockState()).collectParts(RandomSource.create(), blockStateList);
+		var defSprite = blockStateList.getFirst().getQuads(Direction.UP).get(0).materialInfo().sprite();
 		//get id of the atlas containing above
-		var atlas = defSprite.getAtlasId();
+		var atlas = defSprite.atlasLocation();
 		//use atlas id to get OpenGL ID. Atlas contains ALL blocks
-		GlTexture glTexture = (GlTexture) client.getTextureManager().getTexture(atlas).getGlTexture();
+		GlTexture glTexture = (GlTexture) client.getTextureManager().getTexture(atlas).getTexture();
 		//get width and height from OpenGL by binding texture
 		int width = glTexture.getWidth(0);
 		int height = glTexture.getHeight(0);
 		int size = width * height;
 		//Make byte buffer and load full atlas into buffer.
-		GlStateManager._bindTexture(glTexture.getGlId());
+		GlStateManager._bindTexture(glTexture.glId());
 		ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
 		GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 		//convert buffer to an array of bytes
@@ -343,18 +347,24 @@ public class MCRGBClient implements ClientModInitializer {
 		buffer.get(pixels);
 		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
 		//loop through every block in the game
-		Registries.BLOCK.forEach(block -> {
-			if(block.asItem().getTranslationKey() == Items.AIR.getTranslationKey()) return;
+		BuiltInRegistries.BLOCK.forEach(block -> {
+			if(block.asItem().getDescriptionId() == Items.AIR.getDescriptionId()) return;
 			((IItemBlockColourSaver) block.asItem()).clearSpriteDetails();
 			BlockColourStorage storage = new BlockColourStorage();
-			Set<Sprite> sprites = new HashSet<Sprite>();
+			Set<TextureAtlasSprite> sprites = new HashSet<TextureAtlasSprite>();
 			//try to get the default top texture sprite. if fails, report error and skip this block
-			Direction[] directions = {Direction.UP,Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST,null};
-			block.getStateManager().getStates().forEach(state -> {
+			Direction[] directions = {Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST,null};
+			block.getStateDefinition().getPossibleStates().forEach(state -> {
 				for(int i = 0; i < directions.length; i++){
 					try{
-						var model = client.getBakedModelManager().getBlockModels().getModel(state);
-						sprites.add(model.getParts(Random.create()).getFirst().getQuads(directions[i]).get(0).sprite());
+
+
+
+
+						var model = client.getModelManager().getBlockStateModelSet().get(state);
+						ArrayList<BlockStateModelPart> blockStateList2 = new ArrayList<BlockStateModelPart>();
+						model.collectParts(RandomSource.create(), blockStateList2);
+						sprites.add(blockStateList2.getFirst().getQuads(directions[i]).get(0).materialInfo().sprite());
 					}catch(Exception e){
 					}
 				}
@@ -363,7 +373,7 @@ public class MCRGBClient implements ClientModInitializer {
 				return;
 			}
 			sprites.forEach(sprite -> {
-				if(sprite.getContents().getId().getPath().equals("block/grass_block_side")) return;
+				if(sprite.contents().name().getPath().equals("block/grass_block_side")) return;
 				//get coords of sprite in atlas
 
 				//x and y Buffer of 17 required as workaround for Minecraft 1.21.11 bug: MC-303675
@@ -372,14 +382,14 @@ public class MCRGBClient implements ClientModInitializer {
 
 				int spriteX = sprite.getX()+xBuffer;
 				int spriteY = sprite.getY()+yBuffer;
-				int spriteW = sprite.getContents().getWidth();
-				int spriteH = sprite.getContents().getHeight();
+				int spriteW = sprite.contents().width();
+				int spriteH = sprite.contents().height();
 				//convert coords to byte position
 				int firstPixel = (spriteY*width + spriteX)*4;
 				ArrayList<ColourVector> rgbList = new ArrayList<ColourVector>();
 				int biomeColour = 0xFFFFFF;
 				try{
-					biomeColour = client.getBlockColors().getColor(block.getDefaultState(), null, null, 0);
+					biomeColour = client.getBlockColors().getTintSource(block.defaultBlockState(), 0).color(block.defaultBlockState());
 				}catch (Exception e){
 					LOGGER.warn("Could not find biome colour for block: " + block.getName() + ". Please report this logfile to https://github.com/bacco-bacco/MCRGB/issues");
 				}
@@ -391,14 +401,14 @@ public class MCRGBClient implements ClientModInitializer {
 					for (int pos = firstInRow; pos < firstInRow + 4*spriteW; pos+=4){
 						//retrieve bytes for RGBA values
 						//"& 0xFF" does logical and with 11111111. this extracts the last 8 bits, converting to unsigned int
-						int pixelColour = ColorHelper.getArgb(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
-						int alpha = ColorHelper.getAlpha(pixelColour);
-						if(biomeColour != -1 & (!block.getDefaultState().isOf(Blocks.GRASS_BLOCK) || sprite.getContents().getId().getPath().equals("block/grass_block_top"))){
-							pixelColour = ColorHelper.mix(biomeColour, pixelColour);
+						int pixelColour = ARGB.color(pixels[pos+3], pixels[pos] & 0xFF, pixels[pos+1] & 0xFF, pixels[pos+2] & 0xFF);
+						int alpha = ARGB.alpha(pixelColour);
+						if(biomeColour != -1 & (!block.defaultBlockState().is(Blocks.GRASS_BLOCK) || sprite.contents().name().getPath().equals("block/grass_block_top"))){
+							pixelColour = ARGB.multiply(biomeColour, pixelColour);
 						}
 						//if the pixel is not fully transparent, add to the list
 						if(alpha > 0) {
-							ColourVector c = new ColourVector(ColorHelper.getRed(pixelColour), ColorHelper.getGreen(pixelColour), ColorHelper.getBlue(pixelColour));
+							ColourVector c = new ColourVector(ARGB.red(pixelColour), ARGB.green(pixelColour), ARGB.blue(pixelColour));
 							rgbList.add(c);
 						}
 
@@ -415,14 +425,14 @@ public class MCRGBClient implements ClientModInitializer {
 
 				//Add sprite name and each dominant colour to the IItemBlockColourSaver
 				SpriteDetails spriteDetails = new SpriteDetails();
-				String[] namesplit = sprite.getContents().getId().toString().split("/");
+				String[] namesplit = sprite.contents().name().toString().split("/");
 				String name = namesplit[namesplit.length-1];
 				spriteDetails.name = name;
 				colourGroups.forEach(cg -> {	
 					spriteDetails.colourinfo.add(cg.repColour);
 					spriteDetails.weights.add(cg.weight);
 				});
-				storage.block = block.asItem().getTranslationKey();
+				storage.block = block.asItem().getDescriptionId();
 				storage.spriteDetails.add(spriteDetails);
 			});				
 			storage.spriteDetails.forEach(details -> {
@@ -442,9 +452,11 @@ public class MCRGBClient implements ClientModInitializer {
 			}
 			LOGGER.info("Saved to JSON in: " + (System.nanoTime() - saveStartTime)/1000000 + " ms");
 		}
-
-		SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.reloaded"));
-		MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+        assert client.gui.screen() != null;
+        if(client.gui.screen() instanceof ColourScreen){
+		SystemToast clipboardToast = new SystemToast(SystemToast.SystemToastId.PERIODIC_NOTIFICATION, Component.translatable("toast.mcrgb.generic_toast_title"), Component.translatable("toast.mcrgb.reloaded"));
+		Minecraft.getInstance().gui.toastManager().addToast(clipboardToast);
+		}
 		LOGGER.info("Refreshed colours in: " + (System.nanoTime()-refreshStartTime)/1000000 + " ms");
 	}
 
