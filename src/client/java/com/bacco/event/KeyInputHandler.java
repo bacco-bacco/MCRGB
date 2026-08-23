@@ -53,7 +53,7 @@ public class KeyInputHandler {
         quickSearchKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 KEY_QUICK_SEARCH_FROM_CLIPBOARD,
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_O,
+                GLFW.GLFW_KEY_U,
                 KEY_CATEGORY_MCRGB
         ));
             registerKeyInputs(mcrgbClient);
