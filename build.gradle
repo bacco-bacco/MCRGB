@@ -13,7 +13,7 @@ base {
 repositories {
     maven {
         name = "CottonMC"
-        url = "https://server.bbkr.space/artifactory/libs-release"
+        url = "https://staging.alexiil.uk/maven/"
     }
 	maven { url "https://maven.shedaniel.me/" }
 	maven { url "https://maven.terraformersmc.com/releases/" }

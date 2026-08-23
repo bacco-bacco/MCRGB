@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyInputHandler {
-    public static final String KEY_CATEGORY_MCRGB = "key.category.mcrgb.mcrgb";
+    public static final String KEY_CATEGORY_MCRGB = "mcrgb";
     public static final String KEY_COLOUR_INV_OPEN = "key.mcrgb.colour_inv_open";
 
     public static final String KEY_QUICK_SEARCH_FROM_CLIPBOARD = "key.mcrgb.quick_search_from_clipboard";
@@ -54,7 +54,7 @@ public class KeyInputHandler {
         quickSearchKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 KEY_QUICK_SEARCH_FROM_CLIPBOARD,
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_O,
+                GLFW.GLFW_KEY_U,
                 mcrgbKeyCategory
         ));
             registerKeyInputs(mcrgbClient);

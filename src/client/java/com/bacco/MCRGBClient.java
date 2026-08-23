@@ -1,6 +1,7 @@
 package com.bacco;
 
 import com.bacco.event.KeyInputHandler;
+import com.bacco.gui.ColourScreen;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -442,9 +443,10 @@ public class MCRGBClient implements ClientModInitializer {
 			}
 			LOGGER.info("Saved to JSON in: " + (System.nanoTime() - saveStartTime)/1000000 + " ms");
 		}
-
-		SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.reloaded"));
-		MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+		if(client.currentScreen instanceof ColourScreen){
+			SystemToast clipboardToast = new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, Text.translatable("toast.mcrgb.generic_toast_title"), Text.translatable("toast.mcrgb.reloaded"));
+			MinecraftClient.getInstance().getToastManager().add(clipboardToast);
+		}
 		LOGGER.info("Refreshed colours in: " + (System.nanoTime()-refreshStartTime)/1000000 + " ms");
 	}
 
