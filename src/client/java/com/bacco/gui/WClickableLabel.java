@@ -50,10 +50,10 @@ public class WClickableLabel extends WLabel {
     @Override
     public InputResult onClick(MouseButtonEvent click, boolean doubled) {
         switch (click.button()){
-            case 0:
+            case 1:
                 gui.SetColour(colour);
                 break;
-            case 1:
+            case 3:
                 gui.SetColour(colour);
                 break;
             case 2:

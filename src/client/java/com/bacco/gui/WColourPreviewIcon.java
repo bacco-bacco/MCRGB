@@ -23,12 +23,12 @@ public class WColourPreviewIcon extends WSprite {
     @Override
     public InputResult onClick(MouseButtonEvent click, boolean doubled) {
         switch (click.button()){
-            case 0:
+            case 1:
                 if (!interactable) return InputResult.PROCESSED;
                 colour = gui.GetColour();
                 setOpaqueTint(colour);
                 break;
-            case 1:
+            case 3:
                 if (!interactable) return InputResult.PROCESSED;
                 colour = 0xFFFFFF;
                 setOpaqueTint(colour);
