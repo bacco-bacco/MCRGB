@@ -1,8 +1,8 @@
 package com.bacco.gui;
 
 import com.bacco.ColourVector;
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.opengl.GlTexture;
+import com.bacco.MCRGBClient;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
 import io.github.cottonmc.cotton.gui.widget.data.InputResult;
 import net.minecraft.client.Minecraft;
@@ -13,10 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-
-import java.nio.ByteBuffer;
 
 public class WPickableTexture extends WSprite {
 
@@ -34,12 +30,13 @@ public class WPickableTexture extends WSprite {
 
     MCRGBBaseGui gui;
 
-    GlTexture gpuTexture;
+    GpuTexture gpuTexture;
     int glID;
     public WPickableTexture(Identifier image, float u1, float v1, float u2, float v2, net.minecraft.client.Minecraft client, MCRGBBaseGui gui) {
         super(image, u1, v1, u2, v2);
-        gpuTexture = (GlTexture) client.getTextureManager().getTexture(image).getTexture();
-        glID = gpuTexture.glId();
+
+
+        gpuTexture = MCRGBClient.GetBlockAtlas();
 
         //get width and height from OpenGL by binding texture
         //RenderSystem.bindTexture(glID);
@@ -79,14 +76,8 @@ public class WPickableTexture extends WSprite {
         double trueY = texV1+ Math.floor(((float) y / height)*(texV2-texV1));
         int size = atlasHeight*atlasWidth;
 
-        GlStateManager._bindTexture(glID);
-        //RenderSystem.bindTexture(glID);
-        //Make byte buffer and load full atlas into buffer.
-        ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
-        GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-        //convert buffer to an array of bytes
         byte[] pixels = new byte[size*4];
-        buffer.get(pixels);
+        pixels = MCRGBClient.GetAtlasPixels(gpuTexture);
 
         int pos = (((int)trueY*atlasWidth + (int)trueX)*4);
 

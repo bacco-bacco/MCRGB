@@ -9,7 +9,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 
 public class KeyInputHandler {
     public static final String KEY_CATEGORY_MCRGB = "mcrgb";
@@ -46,15 +45,15 @@ public class KeyInputHandler {
     public static void register(MCRGBClient mcrgbClient){
         colourInvKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 KEY_COLOUR_INV_OPEN,
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_I,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_I,
                 mcrgbKeyCategory
         ));
 
         quickSearchKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 KEY_QUICK_SEARCH_FROM_CLIPBOARD,
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_U,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_U,
                 mcrgbKeyCategory
         ));
             registerKeyInputs(mcrgbClient);

@@ -5,29 +5,31 @@ import com.bacco.gui.ColourScreen;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.commands.GpuFence;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.opengl.GlTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 import net.minecraft.util.ARGB;
-import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,11 +59,13 @@ public class MCRGBClient implements ClientModInitializer {
 	static boolean scanned = false;
 	public ArrayList<Palette> palettes = new ArrayList<>();
 
-
 	//public static ColourInventoryScreen colourInvScreen;
 
 	@Override
 	public void onInitializeClient() {
+
+
+
 		KeyInputHandler.register(this);
 		MCRGBConfig.load();
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, _client) -> {
@@ -326,25 +330,15 @@ public class MCRGBClient implements ClientModInitializer {
 	public static void RefreshColours(){
 		long refreshStartTime = System.nanoTime();
 		if (client == null) return;
-		//get top sprite of stone block default state
-		ArrayList<BlockStateModelPart> blockStateList = new ArrayList<BlockStateModelPart>();
-		client.getModelManager().getBlockStateModelSet().get(Blocks.STONE.defaultBlockState()).collectParts(RandomSource.create(), blockStateList);
-		var defSprite = blockStateList.getFirst().getQuads(Direction.UP).get(0).materialInfo().sprite();
-		//get id of the atlas containing above
-		var atlas = defSprite.atlasLocation();
-		//use atlas id to get OpenGL ID. Atlas contains ALL blocks
-		GlTexture glTexture = (GlTexture) client.getTextureManager().getTexture(atlas).getTexture();
-		//get width and height from OpenGL by binding texture
-		int width = glTexture.getWidth(0);
-		int height = glTexture.getHeight(0);
-		int size = width * height;
-		//Make byte buffer and load full atlas into buffer.
-		GlStateManager._bindTexture(glTexture.glId());
-		ByteBuffer buffer = BufferUtils.createByteBuffer(size*4);
-		GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-		//convert buffer to an array of bytes
-		byte[] pixels = new byte[size*4];
-		buffer.get(pixels);
+		GpuTexture gpuTexture = GetBlockAtlas();
+		int width = gpuTexture.getWidth(0);
+		int height = gpuTexture.getHeight(0);
+		int size = height*width*4;
+
+		byte[] pixelList = new byte[size];
+		pixelList = GetAtlasPixels(gpuTexture);
+		final byte[] pixels = pixelList;
+
 		ArrayList<BlockColourStorage> blockColourList = new ArrayList<BlockColourStorage>();
 		//loop through every block in the game
 		BuiltInRegistries.BLOCK.forEach(block -> {
@@ -357,10 +351,6 @@ public class MCRGBClient implements ClientModInitializer {
 			block.getStateDefinition().getPossibleStates().forEach(state -> {
 				for(int i = 0; i < directions.length; i++){
 					try{
-
-
-
-
 						var model = client.getModelManager().getBlockStateModelSet().get(state);
 						ArrayList<BlockStateModelPart> blockStateList2 = new ArrayList<BlockStateModelPart>();
 						model.collectParts(RandomSource.create(), blockStateList2);
@@ -428,13 +418,13 @@ public class MCRGBClient implements ClientModInitializer {
 				String[] namesplit = sprite.contents().name().toString().split("/");
 				String name = namesplit[namesplit.length-1];
 				spriteDetails.name = name;
-				colourGroups.forEach(cg -> {	
+				colourGroups.forEach(cg -> {
 					spriteDetails.colourinfo.add(cg.repColour);
 					spriteDetails.weights.add(cg.weight);
 				});
 				storage.block = block.asItem().getDescriptionId();
 				storage.spriteDetails.add(spriteDetails);
-			});				
+			});
 			storage.spriteDetails.forEach(details -> {
 				((IItemBlockColourSaver) block.asItem()).addSpriteDetails(details);
 			});
@@ -452,6 +442,9 @@ public class MCRGBClient implements ClientModInitializer {
 			}
 			LOGGER.info("Saved to JSON in: " + (System.nanoTime() - saveStartTime)/1000000 + " ms");
 		}
+
+
+
         assert client.gui.screen() != null;
         if(client.gui.screen() instanceof ColourScreen){
 		SystemToast clipboardToast = new SystemToast(SystemToast.SystemToastId.PERIODIC_NOTIFICATION, Component.translatable("toast.mcrgb.generic_toast_title"), Component.translatable("toast.mcrgb.reloaded"));
@@ -496,6 +489,53 @@ public class MCRGBClient implements ClientModInitializer {
 	public static int mean(int[] values){
 		int sum = IntStream.of(values).sum();
 		return sum/values.length;
+	}
+
+	public static GpuTexture GetBlockAtlas(){
+		//get top sprite of stone block default state
+		ArrayList<BlockStateModelPart> blockStateList = new ArrayList<BlockStateModelPart>();
+		client.getModelManager().getBlockStateModelSet().get(Blocks.STONE.defaultBlockState()).collectParts(RandomSource.create(), blockStateList);
+		var defSprite = blockStateList.getFirst().getQuads(Direction.UP).get(0).materialInfo().sprite();
+		//get id of the atlas containing above
+		var atlas = defSprite.atlasLocation();
+		//use atlas id to get OpenGL ID. Atlas contains ALL blocks
+		GpuTexture glTexture = client.getTextureManager().getTexture(atlas).getTexture();
+		return glTexture;
+	}
+
+	public static byte[] GetAtlasPixels(GpuTexture glTexture){
+
+		//get width and height from OpenGL by binding texture
+		int width = glTexture.getWidth(0);
+		int height = glTexture.getHeight(0);
+		int size = width * height * 4;
+
+		//Make byte buffer and load full atlas into buffer.
+		GpuBuffer buffer = RenderSystem.getDevice().createBuffer(
+				() -> "atlas readback",
+				GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_MAP_READ,
+				size
+		);
+		CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
+		encoder.copyTextureToBuffer(
+				glTexture,
+				buffer,
+				0,
+				() -> {},
+				0
+		);
+		GpuFence fence = encoder.createFence();
+		encoder.submit();
+		fence.awaitCompletion(GpuFence.NO_TIMEOUT);
+		GpuBufferSlice slice = buffer.slice(0, size);
+		byte[] pixels = new byte[size];
+		try (GpuBufferSlice.MappedView mapped = slice.map(true, false)) {
+			ByteBuffer pixelBuffer = mapped.data();
+			pixelBuffer.get(pixels);
+		}
+		fence.close();
+		buffer.close();
+		return pixels;
 	}
 
 

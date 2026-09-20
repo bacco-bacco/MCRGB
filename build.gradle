@@ -1,5 +1,5 @@
 plugins {
-	id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+	id 'net.fabricmc.fabric-loom' version '1.18-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -43,9 +43,9 @@ dependencies {
 	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
 
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
-	implementation include("io.github.cottonmc:LibGui:17.0.0+26.2")
-	api "me.shedaniel.cloth:cloth-config-fabric:26.2.155"
-	api "com.terraformersmc:modmenu:20.0.1"
+	implementation include("io.github.cottonmc:LibGui:18.0.1+26.3-rc-2")
+	api "me.shedaniel.cloth:cloth-config-fabric:26.3.158"
+	api "com.terraformersmc:modmenu:21.0.0-beta.1"
 
 }
 

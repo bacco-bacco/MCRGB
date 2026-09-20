@@ -132,7 +132,6 @@ public class BlockInfoGui extends MCRGBBaseGui {
     }
 
     public void ChangeSprite(int i){
-        //blockTexture = new WSprite(spritesAL.get(i).getAtlasId(),spritesAL.get(i).getMinU(), spritesAL.get(i).getMinV(), spritesAL.get(i).getMaxU(), spritesAL.get(i).getMaxV());
         blockTexture.setImage(spritesAL.get(i).atlasLocation());
         blockTexture.setUv(spritesAL.get(i).getU0(), spritesAL.get(i).getV0(), spritesAL.get(i).getU1(), spritesAL.get(i).getV1());
         root.validate(this);

@@ -62,8 +62,6 @@ public class WColourGuiSlot extends WWidget{
 
    @Override
    public InputResult onClick(MouseButtonEvent click, boolean doubled) {
-      // x & y are the coordinates of the mouse when the event was triggered
-      // int button is which button was pressed
       String nbt = "";
       if(stack.has(DataComponents.DYED_COLOR)) {
          nbt = "dyed_color=" + String.valueOf(stack.get(DataComponents.DYED_COLOR).rgb()) ;//stack.getOrCreateNbt().toString();
@@ -73,7 +71,8 @@ public class WColourGuiSlot extends WWidget{
 
       command = command.replace("%c",nbt);
       switch (click.button()){
-         case 0:
+         case 1:
+            //left click
             switch(MCRGBConfig.instance.creativeGive){
                case CREATIVE_DRAG:
                if(player.isCreative()){
@@ -111,7 +110,8 @@ public class WColourGuiSlot extends WWidget{
                break;
             }
             break;
-         case 1:
+         case 3:
+            //middle click
             IItemBlockColourSaver item = (IItemBlockColourSaver) stack.getItem();
             if(item.getLength() <= 0) break;
             /*ArrayList<ColourVector> colours = item.getSpriteDetails(0).colourinfo;
@@ -126,6 +126,7 @@ public class WColourGuiSlot extends WWidget{
                gui.OpenBlockInfoGui(gui.client, gui.mcrgbClient, stack);
             break;
          case 2:
+            //right click
             switch(MCRGBConfig.instance.creativeGive){
                case CREATIVE_DRAG:
 
